@@ -11,7 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -21,10 +21,10 @@ import java.util.ResourceBundle;
 
 public class SplashController implements Initializable {
 
-    @FXML private Pane        rootPane;
-    @FXML private VBox        mainContent;
+    @FXML private Label loadingLabel;
+    @FXML private VBox mainContent;
     @FXML private ProgressBar progressBar;
-    @FXML private Label       loadingLabel;
+    @FXML private AnchorPane rootPane;
 
     private static final double LOADING_DURATION_MS  = 4000;
     private static final double FADE_OUT_DURATION_MS = 700;
@@ -51,10 +51,10 @@ public class SplashController implements Initializable {
     private void startProgressAnimation() {
         progressBar.setProgress(0.0);
         progressTimeline = new Timeline(
-            new KeyFrame(Duration.ZERO,
-                new KeyValue(progressBar.progressProperty(), 0.0)),
-            new KeyFrame(Duration.millis(LOADING_DURATION_MS),
-                new KeyValue(progressBar.progressProperty(), 1.0, Interpolator.EASE_OUT))
+                new KeyFrame(Duration.ZERO,
+                        new KeyValue(progressBar.progressProperty(), 0.0)),
+                new KeyFrame(Duration.millis(LOADING_DURATION_MS),
+                        new KeyValue(progressBar.progressProperty(), 1.0, Interpolator.EASE_OUT))
         );
         progressTimeline.setOnFinished(e -> onLoadingFinished());
         progressTimeline.play();

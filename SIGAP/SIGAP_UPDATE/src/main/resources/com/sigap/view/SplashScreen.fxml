@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+
+<StackPane prefHeight="800" prefWidth="1280" style="-fx-background-color: #EEF2FB;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sigap.controller.SplashController">
+    <children>
+
+        <AnchorPane fx:id="rootPane" prefHeight="800" prefWidth="1280">
+            <children>
+
+                <AnchorPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0">
+                    <children>
+                        <SVGPath content="M0,330 C60,290 130,230 200,260 C270,290 310,350 420,310 L420,330 L0,330 Z" fill="#1A3A8F" layoutY="10.0" />
+                        <SVGPath content="M0,320 C80,270 160,220 250,255 C330,285 380,340 500,305 L500,320 L0,320 Z" fill="#1E45AA" layoutY="20.0" />
+                        <SVGPath content="M0,290 C70,250 150,205 240,230 C310,250 370,295 460,275" fill="transparent" layoutY="0.0" stroke="#F5A623" strokeLineCap="ROUND" strokeWidth="4" />
+
+                        <Circle fill="transparent" layoutX="80.0" layoutY="142.0" radius="12" stroke="#A0B8E0" strokeWidth="2" />
+                        <Rectangle fill="transparent" height="18" layoutX="143.0" layoutY="158.0" rotate="45" stroke="#C0D0E8" strokeWidth="2" width="18" />
+                        <Text layoutX="196.0" layoutY="248.0" style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-fill: #F5A623;" text="+" />
+                        <Circle fill="#E85252" layoutX="78.0" layoutY="142.0" radius="7" />
+                        <Circle fill="#3A7BD5" layoutX="225.0" layoutY="252.0" radius="7" />
+                    </children>
+                </AnchorPane>
+
+                <AnchorPane AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <children>
+                        <SVGPath content="M380,0 C300,40 255,100 270,160 C290,220 340,255 380,275 L380,0 Z" fill="#1A3A8F" layoutX="120.0" />
+                        <SVGPath content="M370,0 C310,30 275,80 285,130 C300,175 345,210 370,230 L370,0 Z" fill="#243FAA" layoutX="130.0" />
+                        <SVGPath content="M255,0 C270,50 275,100 260,148 C248,185 235,210 248,240" fill="transparent" layoutX="120.0" stroke="#F5A623" strokeLineCap="ROUND" strokeWidth="4" />
+
+                        <Rectangle fill="transparent" height="22" layoutX="325.0" layoutY="160.0" rotate="45" stroke="#C0D0E8" strokeWidth="2" width="22" />
+                    </children>
+                </AnchorPane>
+
+                <AnchorPane AnchorPane.leftAnchor="42.0" AnchorPane.topAnchor="42.0">
+                    <children>
+                        <Circle fill="#B0C4E8" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="16.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="32.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="48.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="64.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutY="16.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="16.0" layoutY="16.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="32.0" layoutY="16.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="48.0" layoutY="16.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="64.0" layoutY="16.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutY="32.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="16.0" layoutY="32.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="32.0" layoutY="32.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="48.0" layoutY="32.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutY="48.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="16.0" layoutY="48.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="32.0" layoutY="48.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutY="64.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="16.0" layoutY="64.0" radius="3" />
+
+                        <Circle fill="transparent" layoutX="73.0" layoutY="248.0" radius="18" stroke="#A0B8E0" strokeWidth="2" />
+                    </children>
+                </AnchorPane>
+
+                <AnchorPane AnchorPane.bottomAnchor="78.0" AnchorPane.rightAnchor="73.0">
+                    <children>
+                        <Circle fill="#B0C4E8" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="16.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="32.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutY="16.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="16.0" layoutY="16.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="32.0" layoutY="16.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutY="32.0" radius="3" />
+                        <Circle fill="#B0C4E8" layoutX="16.0" layoutY="32.0" radius="3" />
+
+                        <Circle fill="transparent" layoutX="-20.0" layoutY="-380.0" radius="22" stroke="#A0B8E0" strokeWidth="2" />
+                        <Circle fill="transparent" layoutX="20.0" layoutY="-145.0" radius="15" stroke="#E85252" strokeWidth="2" />
+                        <Text layoutX="-83.0" layoutY="-370.0" style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-fill: #F5A623;" text="+" />
+                        <Text layoutX="-27.0" layoutY="-42.0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-fill: #3A7BD5;" text="+" />
+                    </children>
+                </AnchorPane>
+
+                <AnchorPane AnchorPane.bottomAnchor="110.0" AnchorPane.leftAnchor="312.0">
+                    <children>
+                        <Circle fill="transparent" radius="14" stroke="#A0B8E0" strokeWidth="2" />
+                    </children>
+                </AnchorPane>
+
+                <VBox fx:id="mainContent" alignment="CENTER" spacing="0" style="-fx-opacity: 0;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <children>
+                        <VBox alignment="CENTER" spacing="14">
+                            <children>
+                                <ProgressBar fx:id="progressBar" prefHeight="12" prefWidth="420" progress="0.0" style="-fx-accent: #1A3A8F; -fx-background-color: #D0DBF0; -fx-background-radius: 8; -fx-border-radius: 8;" />
+                                <Label fx:id="loadingLabel" style="-fx-font-size: 13px; -fx-text-fill: #3A7BD5; -fx-font-family: 'Segoe UI', Arial, sans-serif;" text="Tekan tombol apa saja untuk melanjutkan" />
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+
+            </children>
+        </AnchorPane>
+
+    </children>
+</StackPane>

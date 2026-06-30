@@ -11,11 +11,11 @@ public class DBConnect {
 
     public DBConnect() {
         try {
-            String url = "jdbc:sqlserver://LAPTOP-4VE0OTHT;" +
-                    "databaseName=db_sigap;" +
-                    "user=sa;" +
-                    "password=123;" +
-                    "trustServerCertificate=true;";
+            String url = ("jdbc:sqlserver://LAPTOP-4F1A3VGF\\SQLWAHYU:1433;"+
+                    "databaseName=db_sigap;"+
+                    "user=sa;"+
+                    "password=PoltekAstra;"+
+                    "trustServerCertificate=true");
 
             conn = DriverManager.getConnection(url);
             stat = conn.createStatement();

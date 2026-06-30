@@ -3,17 +3,25 @@ package com.sigap.controller;
 import com.sigap.ADT.Penyewa;
 import com.sigap.APP.CRUD_Penyewa;
 
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
-import javafx.util.Duration;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.DateCell;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 
 import java.net.URL;
 import java.time.LocalDate;
@@ -24,81 +32,79 @@ import java.util.ResourceBundle;
 
 public class PenyewaController implements Initializable {
 
-    // ── Form fields ───────────────────────────────────────────────────
-    @FXML private TextField  txtIdPenyewa;
-    @FXML private TextField  txtNama;
-    @FXML private TextField  txtNIK;
-    @FXML private TextField  txtNoTelp;
-    @FXML private TextArea   txtAlamat;
-    @FXML private DatePicker dpTglDaftar;
-    @FXML private TextField  txtStatus;
+    @FXML
+    private Button btnHapus;
+    @FXML
+    private Button btnSimpan;
+    @FXML
+    private Button btnUbah;
+    @FXML
+    private TableColumn<Penyewa, String> colAlamat;
+    @FXML
+    private TableColumn<Penyewa, String> colId;
+    @FXML
+    private TableColumn<Penyewa, String> colNIK;
+    @FXML
+    private TableColumn<Penyewa, String> colNama;
+    @FXML
+    private TableColumn<Penyewa, String> colNoTelp;
+    @FXML
+    private TableColumn<Penyewa, String> colStatus;
+    @FXML
+    private TableColumn<Penyewa, String> colTgl;
+    @FXML
+    private DatePicker dpTglDaftar;
+    @FXML
+    private Label lblPage;
+    @FXML
+    private Label lblTotal;
+    @FXML
+    private TableView<Penyewa> tabelPenyewa;
+    @FXML
+    private TextArea txtAlamat;
+    @FXML
+    private TextField txtCari;
+    @FXML
+    private TextField txtIdPenyewa;
+    @FXML
+    private TextField txtNIK;
+    @FXML
+    private TextField txtNama;
+    @FXML
+    private TextField txtNoTelp;
+    @FXML
+    private TextField txtStatus;
 
-    // ── Tombol ───────────────────────────────────────────────────────
-    @FXML private Button btnSimpan;
-    @FXML private Button btnUbah;
-    @FXML private Button btnHapus;
-
-    // ── Pencarian ────────────────────────────────────────────────────
-    @FXML private TextField txtCari;
-
-    // ── Tabel ────────────────────────────────────────────────────────
-    @FXML private TableView<Penyewa>           tabelPenyewa;
-    @FXML private TableColumn<Penyewa, String> colId;
-    @FXML private TableColumn<Penyewa, String> colNama;
-    @FXML private TableColumn<Penyewa, String> colNIK;
-    @FXML private TableColumn<Penyewa, String> colNoTelp;
-    @FXML private TableColumn<Penyewa, String> colAlamat;
-    @FXML private TableColumn<Penyewa, String> colTgl;
-    @FXML private TableColumn<Penyewa, String> colStatus;
-
-    // ── Status bar ───────────────────────────────────────────────────
-    @FXML private Label lblTotal;
-    @FXML private Label lblTanggal;
-    @FXML private Label lblJam;
-    @FXML private Label lblPage;
-
-    // ── State ────────────────────────────────────────────────────────
     private ObservableList<Penyewa> masterList = FXCollections.observableArrayList();
     private static final int PAGE_SIZE = 10;
     private int currentPage = 1;
-    private int totalPage   = 1;
+    private int totalPage = 1;
 
-    // ─────────────────────────────────────────────────────────────────
-    //  initialize
-    // ─────────────────────────────────────────────────────────────────
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         txtStatus.setEditable(false);
         txtStatus.setText("Aktif");
 
         setupTable();
-//        setupClock();
         setupListeners();
-        setFormState(false, false); // mode awal: bukan edit, bukan nonaktif
+        setFormState(false, false);
         Platform.runLater(() -> {
             loadData();
             autoGenerateId();
         });
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    //  Setup listeners real-time
-    // ─────────────────────────────────────────────────────────────────
     private void setupListeners() {
-
-        // NIK: hanya angka, max 16 digit
         txtNIK.textProperty().addListener((obs, oldVal, newVal) -> {
             String filtered = newVal.replaceAll("[^0-9]", "");
             if (filtered.length() > 16) filtered = filtered.substring(0, 16);
             if (!filtered.equals(newVal)) txtNIK.setText(filtered);
         });
 
-        // No Telp: + hanya boleh di posisi pertama, sisanya angka, max 15
         txtNoTelp.textProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal.isEmpty()) return;
             String filtered;
             if (newVal.startsWith("+")) {
-                // Pertahankan + di depan, sisanya hanya angka
                 filtered = "+" + newVal.substring(1).replaceAll("[^0-9]", "");
             } else {
                 filtered = newVal.replaceAll("[^0-9]", "");
@@ -107,7 +113,6 @@ public class PenyewaController implements Initializable {
             if (!filtered.equals(newVal)) txtNoTelp.setText(filtered);
         });
 
-        // DatePicker: blokir tanggal masa depan dan sebelum tahun 2000 secara visual
         dpTglDaftar.setDayCellFactory(picker -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
@@ -119,9 +124,6 @@ public class PenyewaController implements Initializable {
         });
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    //  Setup kolom tabel
-    // ─────────────────────────────────────────────────────────────────
     private void setupTable() {
         colId.setCellValueFactory(d     -> new SimpleStringProperty(d.getValue().getIdPenyewa()));
         colNama.setCellValueFactory(d   -> new SimpleStringProperty(d.getValue().getNamaPenyewa()));
@@ -133,7 +135,6 @@ public class PenyewaController implements Initializable {
                         d.getValue().getTglDaftar().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
         colStatus.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getStsPenyewa()));
 
-        // Badge warna Status
         colStatus.setCellFactory(col -> new TableCell<>() {
             @Override
             protected void updateItem(String status, boolean empty) {
@@ -148,7 +149,6 @@ public class PenyewaController implements Initializable {
             }
         });
 
-        // Nama biru
         colNama.setCellFactory(col -> new TableCell<>() {
             @Override
             protected void updateItem(String nama, boolean empty) {
@@ -160,24 +160,6 @@ public class PenyewaController implements Initializable {
         });
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    //  Jam & tanggal berjalan
-    // ─────────────────────────────────────────────────────────────────
-    private void setupClock() {
-        DateTimeFormatter fmtTgl = DateTimeFormatter.ofPattern("dd MMMM yyyy", new java.util.Locale("id", "ID"));
-        DateTimeFormatter fmtJam = DateTimeFormatter.ofPattern("HH:mm:ss");
-        Timeline clock = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
-            java.time.LocalDateTime now = java.time.LocalDateTime.now();
-            lblTanggal.setText(now.format(fmtTgl));
-            lblJam.setText(now.format(fmtJam));
-        }));
-        clock.setCycleCount(Animation.INDEFINITE);
-        clock.play();
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    //  Load data
-    // ─────────────────────────────────────────────────────────────────
     private void loadData() {
         try {
             List<Penyewa> list = CRUD_Penyewa.getAll();
@@ -190,23 +172,17 @@ public class PenyewaController implements Initializable {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    //  Refresh tabel + pagination
-    // ─────────────────────────────────────────────────────────────────
     private void refreshTable() {
         int total = masterList.size();
         totalPage = (total == 0) ? 1 : (int) Math.ceil((double) total / PAGE_SIZE);
         if (currentPage > totalPage) currentPage = totalPage;
         int from = (currentPage - 1) * PAGE_SIZE;
-        int to   = Math.min(from + PAGE_SIZE, total);
+        int to = Math.min(from + PAGE_SIZE, total);
         tabelPenyewa.setItems(FXCollections.observableArrayList(masterList.subList(from, to)));
         lblTotal.setText("Total Data : " + total);
         lblPage.setText(String.valueOf(currentPage));
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    //  Auto generate ID
-    // ─────────────────────────────────────────────────────────────────
     private void autoGenerateId() {
         try {
             txtIdPenyewa.setText(CRUD_Penyewa.generateNextId());
@@ -215,207 +191,33 @@ public class PenyewaController implements Initializable {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    //  Klik baris tabel → isi form
-    //  Jika status Tidak Aktif → semua field readonly, tombol disabled
-    // ─────────────────────────────────────────────────────────────────
-    @FXML
-    private void onTableClick() {
-        Penyewa p = tabelPenyewa.getSelectionModel().getSelectedItem();
-        if (p == null) return;
-
-        txtIdPenyewa.setText(p.getIdPenyewa());
-        txtNama.setText(p.getNamaPenyewa());
-        txtNIK.setText(p.getNik());
-        txtNoTelp.setText(p.getNoTelp());
-        txtAlamat.setText(p.getAlamat());
-        dpTglDaftar.setValue(p.getTglDaftar());
-        txtStatus.setText(p.getStsPenyewa() != null ? p.getStsPenyewa().trim() : "Aktif");
-
-        boolean isNonaktif = "Tidak Aktif".equalsIgnoreCase(
-                p.getStsPenyewa() != null ? p.getStsPenyewa().trim() : ""
-        );
-
-        // edit=true hanya jika aktif; nonaktif=isNonaktif
-        setFormState(true, isNonaktif);
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    //  TAMBAH
-    // ─────────────────────────────────────────────────────────────────
-    @FXML
-    private void onTambah() {
-        bersihForm();
-        setFormState(false, false);
-        autoGenerateId();
-        txtNama.requestFocus();
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    //  SIMPAN — insert, status selalu Aktif
-    // ─────────────────────────────────────────────────────────────────
-    @FXML
-    private void onSimpan() {
-        if (!validasi()) return;
-        try {
-            Penyewa p = new Penyewa(
-                    txtIdPenyewa.getText().trim(),
-                    txtNama.getText().trim(),
-                    txtNIK.getText().trim(),
-                    txtNoTelp.getText().trim(),
-                    txtAlamat.getText().trim(),
-                    dpTglDaftar.getValue(),
-                    "Aktif"
-            );
-            CRUD_Penyewa.insert(p);
-            showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Data penyewa berhasil disimpan.");
-            loadData();
-            onTambah();
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Simpan", "Error: " + e.getMessage());
-        }
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    //  UBAH — hanya bisa jika status Aktif
-    // ─────────────────────────────────────────────────────────────────
-    @FXML
-    private void onUbah() {
-        if (!validasi()) return;
-        try {
-            Penyewa p = new Penyewa(
-                    txtIdPenyewa.getText().trim(),
-                    txtNama.getText().trim(),
-                    txtNIK.getText().trim(),
-                    txtNoTelp.getText().trim(),
-                    txtAlamat.getText().trim(),
-                    dpTglDaftar.getValue(),
-                    txtStatus.getText()
-            );
-            CRUD_Penyewa.update(p);
-            showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Data penyewa berhasil diubah.");
-            loadData();
-            onBersih();
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Ubah", "Error: " + e.getMessage());
-        }
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    //  HAPUS — soft delete, hanya bisa jika status Aktif
-    // ─────────────────────────────────────────────────────────────────
-    @FXML
-    private void onHapus() {
-        String id = txtIdPenyewa.getText().trim();
-        if (id.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Peringatan", "Pilih data yang ingin dinonaktifkan.");
-            return;
-        }
-        Alert konfirmasi = new Alert(Alert.AlertType.CONFIRMATION);
-        konfirmasi.setTitle("Konfirmasi Nonaktifkan");
-        konfirmasi.setHeaderText("Nonaktifkan Penyewa");
-        konfirmasi.setContentText("Penyewa [" + id + "] akan diubah statusnya menjadi Tidak Aktif.\nLanjutkan?");
-        if (txtIdPenyewa.getScene() != null)
-            konfirmasi.initOwner(txtIdPenyewa.getScene().getWindow());
-
-        Optional<ButtonType> result = konfirmasi.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            try {
-                CRUD_Penyewa.delete(id);
-                showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Penyewa berhasil dinonaktifkan.");
-                loadData();
-                onBersih();
-            } catch (Exception e) {
-                showAlert(Alert.AlertType.ERROR, "Gagal", "Error: " + e.getMessage());
-            }
-        }
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    //  BATAL
-    // ─────────────────────────────────────────────────────────────────
-    @FXML
-    private void onBersih() {
-        bersihForm();
-        setFormState(false, false);
-        tabelPenyewa.getSelectionModel().clearSelection();
-        autoGenerateId();
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    //  CARI
-    // ─────────────────────────────────────────────────────────────────
-    @FXML
-    private void onCari() {
-        String kw = txtCari.getText().trim();
-        if (kw.isEmpty()) { loadData(); return; }
-        try {
-            List<Penyewa> hasil = CRUD_Penyewa.search(kw);
-            masterList.setAll(hasil);
-            currentPage = 1;
-            refreshTable();
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Cari", "Error: " + e.getMessage());
-        }
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    //  Pagination
-    // ─────────────────────────────────────────────────────────────────
-    @FXML private void onFirstPage() { currentPage = 1;            refreshTable(); }
-    @FXML private void onPrevPage()  { if (currentPage > 1)         { currentPage--; refreshTable(); } }
-    @FXML private void onNextPage()  { if (currentPage < totalPage)  { currentPage++; refreshTable(); } }
-    @FXML private void onLastPage()  { currentPage = totalPage;     refreshTable(); }
-
-    // ─────────────────────────────────────────────────────────────────
-    //  Navigasi sidebar
-    // ─────────────────────────────────────────────────────────────────
-    @FXML private void onDashboard() { showAlert(Alert.AlertType.INFORMATION, "Info", "Dashboard belum tersedia."); }
-    @FXML private void onPenyewa()   { loadData(); }
-
-    // ─────────────────────────────────────────────────────────────────
-    //  setFormState
-    //  editMode  : true  = baris tabel dipilih
-    //  isNonaktif: true  = status Tidak Aktif → semua field & tombol locked
-    // ─────────────────────────────────────────────────────────────────
     private void setFormState(boolean editMode, boolean isNonaktif) {
-
-        // Tombol SIMPAN hanya aktif saat mode tambah (bukan edit, bukan nonaktif)
         btnSimpan.setDisable(editMode || isNonaktif);
-
-        // Tombol UBAH & HAPUS disabled jika belum pilih baris ATAU penyewa nonaktif
         btnUbah.setDisable(!editMode || isNonaktif);
         btnHapus.setDisable(!editMode || isNonaktif);
 
-        // Field form: readonly jika penyewa nonaktif
-        boolean readOnly = isNonaktif;
-        txtNama.setEditable(!readOnly);
-        txtNIK.setEditable(!readOnly);
-        txtNoTelp.setEditable(!readOnly);
-        txtAlamat.setEditable(!readOnly);
-        dpTglDaftar.setDisable(readOnly);
+        txtNama.setEditable(!isNonaktif);
+        txtNIK.setEditable(!isNonaktif);
+        txtNoTelp.setEditable(!isNonaktif);
+        txtAlamat.setEditable(!isNonaktif);
+        dpTglDaftar.setDisable(isNonaktif);
 
-        // Warna visual field — abu-abu jika readonly
         String styleReadOnly = "-fx-background-color: #F0F0F0; -fx-border-color: #D0D8E8; "
                 + "-fx-border-radius: 6; -fx-background-radius: 6; "
                 + "-fx-padding: 6 12; -fx-font-size: 13px; -fx-text-fill: #888;";
-        String styleNormal   = "-fx-background-color: WHITE; -fx-border-color: #D0D8E8; "
+        String styleNormal = "-fx-background-color: WHITE; -fx-border-color: #D0D8E8; "
                 + "-fx-border-radius: 6; -fx-background-radius: 6; "
                 + "-fx-padding: 6 12; -fx-font-size: 13px;";
 
-        txtNama.setStyle(readOnly ? styleReadOnly : styleNormal);
-        txtNIK.setStyle(readOnly ? styleReadOnly : styleNormal);
-        txtNoTelp.setStyle(readOnly ? styleReadOnly : styleNormal);
-        txtAlamat.setStyle(readOnly ? styleReadOnly : styleNormal);
+        txtNama.setStyle(isNonaktif ? styleReadOnly : styleNormal);
+        txtNIK.setStyle(isNonaktif ? styleReadOnly : styleNormal);
+        txtNoTelp.setStyle(isNonaktif ? styleReadOnly : styleNormal);
+        txtAlamat.setStyle(isNonaktif ? styleReadOnly : styleNormal);
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    //  validasi
-    // ─────────────────────────────────────────────────────────────────
     private boolean validasi() {
         StringBuilder sb = new StringBuilder();
 
-        // ── Nama Penyewa ──────────────────────────────────────────────
         String nama = txtNama.getText().trim();
         if (nama.isEmpty()) {
             sb.append("• Nama Penyewa wajib diisi.\n");
@@ -427,7 +229,6 @@ public class PenyewaController implements Initializable {
             sb.append("• Nama Penyewa hanya boleh mengandung huruf dan spasi.\n");
         }
 
-        // ── NIK ───────────────────────────────────────────────────────
         String nik = txtNIK.getText().trim();
         if (nik.isEmpty()) {
             sb.append("• NIK wajib diisi.\n");
@@ -435,7 +236,6 @@ public class PenyewaController implements Initializable {
             sb.append("• NIK harus terdiri dari tepat 16 digit angka.\n");
         }
 
-        // ── No Telp ───────────────────────────────────────────────────
         String noTelp = txtNoTelp.getText().trim();
         if (noTelp.isEmpty()) {
             sb.append("• No Telp wajib diisi.\n");
@@ -443,7 +243,6 @@ public class PenyewaController implements Initializable {
             sb.append("• No Telp harus diawali 08 atau +62 dan terdiri dari 10–15 digit angka.\n");
         }
 
-        // ── Alamat ────────────────────────────────────────────────────
         String alamat = txtAlamat.getText().trim();
         if (alamat.isEmpty()) {
             sb.append("• Alamat wajib diisi.\n");
@@ -455,7 +254,6 @@ public class PenyewaController implements Initializable {
             sb.append("• Alamat hanya boleh mengandung huruf, angka, spasi, koma, titik, garis miring, dan tanda hubung.\n");
         }
 
-        // ── Tanggal Daftar ────────────────────────────────────────────
         if (dpTglDaftar.getValue() == null) {
             sb.append("• Tanggal Daftar wajib diisi.\n");
         } else if (dpTglDaftar.getValue().isAfter(LocalDate.now())) {
@@ -471,9 +269,6 @@ public class PenyewaController implements Initializable {
         return true;
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    //  bersihForm
-    // ─────────────────────────────────────────────────────────────────
     private void bersihForm() {
         txtIdPenyewa.clear();
         txtNama.clear();
@@ -484,9 +279,6 @@ public class PenyewaController implements Initializable {
         txtStatus.setText("Aktif");
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    //  showAlert
-    // ─────────────────────────────────────────────────────────────────
     private void showAlert(Alert.AlertType type, String title, String msg) {
         Runnable show = () -> {
             Alert alert = new Alert(type);
@@ -499,5 +291,148 @@ public class PenyewaController implements Initializable {
         };
         if (Platform.isFxApplicationThread()) show.run();
         else Platform.runLater(show);
+    }
+
+    @FXML
+    void onBersih(ActionEvent event) {
+        bersihForm();
+        setFormState(false, false);
+        tabelPenyewa.getSelectionModel().clearSelection();
+        autoGenerateId();
+    }
+
+    @FXML
+    void onCari(ActionEvent event) {
+        String kw = txtCari.getText().trim();
+        if (kw.isEmpty()) { loadData(); return; }
+        try {
+            List<Penyewa> hasil = CRUD_Penyewa.search(kw);
+            masterList.setAll(hasil);
+            currentPage = 1;
+            refreshTable();
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Gagal Cari", "Error: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    void onFirstPage(ActionEvent event) {
+        currentPage = 1;
+        refreshTable();
+    }
+
+    @FXML
+    void onHapus(ActionEvent event) {
+        String id = txtIdPenyewa.getText().trim();
+        if (id.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Peringatan", "Pilih data yang ingin dinonaktifkan.");
+            return;
+        }
+
+        Alert konfirmasi = new Alert(Alert.AlertType.CONFIRMATION);
+        konfirmasi.setTitle("Konfirmasi Nonaktifkan");
+        konfirmasi.setHeaderText("Nonaktifkan Penyewa");
+        konfirmasi.setContentText("Penyewa [" + id + "] akan diubah statusnya menjadi Tidak Aktif.\nLanjutkan?");
+        if (txtIdPenyewa.getScene() != null)
+            konfirmasi.initOwner(txtIdPenyewa.getScene().getWindow());
+
+        Optional<ButtonType> result = konfirmasi.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                CRUD_Penyewa.delete(id);
+                showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Penyewa berhasil dinonaktifkan.");
+                loadData();
+                onBersih(null);
+            } catch (Exception e) {
+                showAlert(Alert.AlertType.ERROR, "Gagal", "Error: " + e.getMessage());
+            }
+        }
+    }
+
+    @FXML
+    void onLastPage(ActionEvent event) {
+        currentPage = totalPage;
+        refreshTable();
+    }
+
+    @FXML
+    void onNextPage(ActionEvent event) {
+        if (currentPage < totalPage) { currentPage++; refreshTable(); }
+    }
+
+    @FXML
+    void onPrevPage(ActionEvent event) {
+        if (currentPage > 1) { currentPage--; refreshTable(); }
+    }
+
+    @FXML
+    void onSimpan(ActionEvent event) {
+        if (!validasi()) return;
+        try {
+            Penyewa p = new Penyewa(
+                    txtIdPenyewa.getText().trim(),
+                    txtNama.getText().trim(),
+                    txtNIK.getText().trim(),
+                    txtNoTelp.getText().trim(),
+                    txtAlamat.getText().trim(),
+                    dpTglDaftar.getValue(),
+                    "Aktif"
+            );
+            CRUD_Penyewa.insert(p);
+            showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Data penyewa berhasil disimpan.");
+            loadData();
+            onTambah(null);
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Gagal Simpan", "Error: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    void onTableClick(MouseEvent event) {
+        Penyewa p = tabelPenyewa.getSelectionModel().getSelectedItem();
+        if (p == null) return;
+
+        txtIdPenyewa.setText(p.getIdPenyewa());
+        txtNama.setText(p.getNamaPenyewa());
+        txtNIK.setText(p.getNik());
+        txtNoTelp.setText(p.getNoTelp());
+        txtAlamat.setText(p.getAlamat());
+        dpTglDaftar.setValue(p.getTglDaftar());
+        txtStatus.setText(p.getStsPenyewa() != null ? p.getStsPenyewa().trim() : "Aktif");
+
+        boolean isNonaktif = "Tidak Aktif".equalsIgnoreCase(
+                p.getStsPenyewa() != null ? p.getStsPenyewa().trim() : ""
+        );
+        setFormState(true, isNonaktif);
+    }
+
+    @FXML
+    void onTambah(ActionEvent event) {
+        bersihForm();
+        setFormState(false, false);
+        autoGenerateId();
+        txtNama.requestFocus();
+    }
+
+    @FXML
+    void onUbah(ActionEvent event) {
+        if (!validasi()) return;
+        try {
+            Penyewa p = new Penyewa(
+                    txtIdPenyewa.getText().trim(),
+                    txtNama.getText().trim(),
+                    txtNIK.getText().trim(),
+                    txtNoTelp.getText().trim(),
+                    txtAlamat.getText().trim(),
+                    dpTglDaftar.getValue(),
+                    txtStatus.getText()
+            );
+            CRUD_Penyewa.update(p);
+            showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Data penyewa berhasil diubah.");
+            loadData();
+            onBersih(null);
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Gagal Ubah", "Error: " + e.getMessage());
+        }
     }
 }

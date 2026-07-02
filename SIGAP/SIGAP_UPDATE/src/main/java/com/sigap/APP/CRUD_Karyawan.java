@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CRUD_Karyawan {
-
+//la
     public static void insert(Karyawan k) throws SQLException {
         try (Connection conn = new DBConnect().conn;
              CallableStatement cs = conn.prepareCall("{CALL spInsertKaryawan(?,?,?,?,?,?,?)}")) {

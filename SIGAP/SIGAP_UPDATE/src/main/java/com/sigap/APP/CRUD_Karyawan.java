@@ -59,16 +59,25 @@ public class CRUD_Karyawan {
         return k;
     }
 
-    public static void update(Karyawan k) throws SQLException {
+    public static void updateData(Karyawan k) throws SQLException {
         DBConnect db = new DBConnect();
-        CallableStatement cs = db.conn.prepareCall("{CALL spUpdateKaryawan(?,?,?,?,?,?,?)}");
+        CallableStatement cs = db.conn.prepareCall("{CALL spUpdateKaryawan(?,?,?,?,?,?)}");
         cs.setString(1, k.getIdKaryawan());
         cs.setString(2, k.getNamaKaryawan());
         cs.setString(3, k.getJabatanKaryawan());
         cs.setString(4, k.getNoTelp());
         cs.setString(5, k.getEmail());
         cs.setString(6, k.getUsername());
-        cs.setString(7, k.getPassword());
+        cs.executeUpdate();
+        cs.close();
+        db.conn.close();
+    }
+
+    public static void updatePassword(String idKaryawan, String newPassword) throws SQLException {
+        DBConnect db = new DBConnect();
+        CallableStatement cs = db.conn.prepareCall("{CALL spUpdatePasswordKaryawan(?,?)}");
+        cs.setString(1, idKaryawan);
+        cs.setString(2, newPassword);
         cs.executeUpdate();
         cs.close();
         db.conn.close();

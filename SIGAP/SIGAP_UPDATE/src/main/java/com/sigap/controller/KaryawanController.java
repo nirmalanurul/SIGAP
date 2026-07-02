@@ -23,18 +23,27 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class KaryawanController implements Initializable {
-//lakik
     @FXML
     private Button btnHapus;
     @FXML
@@ -43,6 +52,8 @@ public class KaryawanController implements Initializable {
     private Button btnUbah;
     @FXML
     private Button btnUbahPassword;
+    @FXML
+    private Button btnPilihFotoKtp;
     @FXML
     private ComboBox<String> cmbJabatan;
     @FXML
@@ -60,11 +71,15 @@ public class KaryawanController implements Initializable {
     @FXML
     private TableColumn<Karyawan, String> colUsername;
     @FXML
+    private TableColumn<Karyawan, Void> colFoto;
+    @FXML
     private Label lblPage;
     @FXML
     private Label lblTotal;
     @FXML
     private Label lblPassword;
+    @FXML
+    private Label lblFotoKtpNama;
     @FXML
     private TableView<Karyawan> tabelKaryawan;
     @FXML
@@ -88,6 +103,10 @@ public class KaryawanController implements Initializable {
     private static final int PAGE_SIZE = 10;
     private int currentPage = 1;
     private int totalPage = 1;
+
+    private static final String FOLDER_FOTO_KTP =
+            new File("uploads" + File.separator + "ktp").getAbsolutePath() + File.separator;
+    private String fotoKtpPath;
 
     private static final String STYLE_READONLY =
             "-fx-background-color:#F0F0F0;-fx-border-color:#D0D8E8;" +
@@ -168,6 +187,25 @@ public class KaryawanController implements Initializable {
                 setStyle("-fx-text-fill:#1A3A8F;-fx-font-weight:600;");
             }
         });
+
+        colFoto.setCellFactory(col -> new TableCell<>() {
+            private final Button btnLihat = new Button("Lihat Gambar");
+            {
+                btnLihat.setStyle(
+                        "-fx-background-color:#1A3A8F;-fx-text-fill:WHITE;-fx-font-size:11px;" +
+                                "-fx-font-weight:700;-fx-background-radius:5;-fx-cursor:hand;-fx-padding:4 10;");
+                btnLihat.setOnAction(e -> {
+                    Karyawan k = getTableView().getItems().get(getIndex());
+                    tampilkanFotoKtp(k.getFotoKtp());
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : btnLihat);
+            }
+        });
     }
 
     private void loadData() {
@@ -212,6 +250,8 @@ public class KaryawanController implements Initializable {
         txtNoTelp.setEditable(!locked);
         txtEmail.setEditable(!locked);
         txtUsername.setEditable(!locked);
+
+        btnPilihFotoKtp.setDisable(locked);
 
         txtNamaKaryawan.setStyle(locked ? STYLE_READONLY : STYLE_NORMAL);
         txtNoTelp.setStyle(locked ? STYLE_READONLY : STYLE_NORMAL);
@@ -275,6 +315,10 @@ public class KaryawanController implements Initializable {
             sb.append("• Password maksimal 30 karakter.\n");
         }
 
+        if (isInsert && (fotoKtpPath == null || fotoKtpPath.isBlank())) {
+            sb.append("• Foto KTP wajib diunggah.\n");
+        }
+
         if (sb.length() > 0) {
             showAlert(Alert.AlertType.WARNING, "Validasi Input", sb.toString());
             return false;
@@ -291,6 +335,8 @@ public class KaryawanController implements Initializable {
         txtUsername.clear();
         txtPassword.clear();
         txtStatus.clear();
+        fotoKtpPath = null;
+        lblFotoKtpNama.setText("Belum ada gambar dipilih");
     }
 
     private void showAlert(Alert.AlertType type, String title, String msg) {
@@ -307,21 +353,87 @@ public class KaryawanController implements Initializable {
         else Platform.runLater(show);
     }
 
+    private void tampilkanFotoKtp(String pathFoto) {
+        if (pathFoto == null || pathFoto.isBlank()) {
+            showAlert(Alert.AlertType.WARNING, "Tidak Ada Gambar", "Data karyawan ini belum memiliki foto KTP.");
+            return;
+        }
+        File file = new File(pathFoto);
+        if (!file.exists()) {
+            showAlert(Alert.AlertType.ERROR, "Gambar Tidak Ditemukan",
+                    "File gambar tidak ditemukan pada path:\n" + pathFoto);
+            return;
+        }
+        try {
+            Image image = new Image(file.toURI().toString());
+            ImageView imageView = new ImageView(image);
+            imageView.setPreserveRatio(true);
+            imageView.setFitWidth(480);
+
+            VBox box = new VBox(imageView);
+            box.setStyle("-fx-padding:16;-fx-background-color:WHITE;-fx-alignment:CENTER;");
+
+            Stage dialog = new Stage();
+            dialog.setTitle("Foto KTP Karyawan");
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            if (tabelKaryawan.getScene() != null) dialog.initOwner(tabelKaryawan.getScene().getWindow());
+            dialog.setScene(new Scene(box));
+            dialog.showAndWait();
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Gagal Menampilkan Gambar", "Error: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    void onPilihFotoKtp(ActionEvent event) {
+        String nama = txtNamaKaryawan.getText().trim();
+        if (nama.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Peringatan",
+                    "Isi Nama Karyawan terlebih dahulu sebelum mengunggah foto KTP.");
+            return;
+        }
+
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Pilih Foto KTP");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Gambar (*.jpg, *.jpeg, *.png)", "*.jpg", "*.jpeg", "*.png")
+        );
+        File file = chooser.showOpenDialog(btnPilihFotoKtp.getScene().getWindow());
+        if (file == null) return;
+
+        try {
+            File folder = new File(FOLDER_FOTO_KTP);
+            if (!folder.exists()) folder.mkdirs();
+
+            String namaAsli = file.getName();
+            String ekstensi = namaAsli.substring(namaAsli.lastIndexOf('.'));
+            // Format penamaan: KTP_<Nama Karyawan>.ext
+            // Nama file yang sama otomatis menimpa file lama, sehingga
+            // jika salah unggah, pengguna cukup unggah ulang untuk memperbaikinya.
+            String namaFile = "KTP_" + sanitizeNamaFile(nama) + ekstensi;
+
+            Path target = Paths.get(FOLDER_FOTO_KTP + namaFile).toAbsolutePath().normalize();
+            Files.copy(file.toPath(), target, StandardCopyOption.REPLACE_EXISTING);
+
+            fotoKtpPath = target.toString();
+            lblFotoKtpNama.setText(namaAsli);
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Gagal Upload", "Gagal menyimpan gambar: " + e.getMessage());
+        }
+    }
+
+    private String sanitizeNamaFile(String nama) {
+        return nama.trim()
+                .replaceAll("\\s+", "_")
+                .replaceAll("[^A-Za-z0-9_]", "");
+    }
+
     @FXML
     void onBersih(ActionEvent event) {
         bersihForm();
         setFormState(false, false);
         showPasswordField(true);
         tabelKaryawan.getSelectionModel().clearSelection();
-        autoGenerateId();
-        txtStatus.setText("Aktif");
-    }
-
-    @FXML
-    void onTambah(ActionEvent event) {
-        bersihForm();
-        setFormState(false, false);
-        showPasswordField(true);
         autoGenerateId();
         txtStatus.setText("Aktif");
         txtNamaKaryawan.requestFocus();
@@ -339,6 +451,13 @@ public class KaryawanController implements Initializable {
         txtEmail.setText(k.getEmail());
         txtUsername.setText(k.getUsername());
         txtStatus.setText(k.getStsKaryawan());
+
+        fotoKtpPath = k.getFotoKtp();
+        lblFotoKtpNama.setText(
+                (k.getFotoKtp() == null || k.getFotoKtp().isBlank())
+                        ? "Belum ada gambar dipilih"
+                        : new File(k.getFotoKtp()).getName()
+        );
 
         showPasswordField(false);
 
@@ -435,10 +554,11 @@ public class KaryawanController implements Initializable {
                     txtUsername.getText().trim(),
                     txtPassword.getText().trim()
             );
+            k.setFotoKtp(fotoKtpPath);
             CRUD_Karyawan.insert(k);
             showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Data karyawan berhasil disimpan.");
             loadData();
-            onTambah(null);
+            onBersih(null);
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Gagal Simpan", "Error: " + e.getMessage());
         }
@@ -457,6 +577,7 @@ public class KaryawanController implements Initializable {
                     txtUsername.getText().trim(),
                     ""   // password tidak diubah lewat form ini
             );
+            k.setFotoKtp(fotoKtpPath);
             CRUD_Karyawan.updateData(k);
             showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Data karyawan berhasil diubah.");
             loadData();

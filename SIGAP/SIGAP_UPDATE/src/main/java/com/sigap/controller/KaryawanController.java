@@ -34,7 +34,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class KaryawanController implements Initializable {
-
+//lakik
     @FXML
     private Button btnHapus;
     @FXML

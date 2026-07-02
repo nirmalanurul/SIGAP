@@ -117,12 +117,12 @@
                                            style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;"
                                            GridPane.columnIndex="3" GridPane.rowIndex="1" />
 
-                                <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;"
+                                <Label fx:id="lblPassword" style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;"
                                        text="Password"
                                        GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                 <PasswordField fx:id="txtPassword"
                                                maxWidth="1.7976931348623157E308"
-                                               promptText="Masukkan password"
+                                               promptText="Masukkan password (khusus Tambah)"
                                                style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;"
                                                GridPane.columnIndex="3" GridPane.rowIndex="2" />
 
@@ -155,6 +155,9 @@
                                 <Button fx:id="btnHapus" onAction="#onHapus" prefHeight="38" prefWidth="130"
                                         style="-fx-background-color: #D63030; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;"
                                         text="HAPUS" />
+                                <Button fx:id="btnUbahPassword" onAction="#onUbahPassword" prefHeight="38" prefWidth="150"
+                                        style="-fx-background-color: #6C4FCE; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;"
+                                        text="UBAH PASSWORD" />
                                 <Button onAction="#onBersih" prefHeight="38" prefWidth="110"
                                         style="-fx-background-color: #A0A8B8; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;"
                                         text="BATAL" />

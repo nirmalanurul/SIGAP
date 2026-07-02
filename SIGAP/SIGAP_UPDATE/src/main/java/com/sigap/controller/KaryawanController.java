@@ -9,7 +9,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -21,6 +24,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.net.URL;
 import java.util.List;
@@ -36,6 +41,8 @@ public class KaryawanController implements Initializable {
     private Button btnSimpan;
     @FXML
     private Button btnUbah;
+    @FXML
+    private Button btnUbahPassword;
     @FXML
     private ComboBox<String> cmbJabatan;
     @FXML
@@ -57,6 +64,8 @@ public class KaryawanController implements Initializable {
     @FXML
     private Label lblTotal;
     @FXML
+    private Label lblPassword;
+    @FXML
     private TableView<Karyawan> tabelKaryawan;
     @FXML
     private TextField txtCari;
@@ -75,7 +84,7 @@ public class KaryawanController implements Initializable {
     @FXML
     private TextField txtUsername;
 
-    private ObservableList<Karyawan> masterList = FXCollections.observableArrayList();
+    private final ObservableList<Karyawan> masterList = FXCollections.observableArrayList();
     private static final int PAGE_SIZE = 10;
     private int currentPage = 1;
     private int totalPage = 1;
@@ -108,6 +117,14 @@ public class KaryawanController implements Initializable {
             autoGenerateId();
             txtStatus.setText("Aktif");
         });
+    }
+
+    private void showPasswordField(boolean visible) {
+        lblPassword.setVisible(visible);
+        lblPassword.setManaged(visible);
+        txtPassword.setVisible(visible);
+        txtPassword.setManaged(visible);
+        txtPassword.clear();
     }
 
     private void setupListeners() {
@@ -188,19 +205,18 @@ public class KaryawanController implements Initializable {
         btnSimpan.setDisable(editMode || locked);
         btnUbah.setDisable(!editMode || locked);
         btnHapus.setDisable(!editMode || locked);
+        btnUbahPassword.setDisable(!editMode || locked);
 
         txtNamaKaryawan.setEditable(!locked);
         cmbJabatan.setDisable(locked);
         txtNoTelp.setEditable(!locked);
         txtEmail.setEditable(!locked);
         txtUsername.setEditable(!locked);
-        txtPassword.setEditable(!locked);
 
         txtNamaKaryawan.setStyle(locked ? STYLE_READONLY : STYLE_NORMAL);
         txtNoTelp.setStyle(locked ? STYLE_READONLY : STYLE_NORMAL);
         txtEmail.setStyle(locked ? STYLE_READONLY : STYLE_NORMAL);
         txtUsername.setStyle(locked ? STYLE_READONLY : STYLE_NORMAL);
-        txtPassword.setStyle(locked ? STYLE_READONLY : STYLE_NORMAL);
     }
 
     private boolean validasi(boolean isInsert) {
@@ -295,9 +311,41 @@ public class KaryawanController implements Initializable {
     void onBersih(ActionEvent event) {
         bersihForm();
         setFormState(false, false);
+        showPasswordField(true);
         tabelKaryawan.getSelectionModel().clearSelection();
         autoGenerateId();
         txtStatus.setText("Aktif");
+    }
+
+    @FXML
+    void onTambah(ActionEvent event) {
+        bersihForm();
+        setFormState(false, false);
+        showPasswordField(true);
+        autoGenerateId();
+        txtStatus.setText("Aktif");
+        txtNamaKaryawan.requestFocus();
+    }
+
+    @FXML
+    void onTableClick(MouseEvent event) {
+        Karyawan k = tabelKaryawan.getSelectionModel().getSelectedItem();
+        if (k == null) return;
+
+        txtIdKaryawan.setText(k.getIdKaryawan());
+        txtNamaKaryawan.setText(k.getNamaKaryawan());
+        cmbJabatan.setValue(k.getJabatanKaryawan());
+        txtNoTelp.setText(k.getNoTelp());
+        txtEmail.setText(k.getEmail());
+        txtUsername.setText(k.getUsername());
+        txtStatus.setText(k.getStsKaryawan());
+
+        showPasswordField(false);
+
+        boolean isTidakAktif = "Tidak Aktif".equalsIgnoreCase(
+                k.getStsKaryawan() != null ? k.getStsKaryawan().trim() : ""
+        );
+        setFormState(true, isTidakAktif);
     }
 
     @FXML
@@ -397,35 +445,6 @@ public class KaryawanController implements Initializable {
     }
 
     @FXML
-    void onTableClick(MouseEvent event) {
-        Karyawan k = tabelKaryawan.getSelectionModel().getSelectedItem();
-        if (k == null) return;
-
-        txtIdKaryawan.setText(k.getIdKaryawan());
-        txtNamaKaryawan.setText(k.getNamaKaryawan());
-        cmbJabatan.setValue(k.getJabatanKaryawan());
-        txtNoTelp.setText(k.getNoTelp());
-        txtEmail.setText(k.getEmail());
-        txtUsername.setText(k.getUsername());
-        txtPassword.setText("");
-        txtStatus.setText(k.getStsKaryawan());
-
-        boolean isTidakAktif = "Tidak Aktif".equalsIgnoreCase(
-                k.getStsKaryawan() != null ? k.getStsKaryawan().trim() : ""
-        );
-        setFormState(true, isTidakAktif);
-    }
-
-    @FXML
-    void onTambah(ActionEvent event) {
-        bersihForm();
-        setFormState(false, false);
-        autoGenerateId();
-        txtStatus.setText("Aktif");
-        txtNamaKaryawan.requestFocus();
-    }
-
-    @FXML
     void onUbah(ActionEvent event) {
         if (!validasi(false)) return;
         try {
@@ -436,14 +455,41 @@ public class KaryawanController implements Initializable {
                     txtNoTelp.getText().trim(),
                     txtEmail.getText().trim(),
                     txtUsername.getText().trim(),
-                    txtPassword.getText().trim()
+                    ""   // password tidak diubah lewat form ini
             );
-            CRUD_Karyawan.update(k);
+            CRUD_Karyawan.updateData(k);
             showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Data karyawan berhasil diubah.");
             loadData();
             onBersih(null);
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Gagal Ubah", "Error: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    void onUbahPassword(ActionEvent event) {
+        String id = txtIdKaryawan.getText().trim();
+        if (id.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Peringatan", "Pilih data karyawan yang ingin diubah password-nya.");
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sigap/view/UbahPasswordDialog.fxml"));
+            Parent root = loader.load();
+
+            UbahPasswordController controller = loader.getController();
+            controller.setData(id, txtNamaKaryawan.getText().trim());
+
+            Stage dialog = new Stage();
+            dialog.setTitle("Ubah Password Karyawan");
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            if (txtIdKaryawan.getScene() != null) dialog.initOwner(txtIdKaryawan.getScene().getWindow());
+            dialog.setScene(new Scene(root));
+            dialog.showAndWait();
+
+            if (controller.isBerhasil()) loadData();
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Gagal Membuka Dialog", "Error: " + e.getMessage());
         }
     }
 }

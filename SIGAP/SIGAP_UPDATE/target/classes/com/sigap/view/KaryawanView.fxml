@@ -159,7 +159,7 @@
                     <children>
                         <HBox spacing="8.0" HBox.hgrow="ALWAYS">
                             <children>
-                                //tes
+                               
                                 <Button fx:id="btnSimpan" onAction="#onSimpan" prefHeight="38" prefWidth="120"
                                         style="-fx-background-color: #1A3A8F; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;"
                                         text="SIMPAN" />

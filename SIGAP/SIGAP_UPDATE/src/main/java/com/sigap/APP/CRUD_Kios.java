@@ -71,18 +71,21 @@ public class CRUD_Kios {
         List<Kios> list = new ArrayList<>();
         String sql = """
         SELECT * FROM vwKiosAll
-        WHERE Id_Kios          LIKE ?
-           OR Deskripsi        LIKE ?
-           OR Sts_Ketersediaan LIKE ?
-           OR Sts_Kios         LIKE ?
-           OR CAST(Harga_Kios  AS VARCHAR) LIKE ?
+        WHERE Id_Kios         LIKE ?
+           OR Deskripsi       LIKE ?
+           OR Sts_Kios        LIKE ?
+           OR CAST(Harga_Kios AS VARCHAR) LIKE ?
         """;
         PreparedStatement ps = db.conn.prepareStatement(sql);
         String kw = "%" + keyword.trim() + "%";
-        for (int i = 1; i <= 5; i++) ps.setString(i, kw);
+        for (int i = 1; i <= 4; i++)
+            ps.setString(i, kw);
         ResultSet rs = ps.executeQuery();
-        while (rs.next()) list.add(mapRow(rs));
-        rs.close(); ps.close(); db.conn.close();
+        while (rs.next())
+            list.add(mapRow(rs));
+        rs.close();
+        ps.close();
+        db.conn.close();
         return list;
     }
 
@@ -106,7 +109,6 @@ public class CRUD_Kios {
                 rs.getDouble("Lebar_Kios"),
                 rs.getDouble("Luas_Kios"),
                 rs.getString("Deskripsi"),
-                rs.getString("Sts_Ketersediaan"),
                 rs.getString("Sts_Kios")
         );
     }

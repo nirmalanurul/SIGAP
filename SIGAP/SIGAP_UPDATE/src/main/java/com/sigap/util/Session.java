@@ -7,7 +7,7 @@ public class Session {
     private static Karyawan loggedInUser;
 
     private Session() {
-        // mencega instansiasi, class ini hanya dipakai secara statis
+        //  instansiasi, class ini hanya dipakai secara statis
     }
 
     public static void setLoggedInUser(Karyawan k) {

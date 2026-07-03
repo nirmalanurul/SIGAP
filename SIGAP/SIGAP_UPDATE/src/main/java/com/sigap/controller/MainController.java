@@ -68,7 +68,7 @@ public class MainController implements Initializable {
 
     @FXML
     public void onMenuDenda(){
-        loadView("/com/sigap/view/DendaView.fxml");
+        loadView("/com/sigap/view/BiayaTambahanView.fxml");
         btnMenuKios.setStyle(STYLE_INACTIVE);
         btnMenuPenyewa.setStyle(STYLE_INACTIVE);
         btnMenuDenda.setStyle(STYLE_ACTIVE);

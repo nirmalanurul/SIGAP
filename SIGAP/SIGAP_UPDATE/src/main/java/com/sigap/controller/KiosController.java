@@ -49,8 +49,6 @@ public class KiosController implements Initializable {
     @FXML
     private TableColumn<Kios, String> colPanjang;
     @FXML
-    private TableColumn<Kios, String> colStsKetersediaan;
-    @FXML
     private TableColumn<Kios, String> colStsKios;
     @FXML
     private Label lblPage;
@@ -73,8 +71,6 @@ public class KiosController implements Initializable {
     @FXML
     private TextField txtPanjang;
     @FXML
-    private TextField txtStsKetersediaan;
-    @FXML
     private TextField txtStsKios;
 
     private ObservableList<Kios> masterList = FXCollections.observableArrayList();
@@ -89,15 +85,14 @@ public class KiosController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         txtIdKios.setEditable(false);
         txtLuas.setEditable(false);
-        txtStsKetersediaan.setEditable(false);
         txtStsKios.setEditable(false);
 
-        txtStsKetersediaan.setText("Tersedia");
         txtStsKios.setText("Aktif");
 
         setupTable();
         setupListeners();
         setFormState(false, false);
+
         Platform.runLater(() -> {
             loadData();
             autoGenerateId();
@@ -156,25 +151,8 @@ public class KiosController implements Initializable {
         colDeskripsi.setCellValueFactory(d -> new SimpleStringProperty(
                 d.getValue().getDeskripsi() == null ? "-" : d.getValue().getDeskripsi()));
 
-        colStsKetersediaan.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().getStsKetersediaan()));
-
         colStsKios.setCellValueFactory(d ->
                 new SimpleStringProperty(d.getValue().getStsKios()));
-
-        colStsKetersediaan.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(String val, boolean empty) {
-                super.updateItem(val, empty);
-                if (empty || val == null) { setGraphic(null); return; }
-                Label badge = new Label(val);
-                badge.setStyle("Tersedia".equalsIgnoreCase(val)
-                        ? "-fx-background-color:#E0F5E8;-fx-text-fill:#1E8A3C;-fx-font-weight:700;-fx-font-size:11px;-fx-padding:3 10;-fx-background-radius:10;"
-                        : "-fx-background-color:#FFE8E8;-fx-text-fill:#C0392B;-fx-font-weight:700;-fx-font-size:11px;-fx-padding:3 10;-fx-background-radius:10;");
-                setGraphic(badge);
-                setText(null);
-            }
-        });
 
         colStsKios.setCellFactory(col -> new TableCell<>() {
             @Override
@@ -323,7 +301,6 @@ public class KiosController implements Initializable {
         txtLebar.clear();
         txtLuas.clear();
         txtDeskripsi.clear();
-        txtStsKetersediaan.setText("Tersedia");
         txtStsKios.setText("Aktif");
     }
 
@@ -417,41 +394,44 @@ public class KiosController implements Initializable {
     void onSimpan(ActionEvent event) {
         if (!validasi()) return;
         try {
+            double panjang = Double.parseDouble(txtPanjang.getText().trim());
+            double lebar = Double.parseDouble(txtLebar.getText().trim());
+            double luas = Math.round(panjang * lebar * 100.0) / 100.0;
             Kios k = new Kios(
                     txtIdKios.getText().trim(),
                     Double.parseDouble(txtHarga.getText().trim()),
-                    Double.parseDouble(txtPanjang.getText().trim()),
-                    Double.parseDouble(txtLebar.getText().trim()),
-                    "Tersedia",
-                    "Aktif",
-                    txtDeskripsi.getText().trim().isEmpty() ? null : txtDeskripsi.getText().trim()
+                    panjang,
+                    lebar,
+                    luas,
+                    txtDeskripsi.getText().trim().isEmpty() ? null : txtDeskripsi.getText().trim(),
+                    "Aktif"
             );
             CRUD_Kios.insert(k);
-            showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Data kios berhasil disimpan.");
+            showAlert(Alert.AlertType.INFORMATION,
+                    "Berhasil",
+                    "Data kios berhasil disimpan.");
             loadData();
             onTambah(null);
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Simpan", "Error: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR,
+                    "Gagal Simpan",
+                    "Error : " + e.getMessage());
         }
     }
 
     @FXML
     void onTableClick(MouseEvent event) {
         Kios k = tabelKios.getSelectionModel().getSelectedItem();
-        if (k == null) return;
-
+        if (k == null)
+            return;
         txtIdKios.setText(k.getIdKios());
         txtHarga.setText(String.valueOf((long) k.getHargaKios()));
         txtPanjang.setText(String.valueOf(k.getPanjangKios()));
         txtLebar.setText(String.valueOf(k.getLebarKios()));
         txtLuas.setText(k.getLuasKios() + " m²");
         txtDeskripsi.setText(k.getDeskripsi() == null ? "" : k.getDeskripsi());
-        txtStsKetersediaan.setText(k.getStsKetersediaan());
         txtStsKios.setText(k.getStsKios());
-
-        boolean nonaktif = "Nonaktif".equalsIgnoreCase(
-                k.getStsKios() != null ? k.getStsKios().trim() : ""
-        );
+        boolean nonaktif = "Nonaktif".equalsIgnoreCase(k.getStsKios());
         setFormState(true, nonaktif);
     }
 
@@ -465,7 +445,8 @@ public class KiosController implements Initializable {
 
     @FXML
     void onUbah(ActionEvent event) {
-        if (!validasi()) return;
+        if (!validasi())
+            return;
         try {
             double panjang = Double.parseDouble(txtPanjang.getText().trim());
             double lebar = Double.parseDouble(txtLebar.getText().trim());
@@ -478,15 +459,18 @@ public class KiosController implements Initializable {
                     lebar,
                     luas,
                     txtDeskripsi.getText().trim().isEmpty() ? null : txtDeskripsi.getText().trim(),
-                    txtStsKetersediaan.getText(),
                     txtStsKios.getText()
             );
             CRUD_Kios.update(k);
-            showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Data kios berhasil diubah.");
+            showAlert(Alert.AlertType.INFORMATION,
+                    "Berhasil",
+                    "Data kios berhasil diubah.");
             loadData();
             onBersih(null);
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Ubah", "Error: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR,
+                    "Gagal Ubah",
+                    "Error : " + e.getMessage());
         }
     }
 }

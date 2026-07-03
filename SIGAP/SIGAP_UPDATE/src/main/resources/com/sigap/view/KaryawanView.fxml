@@ -26,7 +26,6 @@
                 <Insets bottom="24.0" left="24.0" right="24.0" top="20.0" />
             </padding>
             <children>
-//lakik
                 <VBox spacing="4.0">
                     <children>
                         <Label style="-fx-font-size: 12px; -fx-text-fill: #888;" text="Master Data  ›  Karyawan" />
@@ -56,6 +55,7 @@
                                 <ColumnConstraints hgrow="ALWAYS" minWidth="200.0" />
                             </columnConstraints>
                             <rowConstraints>
+                                <RowConstraints minHeight="34.0" prefHeight="34.0" vgrow="SOMETIMES" />
                                 <RowConstraints minHeight="34.0" prefHeight="34.0" vgrow="SOMETIMES" />
                                 <RowConstraints minHeight="34.0" prefHeight="34.0" vgrow="SOMETIMES" />
                                 <RowConstraints minHeight="34.0" prefHeight="34.0" vgrow="SOMETIMES" />
@@ -134,6 +134,22 @@
                                            style="-fx-background-color: #F0F0F0; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px; -fx-text-fill: #888;"
                                            GridPane.columnIndex="3" GridPane.rowIndex="3" />
 
+                                <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;"
+                                       text="Foto KTP"
+                                       GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                                <HBox alignment="CENTER_LEFT" spacing="10.0"
+                                      GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4">
+                                    <children>
+                                        <Button fx:id="btnPilihFotoKtp" onAction="#onPilihFotoKtp"
+                                                prefHeight="32" prefWidth="140"
+                                                style="-fx-background-color: #F0F4FF; -fx-text-fill: #1A3A8F; -fx-font-size: 12px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-border-color: #1A3A8F; -fx-border-radius: 6; -fx-cursor: hand;"
+                                                text="Pilih Gambar" />
+                                        <Label fx:id="lblFotoKtpNama"
+                                               style="-fx-font-size: 12px; -fx-text-fill: #888;"
+                                               text="Belum ada gambar dipilih" />
+                                    </children>
+                                </HBox>
+
                             </children>
                         </GridPane>
                     </children>
@@ -143,9 +159,6 @@
                     <children>
                         <HBox spacing="8.0" HBox.hgrow="ALWAYS">
                             <children>
-                                <Button onAction="#onTambah" prefHeight="38" prefWidth="120"
-                                        style="-fx-background-color: #1A3A8F; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;"
-                                        text="TAMBAH" />
                                 <Button fx:id="btnSimpan" onAction="#onSimpan" prefHeight="38" prefWidth="120"
                                         style="-fx-background-color: #1A3A8F; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;"
                                         text="SIMPAN" />
@@ -195,12 +208,13 @@
                                    VBox.vgrow="ALWAYS">
                             <columns>
                                 <TableColumn fx:id="colId"       prefWidth="90"  text="ID" />
-                                <TableColumn fx:id="colNama"     prefWidth="170" text="Nama Karyawan" />
-                                <TableColumn fx:id="colJabatan"  prefWidth="110" text="Jabatan" />
-                                <TableColumn fx:id="colNoTelp"   prefWidth="130" text="No. Telepon" />
-                                <TableColumn fx:id="colEmail"    prefWidth="180" text="Email" />
-                                <TableColumn fx:id="colUsername" prefWidth="120" text="Username" />
-                                <TableColumn fx:id="colStatus"   prefWidth="100" text="Status" />
+                                <TableColumn fx:id="colNama"     prefWidth="160" text="Nama Karyawan" />
+                                <TableColumn fx:id="colJabatan"  prefWidth="100" text="Jabatan" />
+                                <TableColumn fx:id="colNoTelp"   prefWidth="120" text="No. Telepon" />
+                                <TableColumn fx:id="colEmail"    prefWidth="160" text="Email" />
+                                <TableColumn fx:id="colUsername" prefWidth="110" text="Username" />
+                                <TableColumn fx:id="colStatus"   prefWidth="90"  text="Status" />
+                                <TableColumn fx:id="colFoto"     prefWidth="110" text="Foto KTP" />
                             </columns>
                             <placeholder>
                                 <Label style="-fx-font-size: 13px; -fx-text-fill: #AAA;" text="Tidak ada data karyawan." />

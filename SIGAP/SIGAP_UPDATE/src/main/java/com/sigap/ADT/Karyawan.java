@@ -10,6 +10,7 @@ public class Karyawan {
     private String username;
     private String password;
     private String stsKaryawan;
+    private String fotoKtp;
 
     public Karyawan() {
     }
@@ -97,6 +98,14 @@ public class Karyawan {
 
     public void setStsKaryawan(String stsKaryawan) {
         this.stsKaryawan = stsKaryawan;
+    }
+
+    public String getFotoKtp() {
+        return fotoKtp;
+    }
+
+    public void setFotoKtp(String fotoKtp) {
+        this.fotoKtp = fotoKtp;
     }
 
     @Override

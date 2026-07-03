@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CRUD_Karyawan {
-//laki
+    //laki
     public static void insert(Karyawan k) throws SQLException {
         try (Connection conn = new DBConnect().conn;
-             CallableStatement cs = conn.prepareCall("{CALL spInsertKaryawan(?,?,?,?,?,?,?)}")) {
+             CallableStatement cs = conn.prepareCall("{CALL spInsertKaryawan(?,?,?,?,?,?,?,?)}")) {
             cs.setString(1, k.getIdKaryawan());
             cs.setString(2, k.getNamaKaryawan());
             cs.setString(3, k.getJabatanKaryawan());
@@ -19,6 +19,7 @@ public class CRUD_Karyawan {
             cs.setString(5, k.getEmail());
             cs.setString(6, k.getUsername());
             cs.setString(7, k.getPassword());
+            cs.setString(8, k.getFotoKtp());
             cs.executeUpdate();
         }
     }
@@ -61,13 +62,14 @@ public class CRUD_Karyawan {
 
     public static void updateData(Karyawan k) throws SQLException {
         DBConnect db = new DBConnect();
-        CallableStatement cs = db.conn.prepareCall("{CALL spUpdateKaryawan(?,?,?,?,?,?)}");
+        CallableStatement cs = db.conn.prepareCall("{CALL spUpdateKaryawan(?,?,?,?,?,?,?)}");
         cs.setString(1, k.getIdKaryawan());
         cs.setString(2, k.getNamaKaryawan());
         cs.setString(3, k.getJabatanKaryawan());
         cs.setString(4, k.getNoTelp());
         cs.setString(5, k.getEmail());
         cs.setString(6, k.getUsername());
+        cs.setString(7, k.getFotoKtp());
         cs.executeUpdate();
         cs.close();
         db.conn.close();
@@ -125,7 +127,7 @@ public class CRUD_Karyawan {
     }
 
     private static Karyawan mapRow(ResultSet rs) throws SQLException {
-        return new Karyawan(
+        Karyawan k = new Karyawan(
                 rs.getString("Id_Karyawan"),
                 rs.getString("Nama_Karyawan"),
                 rs.getString("Jabatan_Karyawan"),
@@ -135,5 +137,7 @@ public class CRUD_Karyawan {
                 "",
                 rs.getString("Sts_Karyawan")
         );
+        k.setFotoKtp(rs.getString("Foto_KTP"));
+        return k;
     }
 }

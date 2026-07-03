@@ -1,4 +1,4 @@
-package com.sigap.Util;
+package com.sigap.util;
 
 import com.sigap.ADT.Karyawan;
 

@@ -1,3 +1,5 @@
+
+
 module com.sigap {
     requires javafx.controls;
     requires javafx.fxml;
@@ -12,5 +14,7 @@ module com.sigap {
     exports com.sigap.controller;
     exports com.sigap.database;
     exports com.sigap.ADT;
+
+
     exports com.sigap.APP;
 }

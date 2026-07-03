@@ -28,7 +28,7 @@ public class SplashController implements Initializable {
 
     private static final double LOADING_DURATION_MS  = 4000;
     private static final double FADE_OUT_DURATION_MS = 700;
-    private static final String MAIN_FXML = "/com/sigap/view/MainView.fxml";
+    private static final String LOGIN_FXML = "/com/sigap/view/Login.fxml";
 
     private Timeline progressTimeline;
     private boolean  isTransitioning = false;
@@ -88,35 +88,35 @@ public class SplashController implements Initializable {
         FadeTransition fo = new FadeTransition(Duration.millis(FADE_OUT_DURATION_MS), rootPane);
         fo.setFromValue(1.0);
         fo.setToValue(0.0);
-        fo.setOnFinished(e -> loadMainView());
+        fo.setOnFinished(e -> loadLoginView());
         fo.play();
     }
 
-    private void loadMainView() {
+    private void loadLoginView() {
         try {
-            URL fxmlUrl = getClass().getResource(MAIN_FXML);
+            URL fxmlUrl = getClass().getResource(LOGIN_FXML);
             if (fxmlUrl == null) {
-                System.err.println("[SplashController] PenyewaView.fxml tidak ditemukan: " + MAIN_FXML);
+                System.err.println("[SplashController] LoginView.fxml tidak ditemukan: " + LOGIN_FXML);
                 Platform.exit();
                 return;
             }
 
             FXMLLoader loader = new FXMLLoader(fxmlUrl);
-            Parent mainRoot = loader.load();
+            Parent loginRoot = loader.load();
 
             Scene currentScene = rootPane.getScene();
 
             if (currentScene != null) {
-                currentScene.setRoot(mainRoot);
+                currentScene.setRoot(loginRoot);
             } else {
                 Stage stage = (Stage) rootPane.getScene().getWindow();
-                Scene mainScene = new Scene(mainRoot);
-                stage.setScene(mainScene);
+                Scene loginScene = new Scene(loginRoot);
+                stage.setScene(loginScene);
                 stage.setFullScreen(true);
             }
 
         } catch (Exception ex) {
-            System.err.println("[SplashController] Gagal memuat MainView: " + ex.getMessage());
+            System.err.println("[SplashController] Gagal memuat LoginView: " + ex.getMessage());
             ex.printStackTrace();
         }
     }

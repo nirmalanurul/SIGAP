@@ -612,6 +612,8 @@ public class KaryawanController implements Initializable {
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Gagal Membuka Dialog", "Error: " + e.getMessage());
         }
+
+
     }
 }
 //tes

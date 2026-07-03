@@ -8,7 +8,7 @@
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.*?>
 
-<StackPane prefHeight="800" prefWidth="1280" style="-fx-background-color: #EEF2FB;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sigap.controller.SplashController">
+<StackPane prefHeight="800" prefWidth="1280" style="-fx-background-color: #EEF2FB;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sigap.controller.LoginController">
     <children>
 
         <AnchorPane fx:id="rootPane" prefHeight="800" prefWidth="1280">
@@ -132,10 +132,10 @@
                 </PasswordField>
 
                 <!-- Error message -->
-                <Label fx:id="errorLabel" layoutX="46.0" layoutY="374.0" managed="false" prefWidth="328.0" style="-fx-font-size: 12px; -fx-text-fill: #E85252;" text="Username atau password salah" visible="false" wrapText="true" />
+                <Label fx:id="errorLabel" layoutX="46.0" layoutY="342.0" managed="false" prefWidth="328.0" style="-fx-font-size: 12px; -fx-text-fill: #E85252; -fx-font-weight: bold;" text="Username atau password salah" visible="false" wrapText="true" />
 
                 <!-- Login button -->
-                <Button fx:id="loginButton" defaultButton="true" layoutX="46.0" layoutY="374.0" mnemonicParsing="false" prefHeight="46.0" prefWidth="328.0" style="-fx-background-color: linear-gradient(to right, #1A3A8F, #3A7BD5); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="Masuk">
+                <Button fx:id="loginButton" defaultButton="true" layoutX="46.0" layoutY="378.0" mnemonicParsing="false" prefHeight="46.0" prefWidth="328.0" style="-fx-background-color: linear-gradient(to right, #1A3A8F, #3A7BD5); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="Masuk">
                     <effect>
                         <DropShadow blurType="GAUSSIAN" color="#1A3A8F55" offsetY="6.0" radius="14.0" />
                     </effect>

@@ -1,5 +1,5 @@
 package com.sigap.APP;
-
+//
 import com.sigap.ADT.Karyawan;
 import com.sigap.database.DBConnect;
 
@@ -155,7 +155,7 @@ public class CRUD_Karyawan {
                 rs.getString("No_Telp"),
                 rs.getString("Email"),
                 rs.getString("Username"),
-                "",   // memang sengaja kosong: view tidak menyertakan Password
+                "",   // memang sngaja kosong: view tidak menyertakan Password
                 rs.getString("Sts_Karyawan")
         );
         k.setFotoKtp(rs.getString("Foto_KTP"));

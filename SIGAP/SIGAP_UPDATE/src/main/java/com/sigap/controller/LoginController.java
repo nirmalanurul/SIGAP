@@ -29,7 +29,9 @@ public class LoginController implements Initializable {
     @FXML private Label errorLabel;
     @FXML private Button loginButton;
 
-    private static final String MAIN_FXML = "/com/sigap/view/MainView.fxml";
+    private static final String DASHBOARD_ADMIN_FXML   = "/com/sigap/view/DashboardAdminView.fxml";
+    private static final String DASHBOARD_KASIR_FXML   = "/com/sigap/view/DashboardKasirView.fxml";
+    private static final String DASHBOARD_MANAGER_FXML = "/com/sigap/view/DashboardManagerView.fxml";
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -70,7 +72,7 @@ public class LoginController implements Initializable {
             }
 
             Session.setLoggedInUser(matched);
-            goToMain();
+            goToDashboard(matched);
 
         } catch (Exception e) {
             showError("Gagal terhubung ke database.");
@@ -87,11 +89,27 @@ public class LoginController implements Initializable {
         return k;
     }
 
-    private void goToMain() {
+    /**
+     * Mengarahkan user ke dashboard sesuai jabatanKaryawan yang login:
+     * "Admin" -> DashboardAdminView, "Kasir" -> DashboardKasirView,
+     * selain itu (mis. "Manajer") -> DashboardManagerView (placeholder kosong).
+     */
+    private void goToDashboard(Karyawan matched) {
+        String jabatan = matched.getJabatanKaryawan() == null ? "" : matched.getJabatanKaryawan().trim();
+
+        String targetFxml;
+        if ("Admin".equalsIgnoreCase(jabatan)) {
+            targetFxml = DASHBOARD_ADMIN_FXML;
+        } else if ("Kasir".equalsIgnoreCase(jabatan)) {
+            targetFxml = DASHBOARD_KASIR_FXML;
+        } else {
+            targetFxml = DASHBOARD_MANAGER_FXML;
+        }
+
         try {
-            URL fxmlUrl = getClass().getResource(MAIN_FXML);
+            URL fxmlUrl = getClass().getResource(targetFxml);
             if (fxmlUrl == null) {
-                showError("MainView.fxml tidak ditemukan.");
+                showError("Dashboard untuk role \"" + jabatan + "\" tidak ditemukan.");
                 return;
             }
             FXMLLoader loader = new FXMLLoader(fxmlUrl);

@@ -148,7 +148,14 @@ public class KaryawanController implements Initializable {
 
     private void setupListeners() {
         txtNoTelp.textProperty().addListener((obs, oldVal, newVal) -> {
-            String filtered = newVal.replaceAll("[^0-9+]", "");
+            if (newVal.isEmpty()) return;
+            String filtered;
+            if (newVal.startsWith("+")) {
+                filtered = "+" + newVal.substring(1).replaceAll("[^0-9]", "");
+            } else {
+                filtered = newVal.replaceAll("[^0-9]", "");
+            }
+            if (filtered.length() > 15) filtered = filtered.substring(0, 15);
             if (!filtered.equals(newVal)) txtNoTelp.setText(filtered);
         });
     }
@@ -259,6 +266,19 @@ public class KaryawanController implements Initializable {
         txtUsername.setStyle(locked ? STYLE_READONLY : STYLE_NORMAL);
     }
 
+    private boolean isUsernameDuplicate(String username, String currentId) {
+        try {
+            List<Karyawan> semua = CRUD_Karyawan.getAll();
+            return semua.stream().anyMatch(k ->
+                    k.getUsername() != null
+                            && k.getUsername().trim().equalsIgnoreCase(username)
+                            && !k.getIdKaryawan().equalsIgnoreCase(currentId)
+            );
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private boolean validasi(boolean isInsert) {
         StringBuilder sb = new StringBuilder();
 
@@ -304,6 +324,8 @@ public class KaryawanController implements Initializable {
             sb.append("• Username maksimal 30 karakter.\n");
         } else if (username.contains(" ")) {
             sb.append("• Username tidak boleh mengandung spasi.\n");
+        } else if (isUsernameDuplicate(username, txtIdKaryawan.getText().trim())) {
+            sb.append("• Username sudah digunakan, silakan pilih username lain.\n");
         }
 
         String password = txtPassword.getText().trim();
@@ -612,5 +634,7 @@ public class KaryawanController implements Initializable {
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Gagal Membuka Dialog", "Error: " + e.getMessage());
         }
+
+
     }
 }

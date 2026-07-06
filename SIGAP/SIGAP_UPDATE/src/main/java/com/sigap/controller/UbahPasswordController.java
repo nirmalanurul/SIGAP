@@ -22,7 +22,7 @@ public class UbahPasswordController {
 
     private String idKaryawan;
     private boolean berhasil = false;
-//lakik
+
     public void setData(String idKaryawan, String namaKaryawan) {
         this.idKaryawan = idKaryawan;
         lblIdKaryawan.setText(idKaryawan);

@@ -77,6 +77,7 @@ public class KiosController implements Initializable {
     private static final int PAGE_SIZE = 10;
     private int currentPage = 1;
     private int totalPage = 1;
+    private boolean updatingHarga = false;
 
     private static final NumberFormat FMT_RUPIAH =
             NumberFormat.getNumberInstance(new Locale("id", "ID"));
@@ -100,11 +101,6 @@ public class KiosController implements Initializable {
     }
 
     private void setupListeners() {
-        txtHarga.textProperty().addListener((obs, oldVal, newVal) -> {
-            String filtered = newVal.replaceAll("[^0-9]", "");
-            if (!filtered.equals(newVal)) txtHarga.setText(filtered);
-        });
-
         txtPanjang.textProperty().addListener((obs, oldVal, newVal) -> {
             String filtered = newVal.replaceAll("[^0-9.]", "");
             long dots = filtered.chars().filter(c -> c == '.').count();
@@ -120,6 +116,42 @@ public class KiosController implements Initializable {
             if (!filtered.equals(newVal)) txtLebar.setText(filtered);
             hitungLuas();
         });
+
+        txtHarga.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (updatingHarga) return;
+
+            String digitsOnly = newVal.replaceAll("[^0-9]", "");
+
+            if (digitsOnly.isEmpty()) {
+                updatingHarga = true;
+                txtHarga.setText("");
+                updatingHarga = false;
+                return;
+            }
+
+            if (digitsOnly.length() > 8) {
+                digitsOnly = digitsOnly.substring(0, 8);
+            }
+
+            String formatted;
+            try {
+                long value = Long.parseLong(digitsOnly);
+                formatted = FMT_RUPIAH.format(value);
+            } catch (NumberFormatException e) {
+                formatted = digitsOnly;
+            }
+
+            if (!formatted.equals(newVal)) {
+                updatingHarga = true;
+                txtHarga.setText(formatted);
+                txtHarga.positionCaret(formatted.length());
+                updatingHarga = false;
+            }
+        });
+    }
+
+    private String rawHarga() {
+        return txtHarga.getText().replaceAll("[^0-9]", "");
     }
 
     private void hitungLuas() {
@@ -238,7 +270,7 @@ public class KiosController implements Initializable {
     private boolean validasi() {
         StringBuilder sb = new StringBuilder();
 
-        String hargaStr = txtHarga.getText().trim();
+        String hargaStr = rawHarga();
         if (hargaStr.isEmpty()) {
             sb.append("• Harga Kios wajib diisi.\n");
         } else {
@@ -399,7 +431,7 @@ public class KiosController implements Initializable {
             double luas = Math.round(panjang * lebar * 100.0) / 100.0;
             Kios k = new Kios(
                     txtIdKios.getText().trim(),
-                    Double.parseDouble(txtHarga.getText().trim()),
+                    Double.parseDouble(rawHarga()),
                     panjang,
                     lebar,
                     luas,
@@ -407,15 +439,11 @@ public class KiosController implements Initializable {
                     "Aktif"
             );
             CRUD_Kios.insert(k);
-            showAlert(Alert.AlertType.INFORMATION,
-                    "Berhasil",
-                    "Data kios berhasil disimpan.");
+            showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Data kios berhasil disimpan.");
             loadData();
             onTambah(null);
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR,
-                    "Gagal Simpan",
-                    "Error : " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Gagal Simpan", "Error : " + e.getMessage());
         }
     }
 
@@ -425,7 +453,7 @@ public class KiosController implements Initializable {
         if (k == null)
             return;
         txtIdKios.setText(k.getIdKios());
-        txtHarga.setText(String.valueOf((long) k.getHargaKios()));
+        txtHarga.setText(FMT_RUPIAH.format((long) k.getHargaKios()));
         txtPanjang.setText(String.valueOf(k.getPanjangKios()));
         txtLebar.setText(String.valueOf(k.getLebarKios()));
         txtLuas.setText(k.getLuasKios() + " m²");

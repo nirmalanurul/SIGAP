@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.sigap.controller.KiosCardController"
+      fx:id="rootCard" spacing="4.0" prefWidth="230" maxWidth="230"
+      style="-fx-background-color: WHITE; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2); -fx-cursor: hand;">
+    <children>
+
+        <ImageView fx:id="imgThumb" fitWidth="230" fitHeight="130" preserveRatio="false"
+                   style="-fx-background-radius: 10 10 0 0;" />
+
+        <Label fx:id="lblId" text="KS001"
+               style="-fx-font-size: 11px; -fx-text-fill: #888; -fx-font-weight: 600; -fx-padding: 8 12 0 12;" />
+
+        <Label fx:id="lblHarga" text="Rp 0"
+               style="-fx-font-size: 15px; -fx-font-weight: 800; -fx-text-fill: #1A3A8F; -fx-padding: 0 12;" />
+
+        <Label fx:id="lblUkuran" text="0m x 0m · 0 m²"
+               style="-fx-font-size: 12px; -fx-text-fill: #555; -fx-padding: 0 12;" />
+
+        <HBox style="-fx-padding: 4 12 10 12;">
+            <children>
+                <Label fx:id="lblStatus" text="Aktif"
+                       style="-fx-background-color: #E0F5E8; -fx-text-fill: #1E8A3C; -fx-font-weight: 700; -fx-font-size: 10px; -fx-padding: 2 8; -fx-background-radius: 8;" />
+            </children>
+        </HBox>
+
+    </children>
+</VBox>

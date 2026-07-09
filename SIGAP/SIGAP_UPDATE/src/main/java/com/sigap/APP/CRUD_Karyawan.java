@@ -56,11 +56,6 @@ public class CRUD_Karyawan {
         return null;
     }
 
-    /**
-     * Khusus untuk proses login. Mengambil data langsung dari tbKaryawan
-     * (bukan view) karena butuh kolom Password yang sengaja dikecualikan
-     * dari vwKaryawan / vwKaryawanAll untuk keamanan tampilan data.
-     */
     public static Karyawan findByUsername(String username) throws SQLException {
         try (Connection conn = new DBConnect().conn;
              CallableStatement cs = conn.prepareCall("{CALL spGetKaryawanByUsername(?)}")) {

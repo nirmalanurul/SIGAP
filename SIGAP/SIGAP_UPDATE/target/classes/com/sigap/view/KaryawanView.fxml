@@ -50,9 +50,9 @@
                         <GridPane hgap="30.0" vgap="14.0">
                             <columnConstraints>
                                 <ColumnConstraints hgrow="NEVER" minWidth="130.0" prefWidth="130.0" />
-                                <ColumnConstraints hgrow="ALWAYS" minWidth="200.0" />
+                                <ColumnConstraints hgrow="ALWAYS" minWidth="200.0" prefWidth="200.0" />
                                 <ColumnConstraints hgrow="NEVER" minWidth="130.0" prefWidth="130.0" />
-                                <ColumnConstraints hgrow="ALWAYS" minWidth="200.0" />
+                                <ColumnConstraints hgrow="ALWAYS" minWidth="200.0" prefWidth="200.0" />
                             </columnConstraints>
                             <rowConstraints>
                                 <RowConstraints minHeight="34.0" prefHeight="34.0" vgrow="SOMETIMES" />
@@ -72,54 +72,72 @@
                                            style="-fx-background-color: #F8F9FC; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;"
                                            GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-                                <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;"
-                                       text="Nama Karyawan"
-                                       GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                    <children>
+                                        <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;" text="Nama Karyawan" />
+                                        <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
+                                    </children>
+                                </HBox>
                                 <TextField fx:id="txtNamaKaryawan"
                                            maxWidth="1.7976931348623157E308"
                                            promptText="Masukkan nama karyawan"
                                            style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;"
                                            GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                                <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;"
-                                       text="Jabatan"
-                                       GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                                    <children>
+                                        <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;" text="Jabatan" />
+                                        <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
+                                    </children>
+                                </HBox>
                                 <ComboBox fx:id="cmbJabatan"
                                           maxWidth="1.7976931348623157E308"
                                           promptText="Pilih jabatan"
                                           style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-font-size: 13px;"
                                           GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-                                <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;"
-                                       text="No. Telepon"
-                                       GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                                <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="3">
+                                    <children>
+                                        <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;" text="No. Telepon" />
+                                        <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
+                                    </children>
+                                </HBox>
                                 <TextField fx:id="txtNoTelp"
                                            maxWidth="1.7976931348623157E308"
                                            promptText="08xxxxxxxxxx"
                                            style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;"
                                            GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-                                <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;"
-                                       text="Email"
-                                       GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                                    <children>
+                                        <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;" text="Email" />
+                                        <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
+                                    </children>
+                                </HBox>
                                 <TextField fx:id="txtEmail"
                                            maxWidth="1.7976931348623157E308"
                                            promptText="contoh@email.com"
                                            style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;"
                                            GridPane.columnIndex="3" GridPane.rowIndex="0" />
 
-                                <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;"
-                                       text="Username"
-                                       GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                    <children>
+                                        <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;" text="Username" />
+                                        <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
+                                    </children>
+                                </HBox>
                                 <TextField fx:id="txtUsername"
                                            maxWidth="1.7976931348623157E308"
                                            promptText="Masukkan username"
                                            style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;"
                                            GridPane.columnIndex="3" GridPane.rowIndex="1" />
 
-                                <Label fx:id="lblPassword" style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;"
-                                       text="Password"
-                                       GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                    <children>
+                                        <Label fx:id="lblPassword" style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;" text="Password" />
+                                        <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
+                                    </children>
+                                </HBox>
                                 <PasswordField fx:id="txtPassword"
                                                maxWidth="1.7976931348623157E308"
                                                promptText="Masukkan password (khusus Tambah)"
@@ -134,9 +152,12 @@
                                            style="-fx-background-color: #F0F0F0; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px; -fx-text-fill: #888;"
                                            GridPane.columnIndex="3" GridPane.rowIndex="3" />
 
-                                <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;"
-                                       text="Foto KTP"
-                                       GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                                <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="4">
+                                    <children>
+                                        <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;" text="Foto KTP" />
+                                        <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
+                                    </children>
+                                </HBox>
                                 <HBox alignment="CENTER_LEFT" spacing="10.0"
                                       GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4">
                                     <children>

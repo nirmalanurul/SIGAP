@@ -4,6 +4,7 @@ import com.sigap.ADT.Karyawan;
 import com.sigap.APP.CRUD_Karyawan;
 
 import javafx.application.Platform;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -41,9 +42,11 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class KaryawanController implements Initializable {
+
     @FXML
     private Button btnHapus;
     @FXML
@@ -71,7 +74,7 @@ public class KaryawanController implements Initializable {
     @FXML
     private TableColumn<Karyawan, String> colUsername;
     @FXML
-    private TableColumn<Karyawan, Void> colFoto;
+    private TableColumn<Karyawan, Karyawan> colFoto;
     @FXML
     private Label lblPage;
     @FXML
@@ -165,6 +168,15 @@ public class KaryawanController implements Initializable {
         colNama.setCellValueFactory(k -> new SimpleStringProperty(k.getValue().getNamaKaryawan()));
         colJabatan.setCellValueFactory(k -> new SimpleStringProperty(k.getValue().getJabatanKaryawan()));
         colNoTelp.setCellValueFactory(k -> new SimpleStringProperty(k.getValue().getNoTelp()));
+        colNoTelp.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String val, boolean empty) {
+                super.updateItem(val, empty);
+                if (empty || val == null) { setText(null); return; }
+                setText(val);
+                setStyle("-fx-alignment: CENTER-RIGHT; -fx-padding: 0 14 0 0;");
+            }
+        });
         colEmail.setCellValueFactory(k -> new SimpleStringProperty(k.getValue().getEmail()));
         colUsername.setCellValueFactory(k -> new SimpleStringProperty(k.getValue().getUsername()));
         colStatus.setCellValueFactory(k -> new SimpleStringProperty(k.getValue().getStsKaryawan()));
@@ -195,22 +207,35 @@ public class KaryawanController implements Initializable {
             }
         });
 
+        colFoto.setCellValueFactory(k -> new SimpleObjectProperty<>(k.getValue()));
         colFoto.setCellFactory(col -> new TableCell<>() {
-            private final Button btnLihat = new Button("Lihat Gambar");
+            private static final String STYLE_NORMAL =
+                    "-fx-background-color: linear-gradient(to bottom, #2647B8, #1A3A8F);" +
+                            "-fx-text-fill:WHITE;-fx-font-size:11px;-fx-font-weight:700;" +
+                            "-fx-background-radius:20;-fx-cursor:hand;-fx-padding:6 14 6 12;" +
+                            "-fx-effect: dropshadow(gaussian, rgba(26,58,143,0.35), 6, 0, 0, 2);";
+            private static final String STYLE_HOVER =
+                    "-fx-background-color: linear-gradient(to bottom, #3355CC, #1F45A8);" +
+                            "-fx-text-fill:WHITE;-fx-font-size:11px;-fx-font-weight:700;" +
+                            "-fx-background-radius:20;-fx-cursor:hand;-fx-padding:6 14 6 12;" +
+                            "-fx-effect: dropshadow(gaussian, rgba(26,58,143,0.55), 9, 0, 0, 3);" +
+                            "-fx-scale-x:1.05;-fx-scale-y:1.05;";
+
+            private final Button btnLihat = new Button("\uD83D\uDDBC  Lihat Gambar");
             {
-                btnLihat.setStyle(
-                        "-fx-background-color:#1A3A8F;-fx-text-fill:WHITE;-fx-font-size:11px;" +
-                                "-fx-font-weight:700;-fx-background-radius:5;-fx-cursor:hand;-fx-padding:4 10;");
+                btnLihat.setStyle(STYLE_NORMAL);
+                btnLihat.setOnMouseEntered(e -> btnLihat.setStyle(STYLE_HOVER));
+                btnLihat.setOnMouseExited(e -> btnLihat.setStyle(STYLE_NORMAL));
                 btnLihat.setOnAction(e -> {
-                    Karyawan k = getTableView().getItems().get(getIndex());
-                    tampilkanFotoKtp(k.getFotoKtp());
+                    Karyawan k = getItem();
+                    if (k != null) tampilkanFotoKtp(k.getFotoKtp());
                 });
             }
 
             @Override
-            protected void updateItem(Void item, boolean empty) {
+            protected void updateItem(Karyawan item, boolean empty) {
                 super.updateItem(item, empty);
-                setGraphic(empty ? null : btnLihat);
+                setGraphic((empty || item == null) ? null : btnLihat);
             }
         });
     }
@@ -234,6 +259,7 @@ public class KaryawanController implements Initializable {
         int from = (currentPage - 1) * PAGE_SIZE;
         int to = Math.min(from + PAGE_SIZE, total);
         tabelKaryawan.setItems(FXCollections.observableArrayList(masterList.subList(from, to)));
+        tabelKaryawan.refresh();
         lblTotal.setText("Total Data : " + total);
         lblPage.setText(String.valueOf(currentPage));
     }
@@ -246,32 +272,30 @@ public class KaryawanController implements Initializable {
         }
     }
 
+    private TextField[] fieldEditable() {
+        return new TextField[]{ txtNamaKaryawan, txtNoTelp, txtEmail, txtUsername };
+    }
+
     private void setFormState(boolean editMode, boolean locked) {
         btnSimpan.setDisable(editMode || locked);
         btnUbah.setDisable(!editMode || locked);
         btnHapus.setDisable(!editMode || locked);
         btnUbahPassword.setDisable(!editMode || locked);
-
-        txtNamaKaryawan.setEditable(!locked);
         cmbJabatan.setDisable(locked);
-        txtNoTelp.setEditable(!locked);
-        txtEmail.setEditable(!locked);
-        txtUsername.setEditable(!locked);
-
         btnPilihFotoKtp.setDisable(locked);
 
-        txtNamaKaryawan.setStyle(locked ? STYLE_READONLY : STYLE_NORMAL);
-        txtNoTelp.setStyle(locked ? STYLE_READONLY : STYLE_NORMAL);
-        txtEmail.setStyle(locked ? STYLE_READONLY : STYLE_NORMAL);
-        txtUsername.setStyle(locked ? STYLE_READONLY : STYLE_NORMAL);
+        for (TextField tf : fieldEditable()) {
+            tf.setEditable(!locked);
+            tf.setStyle(locked ? STYLE_READONLY : STYLE_NORMAL);
+        }
     }
 
-    private boolean isUsernameDuplicate(String username, String currentId) {
+    private boolean isDuplicate(String nilai, String currentId, Function<Karyawan, String> ambilNilai) {
         try {
             List<Karyawan> semua = CRUD_Karyawan.getAll();
             return semua.stream().anyMatch(k ->
-                    k.getUsername() != null
-                            && k.getUsername().trim().equalsIgnoreCase(username)
+                    ambilNilai.apply(k) != null
+                            && ambilNilai.apply(k).trim().equalsIgnoreCase(nilai)
                             && !k.getIdKaryawan().equalsIgnoreCase(currentId)
             );
         } catch (Exception e) {
@@ -279,66 +303,94 @@ public class KaryawanController implements Initializable {
         }
     }
 
+    private String pesanErrorRamah(Exception e) {
+        String msg = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
+
+        if (msg.contains("uq_email") || (msg.contains("unique") && msg.contains("email"))) {
+            return "Email sudah digunakan oleh karyawan lain. Silakan gunakan email lain.";
+        }
+        if (msg.contains("uq_username") || (msg.contains("unique") && msg.contains("username"))) {
+            return "Username sudah digunakan oleh karyawan lain. Silakan gunakan username lain.";
+        }
+        if (msg.contains("unique") || msg.contains("duplicate key")) {
+            return "Data yang Anda masukkan sudah terdaftar sebelumnya. Silakan periksa kembali data Anda.";
+        }
+        if (msg.contains("foreign key") || msg.contains("reference constraint")) {
+            return "Data ini masih terhubung dengan data lain sehingga tidak dapat diproses.";
+        }
+        if (msg.contains("connection") || msg.contains("timeout")) {
+            return "Koneksi ke database bermasalah. Silakan periksa jaringan Anda dan coba lagi.";
+        }
+        return "Terjadi kesalahan saat memproses data. Silakan coba lagi atau hubungi admin sistem.";
+    }
+
+    private String cekNama(String nama) {
+        if (nama.isEmpty()) return "• Nama Karyawan wajib diisi.\n";
+        if (nama.length() < 3) return "• Nama Karyawan minimal 3 karakter.\n";
+        if (nama.length() > 30) return "• Nama Karyawan maksimal 30 karakter.\n";
+        if (!nama.matches("[A-Za-z ]+")) return "• Nama Karyawan hanya boleh huruf dan spasi (tanpa angka/simbol).\n";
+        return null;
+    }
+
+    private String cekJabatan(String jabatan) {
+        if (jabatan == null || jabatan.isEmpty()) return "• Jabatan wajib dipilih (Admin / Kasir / Manajer).\n";
+        return null;
+    }
+
+    private String cekTelepon(String telp) {
+        if (telp.isEmpty()) return "• No. Telepon wajib diisi.\n";
+        if (!telp.matches("(08[0-9].{7,12}|\\+62[0-9].{7,12})"))
+            return "• No. Telepon harus diawali 08 atau +62 dan panjang 10–15 karakter.\n";
+        return null;
+    }
+
+    private String cekEmail(String email, String currentId) {
+        if (email.isEmpty()) return "• Email wajib diisi.\n";
+        if (email.length() < 8) return "• Email minimal 8 karakter.\n";
+        if (email.length() > 30) return "• Email maksimal 30 karakter.\n";
+        if (!email.matches("^[^@]+@[^@]+\\.[^@]+$")) return "• Format Email tidak valid (contoh: nama@email.com).\n";
+        if (isDuplicate(email, currentId, Karyawan::getEmail))
+            return "• Email sudah digunakan oleh karyawan lain, silakan gunakan email lain.\n";
+        return null;
+    }
+
+    private String cekUsername(String username, String currentId) {
+        if (username.isEmpty()) return "• Username wajib diisi.\n";
+        if (username.length() < 5) return "• Username minimal 5 karakter.\n";
+        if (username.length() > 30) return "• Username maksimal 30 karakter.\n";
+        if (username.contains(" ")) return "• Username tidak boleh mengandung spasi.\n";
+        if (isDuplicate(username, currentId, Karyawan::getUsername))
+            return "• Username sudah digunakan, silakan pilih username lain.\n";
+        return null;
+    }
+
+    private String cekPassword(String password, boolean isInsert) {
+        if (isInsert && password.isEmpty()) return "• Password wajib diisi.\n";
+        if (!password.isEmpty() && password.length() < 8) return "• Password minimal 8 karakter.\n";
+        if (!password.isEmpty() && password.length() > 30) return "• Password maksimal 30 karakter.\n";
+        return null;
+    }
+
+    private String cekFotoKtp(boolean isInsert) {
+        if (isInsert && (fotoKtpPath == null || fotoKtpPath.isBlank())) return "• Foto KTP wajib diunggah.\n";
+        return null;
+    }
+
     private boolean validasi(boolean isInsert) {
+        String idSaatIni = txtIdKaryawan.getText().trim();
         StringBuilder sb = new StringBuilder();
 
-        String nama = txtNamaKaryawan.getText().trim();
-        if (nama.isEmpty()) {
-            sb.append("• Nama Karyawan wajib diisi.\n");
-        } else if (nama.length() < 3) {
-            sb.append("• Nama Karyawan minimal 3 karakter.\n");
-        } else if (nama.length() > 30) {
-            sb.append("• Nama Karyawan maksimal 30 karakter.\n");
-        } else if (!nama.matches("[A-Za-z ]+")) {
-            sb.append("• Nama Karyawan hanya boleh huruf dan spasi (tanpa angka/simbol).\n");
-        }
-
-        if (cmbJabatan.getValue() == null || cmbJabatan.getValue().isEmpty()) {
-            sb.append("• Jabatan wajib dipilih (Admin / Kasir / Manajer).\n");
-        }
-
-        String telp = txtNoTelp.getText().trim();
-        if (telp.isEmpty()) {
-            sb.append("• No. Telepon wajib diisi.\n");
-        } else if (!telp.matches("(08[0-9].{7,12}|\\+62[0-9].{7,12})")) {
-            sb.append("• No. Telepon harus diawali 08 atau +62 dan panjang 10–15 karakter.\n");
-        }
-
-        String email = txtEmail.getText().trim();
-        if (email.isEmpty()) {
-            sb.append("• Email wajib diisi.\n");
-        } else if (email.length() < 8) {
-            sb.append("• Email minimal 8 karakter.\n");
-        } else if (email.length() > 30) {
-            sb.append("• Email maksimal 30 karakter.\n");
-        } else if (!email.matches("^[^@]+@[^@]+\\.[^@]+$")) {
-            sb.append("• Format Email tidak valid (contoh: nama@email.com).\n");
-        }
-
-        String username = txtUsername.getText().trim();
-        if (username.isEmpty()) {
-            sb.append("• Username wajib diisi.\n");
-        } else if (username.length() < 5) {
-            sb.append("• Username minimal 5 karakter.\n");
-        } else if (username.length() > 30) {
-            sb.append("• Username maksimal 30 karakter.\n");
-        } else if (username.contains(" ")) {
-            sb.append("• Username tidak boleh mengandung spasi.\n");
-        } else if (isUsernameDuplicate(username, txtIdKaryawan.getText().trim())) {
-            sb.append("• Username sudah digunakan, silakan pilih username lain.\n");
-        }
-
-        String password = txtPassword.getText().trim();
-        if (isInsert && password.isEmpty()) {
-            sb.append("• Password wajib diisi.\n");
-        } else if (!password.isEmpty() && password.length() < 8) {
-            sb.append("• Password minimal 8 karakter.\n");
-        } else if (!password.isEmpty() && password.length() > 30) {
-            sb.append("• Password maksimal 30 karakter.\n");
-        }
-
-        if (isInsert && (fotoKtpPath == null || fotoKtpPath.isBlank())) {
-            sb.append("• Foto KTP wajib diunggah.\n");
+        String[] errors = {
+                cekNama(txtNamaKaryawan.getText().trim()),
+                cekJabatan(cmbJabatan.getValue()),
+                cekTelepon(txtNoTelp.getText().trim()),
+                cekEmail(txtEmail.getText().trim(), idSaatIni),
+                cekUsername(txtUsername.getText().trim(), idSaatIni),
+                cekPassword(txtPassword.getText().trim(), isInsert),
+                cekFotoKtp(isInsert)
+        };
+        for (String error : errors) {
+            if (error != null) sb.append(error);
         }
 
         if (sb.length() > 0) {
@@ -429,9 +481,7 @@ public class KaryawanController implements Initializable {
 
             String namaAsli = file.getName();
             String ekstensi = namaAsli.substring(namaAsli.lastIndexOf('.'));
-            // Format penamaan: KTP_<Nama Karyawan>.ext
-            // Nama file yang sama otomatis menimpa file lama, sehingga
-            // jika salah unggah, pengguna cukup unggah ulang untuk memperbaikinya.
+
             String namaFile = "KTP_" + sanitizeNamaFile(nama) + ekstensi;
 
             Path target = Paths.get(FOLDER_FOTO_KTP + namaFile).toAbsolutePath().normalize();
@@ -582,7 +632,7 @@ public class KaryawanController implements Initializable {
             loadData();
             onBersih(null);
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Simpan", "Error: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Gagal Simpan", pesanErrorRamah(e));
         }
     }
 
@@ -605,7 +655,7 @@ public class KaryawanController implements Initializable {
             loadData();
             onBersih(null);
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Ubah", "Error: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Gagal Ubah", pesanErrorRamah(e));
         }
     }
 

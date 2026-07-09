@@ -1,5 +1,5 @@
 package com.sigap.ADT;
-//
+
 public class Karyawan {
 
     private String idKaryawan;

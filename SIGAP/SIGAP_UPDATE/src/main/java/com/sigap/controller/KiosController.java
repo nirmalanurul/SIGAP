@@ -25,7 +25,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.scene.layout.FlowPane;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,12 +34,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.UUID;
+import java.util.*;
+
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.ToggleGroup;
 
 public class KiosController implements Initializable {
 
@@ -80,6 +78,20 @@ public class KiosController implements Initializable {
     private TextField txtCari;
     @FXML
     private FlowPane flowKios;
+    @FXML
+    private MenuButton btnFilter;
+    @FXML
+    private RadioMenuItem rmHargaTermurah;
+    @FXML
+    private RadioMenuItem rmHargaTermahal;
+    @FXML
+    private RadioMenuItem rmLuasTerkecil;
+    @FXML
+    private RadioMenuItem rmLuasTerbesar;
+    @FXML
+    private RadioMenuItem rmStatusAktif;
+    @FXML
+    private RadioMenuItem rmStatusNonaktif;
 
     // 4. FXML FIELDS — PAGINATION
     @FXML
@@ -99,12 +111,18 @@ public class KiosController implements Initializable {
     private List<Kios> semuaData = new ArrayList<>();
     private List<Kios> masterList = new ArrayList<>();
     private final List<String> daftarFotoDipilih = new ArrayList<>();
+
     private Kios selectedKios = null;
     private boolean updatingHarga = false;
     private int currentPage = 1;
     private int totalPage = 1;
+
     private static final int PAGE_SIZE = 12;
     private static final int MAKS_FOTO = 8;
+
+    private String urutanHarga = null;
+    private String urutanLuas = null;
+    private String filterStatus = null;
 
     // 6. KONSTANTA
     private static final NumberFormat FMT_RUPIAH =
@@ -131,12 +149,27 @@ public class KiosController implements Initializable {
         txtStsKios.setText("Aktif");
 
         setupListeners();
+        setupFilter();
         setFormState(false, false);
 
         Platform.runLater(() -> {
             loadData();
             autoGenerateId();
         });
+    }
+
+    private void setupFilter() {
+        ToggleGroup grupHarga = new ToggleGroup();
+        rmHargaTermurah.setToggleGroup(grupHarga);
+        rmHargaTermahal.setToggleGroup(grupHarga);
+
+        ToggleGroup grupLuas = new ToggleGroup();
+        rmLuasTerkecil.setToggleGroup(grupLuas);
+        rmLuasTerbesar.setToggleGroup(grupLuas);
+
+        ToggleGroup grupStatus = new ToggleGroup();
+        rmStatusAktif.setToggleGroup(grupStatus);
+        rmStatusNonaktif.setToggleGroup(grupStatus);
     }
 
     // 8. LISTENER INPUT FORM (Panjang, Lebar, Harga)
@@ -216,8 +249,9 @@ public class KiosController implements Initializable {
             currentPage = 1;
             refreshGrid();
         } catch (Exception e) {
+            e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error Koneksi",
-                    "Gagal memuat data.\nDetail: " + e.getMessage());
+                    "Gagal memuat data kios. Periksa koneksi ke database atau hubungi admin sistem.");
         }
     }
 
@@ -234,8 +268,9 @@ public class KiosController implements Initializable {
             try {
                 flowKios.getChildren().add(buatCardKios(k));
             } catch (IOException e) {
-                showAlert(Alert.AlertType.ERROR, "Gagal Render Card",
-                        "Gagal memuat tampilan kartu kios [" + k.getIdKios() + "]: " + e.getMessage());
+                e.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Gagal Menampilkan Kios",
+                        "Kartu kios [" + k.getIdKios() + "] gagal ditampilkan. Silakan muat ulang halaman.");
             }
         }
 
@@ -281,7 +316,9 @@ public class KiosController implements Initializable {
 
             if (controller.isPerluRefresh()) loadData();
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Membuka Detail", "Error: " + e.getMessage());
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Gagal Membuka Detail",
+                    "Detail kios gagal ditampilkan. Silakan coba lagi.");
         }
     }
 
@@ -374,7 +411,9 @@ public class KiosController implements Initializable {
             }
             refreshPreviewFoto();
         } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Upload", "Gagal menyimpan gambar: " + e.getMessage());
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Gagal Upload",
+                    "Gagal menyimpan gambar. Pastikan file tidak sedang digunakan aplikasi lain, lalu coba lagi.");
         }
     }
 
@@ -522,7 +561,9 @@ public class KiosController implements Initializable {
             loadData();
             onBersih(null);
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Simpan", "Error : " + e.getMessage());
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Gagal Simpan",
+                    "Data kios gagal disimpan. Pastikan data yang dimasukkan valid, lalu coba lagi.");
         }
     }
 
@@ -564,7 +605,9 @@ public class KiosController implements Initializable {
             loadData();
             onBersih(null);
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Ubah", "Error : " + e.getMessage());
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Gagal Ubah",
+                    "Data kios gagal diubah. Pastikan data yang dimasukkan valid, lalu coba lagi.");
         }
     }
 
@@ -591,7 +634,9 @@ public class KiosController implements Initializable {
                 loadData();
                 onBersih(null);
             } catch (Exception e) {
-                showAlert(Alert.AlertType.ERROR, "Gagal", "Error: " + e.getMessage());
+                e.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Gagal Nonaktifkan",
+                        "Kios gagal dinonaktifkan. Silakan coba lagi atau hubungi admin sistem.");
             }
         }
     }
@@ -651,4 +696,67 @@ public class KiosController implements Initializable {
         if (currentPage > 1) { currentPage--; refreshGrid(); }
     }
 
+    // 19. EVENT HANDLER — FILTER
+    @FXML
+    void onFilterHarga(ActionEvent event) {
+        urutanHarga = rmHargaTermurah.isSelected() ? "asc"
+                : rmHargaTermahal.isSelected() ? "desc" : null;
+        terapkanFilter();
+    }
+
+    @FXML
+    void onFilterLuas(ActionEvent event) {
+        urutanLuas = rmLuasTerkecil.isSelected() ? "asc"
+                : rmLuasTerbesar.isSelected() ? "desc" : null;
+        terapkanFilter();
+    }
+
+    @FXML
+    void onFilterStatus(ActionEvent event) {
+        filterStatus = rmStatusAktif.isSelected() ? "Aktif"
+                : rmStatusNonaktif.isSelected() ? "Nonaktif" : null;
+        terapkanFilter();
+    }
+
+    private void terapkanFilter() {
+        List<Kios> hasil = new ArrayList<>(masterList);
+
+        if (urutanHarga != null) {
+            Comparator<Kios> byHarga = Comparator.comparingDouble(Kios::getHargaKios);
+            if (urutanHarga.equals("desc")) byHarga = byHarga.reversed();
+            hasil.sort(byHarga);
+        }
+
+        if (urutanLuas != null) {
+            Comparator<Kios> byLuas = Comparator.comparingDouble(Kios::getLuasKios);
+            if (urutanLuas.equals("desc")) byLuas = byLuas.reversed();
+            hasil.sort(byLuas);
+        }
+
+        if (filterStatus != null) {
+            hasil = hasil.stream()
+                    .filter(k -> filterStatus.equalsIgnoreCase(k.getStsKios()))
+                    .collect(java.util.stream.Collectors.toList());
+        }
+
+        List<Kios> tampung = masterList;
+        masterList = hasil;
+        currentPage = 1;
+        refreshGrid();
+        masterList = tampung;
+    }
+
+    @FXML
+    void onResetFilter(ActionEvent event) {
+        urutanHarga = null;
+        urutanLuas = null;
+        filterStatus = null;
+        rmHargaTermurah.setSelected(false);
+        rmHargaTermahal.setSelected(false);
+        rmLuasTerkecil.setSelected(false);
+        rmLuasTerbesar.setSelected(false);
+        rmStatusAktif.setSelected(false);
+        rmStatusNonaktif.setSelected(false);
+        loadData();
+    }
 }

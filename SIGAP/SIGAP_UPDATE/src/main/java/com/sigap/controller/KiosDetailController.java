@@ -74,7 +74,8 @@ public class KiosDetailController {
                 }
             }
         } catch (Exception e) {
-            Label error = new Label("Gagal memuat foto: " + e.getMessage());
+            e.printStackTrace();
+            Label error = new Label("Gagal memuat foto kios. Silakan coba lagi.");
             error.setStyle("-fx-font-size:12px;-fx-text-fill:#C0392B;-fx-padding:20;");
             vboxGaleriFoto.getChildren().add(error);
         }

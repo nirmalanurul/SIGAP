@@ -56,7 +56,6 @@ public class DashboardAdminController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         setupClock();
         setupUserInfo();
-        // Default tampilkan Karyawan saat pertama buka
         onMenuKaryawan();
     }
 

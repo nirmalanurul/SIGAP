@@ -7,8 +7,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-
-
 public class MainApp extends Application {
 
     private static final String SPLASH_FXML = "/com/sigap/view/SplashScreen.fxml";

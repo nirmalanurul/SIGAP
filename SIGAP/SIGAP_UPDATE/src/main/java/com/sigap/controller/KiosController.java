@@ -25,6 +25,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.layout.FlowPane;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,7 +73,7 @@ public class KiosController implements Initializable {
     @FXML
     private Label lblJumlahFoto;
     @FXML
-    private HBox hboxPreviewFoto;
+    private FlowPane hboxPreviewFoto;
 
     // 3. FXML FIELDS — PENCARIAN & CARD GRID
     @FXML
@@ -103,6 +104,7 @@ public class KiosController implements Initializable {
     private int currentPage = 1;
     private int totalPage = 1;
     private static final int PAGE_SIZE = 12;
+    private static final int MAKS_FOTO = 8;
 
     // 6. KONSTANTA
     private static final NumberFormat FMT_RUPIAH =
@@ -194,7 +196,7 @@ public class KiosController implements Initializable {
             double p = Double.parseDouble(txtPanjang.getText().trim());
             double l = Double.parseDouble(txtLebar.getText().trim());
             double luas = Math.round(p * l * 100.0) / 100.0;
-            txtLuas.setText(luas + " m²");
+            txtLuas.setText(String.valueOf(luas));
         } catch (NumberFormatException e) {
             txtLuas.setText("");
         }
@@ -289,7 +291,7 @@ public class KiosController implements Initializable {
         txtHarga.setText(FMT_RUPIAH.format((long) k.getHargaKios()));
         txtPanjang.setText(String.valueOf(k.getPanjangKios()));
         txtLebar.setText(String.valueOf(k.getLebarKios()));
-        txtLuas.setText(k.getLuasKios() + " m²");
+        txtLuas.setText(String.valueOf(k.getLuasKios()));
         txtDeskripsi.setText(k.getDeskripsi() == null ? "" : k.getDeskripsi());
         txtStsKios.setText(k.getStsKios());
 
@@ -344,6 +346,16 @@ public class KiosController implements Initializable {
         List<File> files = chooser.showOpenMultipleDialog(btnPilihFotoKios.getScene().getWindow());
         if (files == null || files.isEmpty()) return;
 
+        if (daftarFotoDipilih.size() + files.size() > MAKS_FOTO) {
+            int sisaSlot = MAKS_FOTO - daftarFotoDipilih.size();
+            showAlert(Alert.AlertType.WARNING, "Batas Foto Terlampaui",
+                    "Maksimal " + MAKS_FOTO + " foto per kios.\n" +
+                            (sisaSlot > 0
+                                    ? "Kamu masih bisa menambahkan " + sisaSlot + " foto lagi."
+                                    : "Batas foto sudah tercapai, hapus foto lama untuk menambah yang baru."));
+            return;
+        }
+
         try {
             File folder = new File(FOLDER_FOTO_KIOS);
             if (!folder.exists()) folder.mkdirs();
@@ -374,7 +386,7 @@ public class KiosController implements Initializable {
             File f = new File(path);
             if (!f.exists()) continue;
 
-            ImageView iv = new ImageView(new Image(f.toURI().toString(), 56, 56, true, true));
+            ImageView iv = new ImageView(new Image(f.toURI().toString(), 100, 100, true, true));
             iv.setStyle("-fx-background-radius:6;-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.15),3,0,0,1);");
 
             iv.setOnMouseClicked(e -> {

@@ -134,9 +134,6 @@
                         </HBox>
 
                         <HBox spacing="8.0">
-                            <HBox.margin>
-                                <Insets right="40.0" />
-                            </HBox.margin>
                             <children>
                                 <TextField fx:id="txtCari" prefHeight="38" prefWidth="240" promptText="Cari ID / Deskripsi / Status..." style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 14; -fx-font-size: 13px;" />
                                 <Button onAction="#onCari" prefHeight="38" prefWidth="94" style="-fx-background-color: #1A3A8F; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;" text="CARI" />
@@ -163,13 +160,31 @@
                                         </Menu>
                                         <Menu style="-fx-text-fill: #333333;" text="Status">
                                             <items>
-                                                <RadioMenuItem fx:id="rmStatusAktif" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Aktif" />
-                                                <RadioMenuItem fx:id="rmStatusNonaktif" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Nonaktif" />
+                                                <RadioMenuItem fx:id="rmStatusTersedia" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Tersedia" />
+                                                <RadioMenuItem fx:id="rmStatusTidakTersedia" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Tidak Tersedia" />
+                                                <RadioMenuItem fx:id="rmStatusTidakAktif" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Tidak Aktif" />
                                             </items>
                                         </Menu>
                                         <MenuItem onAction="#onResetFilter" style="-fx-text-fill: #333333;" text="Reset Filter" />
                                     </items>
                                 </MenuButton>
+
+                                <MenuButton fx:id="btnJumlahTampil" contentDisplay="GRAPHIC_ONLY" prefHeight="38" style="-fx-background-color: #1A3A8F; -fx-background-radius: 6; -fx-cursor: hand; -fx-mark-color: WHITE; -fx-padding: 6 6 6 14;">
+                                    <graphic>
+                                        <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                            <children>
+                                                <Label style="-fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700;" text="TAMPIL" />
+                                            </children>
+                                        </HBox>
+                                    </graphic>
+                                    <items>
+                                        <RadioMenuItem fx:id="rmTampil12" onAction="#onUbahJumlahTampil" style="-fx-text-fill: #333333;" text="12 / halaman" />
+                                        <RadioMenuItem fx:id="rmTampil18" onAction="#onUbahJumlahTampil" style="-fx-text-fill: #333333;" text="18 / halaman" />
+                                        <RadioMenuItem fx:id="rmTampil24" onAction="#onUbahJumlahTampil" style="-fx-text-fill: #333333;" text="24 / halaman" />
+                                        <RadioMenuItem fx:id="rmTampil30" onAction="#onUbahJumlahTampil" style="-fx-text-fill: #333333;" text="30 / halaman" />
+                                    </items>
+                                </MenuButton>
+
                             </children>
                         </HBox>
                     </children>
@@ -191,7 +206,7 @@
                             <content>
                                 <FlowPane fx:id="flowKios" hgap="16" vgap="16">
                                     <padding>
-                                        <Insets bottom="6.0" left="8.0" right="20.0" top="6.0" />
+                                        <Insets bottom="12.0" left="16.0" right="16.0" top="16.0" />
                                     </padding>
                                 </FlowPane>
                             </content>

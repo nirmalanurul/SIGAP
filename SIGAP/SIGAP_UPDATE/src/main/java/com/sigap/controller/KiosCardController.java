@@ -39,16 +39,25 @@ public class KiosCardController {
     private static final NumberFormat FMT_RUPIAH =
             NumberFormat.getNumberInstance(new Locale("id", "ID"));
 
+    public void setCardWidth(double width) {
+        rootCard.setPrefWidth(width);
+        rootCard.setMaxWidth(width);
+        imgThumb.setFitWidth(width);
+    }
+
     public void setData(Kios k, Consumer<Kios> onCardClicked) {
         lblId.setText(k.getIdKios());
         lblHarga.setText("Rp " + FMT_RUPIAH.format(k.getHargaKios()));
         lblUkuran.setText(k.getPanjangKios() + "m x " + k.getLebarKios() + "m  ·  " + k.getLuasKios() + " m²");
         lblStatus.setText(k.getStsKios());
 
-        boolean aktif = "Aktif".equalsIgnoreCase(k.getStsKios());
-        lblStatus.setStyle(aktif
-                ? "-fx-background-color:#E0F5E8;-fx-text-fill:#1E8A3C;-fx-font-weight:700;-fx-font-size:10px;-fx-padding:2 8;-fx-background-radius:8;"
-                : "-fx-background-color:#FFE8E8;-fx-text-fill:#C0392B;-fx-font-weight:700;-fx-font-size:10px;-fx-padding:2 8;-fx-background-radius:8;");
+        String styleBadge = switch (k.getStsKios() == null ? "" : k.getStsKios()) {
+            case "Tersedia" -> "-fx-background-color:#E0F5E8;-fx-text-fill:#1E8A3C;-fx-font-weight:700;-fx-font-size:10px;-fx-padding:2 8;-fx-background-radius:8;"; // hijau
+            case "Tidak Tersedia" -> "-fx-background-color:#FFF3D6;-fx-text-fill:#B8860B;-fx-font-weight:700;-fx-font-size:10px;-fx-padding:2 8;-fx-background-radius:8;"; // kuning
+            case "Tidak Aktif" -> "-fx-background-color:#FFE8E8;-fx-text-fill:#C0392B;-fx-font-weight:700;-fx-font-size:10px;-fx-padding:2 8;-fx-background-radius:8;"; // merah
+            default -> "-fx-background-color:#EAEAEA;-fx-text-fill:#555555;-fx-font-weight:700;-fx-font-size:10px;-fx-padding:2 8;-fx-background-radius:8;";
+        };
+        lblStatus.setStyle(styleBadge);
 
         try {
             List<DetailGambarKios> foto = CRUD_Kios.getFoto(k.getIdKios());

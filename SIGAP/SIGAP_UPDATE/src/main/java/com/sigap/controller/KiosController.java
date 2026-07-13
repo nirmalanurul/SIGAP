@@ -88,10 +88,24 @@ public class KiosController implements Initializable {
     private RadioMenuItem rmLuasTerkecil;
     @FXML
     private RadioMenuItem rmLuasTerbesar;
+
     @FXML
-    private RadioMenuItem rmStatusAktif;
+    private RadioMenuItem rmStatusTersedia;
     @FXML
-    private RadioMenuItem rmStatusNonaktif;
+    private RadioMenuItem rmStatusTidakTersedia;
+    @FXML
+    private RadioMenuItem rmStatusTidakAktif;
+
+    @FXML
+    private MenuButton btnJumlahTampil;
+    @FXML
+    private RadioMenuItem rmTampil12;
+    @FXML
+    private RadioMenuItem rmTampil18;
+    @FXML
+    private RadioMenuItem rmTampil24;
+    @FXML
+    private RadioMenuItem rmTampil30;
 
     // 4. FXML FIELDS — PAGINATION
     @FXML
@@ -117,7 +131,7 @@ public class KiosController implements Initializable {
     private int currentPage = 1;
     private int totalPage = 1;
 
-    private static final int PAGE_SIZE = 12;
+    private int pageSize = 12;
     private static final int MAKS_FOTO = 8;
 
     private String urutanHarga = null;
@@ -135,10 +149,14 @@ public class KiosController implements Initializable {
             "-fx-background-color:#F0F0F0;-fx-border-color:#D0D8E8;" +
                     "-fx-border-radius:6;-fx-background-radius:6;-fx-padding:6 12;" +
                     "-fx-font-size:13px;-fx-text-fill:#888;";
+
     private static final String STYLE_NORMAL =
             "-fx-background-color:WHITE;-fx-border-color:#D0D8E8;" +
                     "-fx-border-radius:6;-fx-background-radius:6;-fx-padding:6 12;" +
                     "-fx-font-size:13px;";
+
+    private static final int JUMLAH_KOLOM = 6;
+    private static final double CARD_HGAP = 20.0;
 
     // 7. INITIALIZE
     @Override
@@ -146,11 +164,17 @@ public class KiosController implements Initializable {
         txtIdKios.setEditable(false);
         txtLuas.setEditable(false);
         txtStsKios.setEditable(false);
-        txtStsKios.setText("Aktif");
+        txtStsKios.setText("Tersedia");
 
         setupListeners();
         setupFilter();
         setFormState(false, false);
+
+        flowKios.widthProperty().addListener((obs, oldW, newW) -> {
+            if (newW.doubleValue() > 0 && !masterList.isEmpty()) {
+                refreshGrid();
+            }
+        });
 
         Platform.runLater(() -> {
             loadData();
@@ -168,8 +192,16 @@ public class KiosController implements Initializable {
         rmLuasTerbesar.setToggleGroup(grupLuas);
 
         ToggleGroup grupStatus = new ToggleGroup();
-        rmStatusAktif.setToggleGroup(grupStatus);
-        rmStatusNonaktif.setToggleGroup(grupStatus);
+        rmStatusTersedia.setToggleGroup(grupStatus);
+        rmStatusTidakTersedia.setToggleGroup(grupStatus);
+        rmStatusTidakAktif.setToggleGroup(grupStatus);
+
+        ToggleGroup grupTampil = new ToggleGroup();
+        rmTampil12.setToggleGroup(grupTampil);
+        rmTampil18.setToggleGroup(grupTampil);
+        rmTampil24.setToggleGroup(grupTampil);
+        rmTampil30.setToggleGroup(grupTampil);
+        rmTampil12.setSelected(true);
     }
 
     // 8. LISTENER INPUT FORM (Panjang, Lebar, Harga)
@@ -257,11 +289,11 @@ public class KiosController implements Initializable {
 
     private void refreshGrid() {
         int total = masterList.size();
-        totalPage = (total == 0) ? 1 : (int) Math.ceil((double) total / PAGE_SIZE);
+        totalPage = (total == 0) ? 1 : (int) Math.ceil((double) total / pageSize);   // GANTI PAGE_SIZE → pageSize
         if (currentPage > totalPage) currentPage = totalPage;
 
-        int from = (currentPage - 1) * PAGE_SIZE;
-        int to = Math.min(from + PAGE_SIZE, total);
+        int from = (currentPage - 1) * pageSize;
+        int to = Math.min(from + pageSize, total);
 
         flowKios.getChildren().clear();
         for (Kios k : masterList.subList(from, to)) {
@@ -284,12 +316,23 @@ public class KiosController implements Initializable {
         lblPage.setText(String.valueOf(currentPage));
     }
 
+    private double hitungLebarCard() {
+        double lebarTersedia = flowKios.getWidth()
+                - flowKios.getPadding().getLeft()
+                - flowKios.getPadding().getRight();
+        if (lebarTersedia <= 0) return 230;
+
+        double totalGap = CARD_HGAP * (JUMLAH_KOLOM - 1);
+        return (lebarTersedia - totalGap) / JUMLAH_KOLOM;
+    }
+
     // 11. CARD & DIALOG DETAIL
     private VBox buatCardKios(Kios k) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sigap/view/KiosCard.fxml"));
         VBox card = loader.load();
 
         KiosCardController controller = loader.getController();
+        controller.setCardWidth(hitungLebarCard());
         controller.setData(k, kiosDiklik -> {
             selectedKios = kiosDiklik;
             isiFormDariKios(kiosDiklik);
@@ -339,8 +382,8 @@ public class KiosController implements Initializable {
         } catch (Exception ignored) {}
         refreshPreviewFoto();
 
-        boolean nonaktif = "Nonaktif".equalsIgnoreCase(k.getStsKios());
-        setFormState(true, nonaktif);
+        boolean tidakAktif = "Tidak Aktif".equalsIgnoreCase(k.getStsKios());
+        setFormState(true, tidakAktif);
     }
 
     private void bersihForm() {
@@ -350,26 +393,26 @@ public class KiosController implements Initializable {
         txtLebar.clear();
         txtLuas.clear();
         txtDeskripsi.clear();
-        txtStsKios.setText("Aktif");
+        txtStsKios.setText("Tersedia");
         daftarFotoDipilih.clear();
         refreshPreviewFoto();
     }
 
-    private void setFormState(boolean editMode, boolean isNonaktif) {
-        btnSimpan.setDisable(editMode || isNonaktif);
-        btnUbah.setDisable(!editMode || isNonaktif);
-        btnHapus.setDisable(!editMode || isNonaktif);
+    private void setFormState(boolean editMode, boolean isTidakAktif) {
+        btnSimpan.setDisable(editMode || isTidakAktif);
+        btnUbah.setDisable(!editMode || isTidakAktif);
+        btnHapus.setDisable(!editMode || isTidakAktif);
 
-        txtHarga.setEditable(!isNonaktif);
-        txtPanjang.setEditable(!isNonaktif);
-        txtLebar.setEditable(!isNonaktif);
-        txtDeskripsi.setEditable(!isNonaktif);
-        btnPilihFotoKios.setDisable(isNonaktif);
+        txtHarga.setEditable(!isTidakAktif);
+        txtPanjang.setEditable(!isTidakAktif);
+        txtLebar.setEditable(!isTidakAktif);
+        txtDeskripsi.setEditable(!isTidakAktif);
+        btnPilihFotoKios.setDisable(isTidakAktif);
 
-        txtHarga.setStyle(isNonaktif ? STYLE_READONLY : STYLE_NORMAL);
-        txtPanjang.setStyle(isNonaktif ? STYLE_READONLY : STYLE_NORMAL);
-        txtLebar.setStyle(isNonaktif ? STYLE_READONLY : STYLE_NORMAL);
-        txtDeskripsi.setStyle(isNonaktif ? STYLE_READONLY : STYLE_NORMAL);
+        txtHarga.setStyle(isTidakAktif ? STYLE_READONLY : STYLE_NORMAL);
+        txtPanjang.setStyle(isTidakAktif ? STYLE_READONLY : STYLE_NORMAL);
+        txtLebar.setStyle(isTidakAktif ? STYLE_READONLY : STYLE_NORMAL);
+        txtDeskripsi.setStyle(isTidakAktif ? STYLE_READONLY : STYLE_NORMAL);
     }
 
     // 13. UPLOAD & PREVIEW FOTO
@@ -553,7 +596,7 @@ public class KiosController implements Initializable {
                     Double.parseDouble(txtLebar.getText().trim()),
                     hitungLuasNilai(),
                     txtDeskripsi.getText().trim().isEmpty() ? null : txtDeskripsi.getText().trim(),
-                    "Aktif"
+                    "Tersedia"
             );
 
             CRUD_Kios.insert(k, daftarFotoDipilih);
@@ -622,7 +665,7 @@ public class KiosController implements Initializable {
         Alert konfirmasi = new Alert(Alert.AlertType.CONFIRMATION);
         konfirmasi.setTitle("Konfirmasi Nonaktifkan");
         konfirmasi.setHeaderText("Nonaktifkan Kios");
-        konfirmasi.setContentText("Kios [" + id + "] akan diubah statusnya menjadi Nonaktif.\nLanjutkan?");
+        konfirmasi.setContentText("Kios [" + id + "] akan diubah statusnya menjadi Tidak Aktif.\nLanjutkan?");
         if (txtIdKios.getScene() != null)
             konfirmasi.initOwner(txtIdKios.getScene().getWindow());
 
@@ -713,8 +756,9 @@ public class KiosController implements Initializable {
 
     @FXML
     void onFilterStatus(ActionEvent event) {
-        filterStatus = rmStatusAktif.isSelected() ? "Aktif"
-                : rmStatusNonaktif.isSelected() ? "Nonaktif" : null;
+        filterStatus = rmStatusTersedia.isSelected() ? "Tersedia"
+                : rmStatusTidakTersedia.isSelected() ? "Tidak Tersedia"
+                : rmStatusTidakAktif.isSelected() ? "Tidak Aktif" : null;
         terapkanFilter();
     }
 
@@ -747,6 +791,17 @@ public class KiosController implements Initializable {
     }
 
     @FXML
+    void onUbahJumlahTampil(ActionEvent event) {
+        if (rmTampil12.isSelected()) pageSize = 12;
+        else if (rmTampil18.isSelected()) pageSize = 18;
+        else if (rmTampil24.isSelected()) pageSize = 24;
+        else if (rmTampil30.isSelected()) pageSize = 30;
+
+        currentPage = 1;
+        refreshGrid();
+    }
+
+    @FXML
     void onResetFilter(ActionEvent event) {
         urutanHarga = null;
         urutanLuas = null;
@@ -755,8 +810,9 @@ public class KiosController implements Initializable {
         rmHargaTermahal.setSelected(false);
         rmLuasTerkecil.setSelected(false);
         rmLuasTerbesar.setSelected(false);
-        rmStatusAktif.setSelected(false);
-        rmStatusNonaktif.setSelected(false);
+        rmStatusTersedia.setSelected(false);
+        rmStatusTidakTersedia.setSelected(false);
+        rmStatusTidakAktif.setSelected(false);
         loadData();
     }
 }

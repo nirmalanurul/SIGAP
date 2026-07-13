@@ -142,26 +142,26 @@ public class PenyewaanController implements Initializable {
 
     // 6. DATE PICKER — batasi tanggal mulai & selesai
     private void setupDatePickers() {
-        // Tgl Mulai tidak boleh sebelum hari ini
         dpTglMulai.setDayCellFactory(picker -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
                 super.updateItem(date, empty);
-                setDisable(empty || date.isBefore(LocalDate.now()));
+                LocalDate batasMaks = LocalDate.now().plusYears(1);
+                setDisable(empty || date.isBefore(LocalDate.now()) || date.isAfter(batasMaks));
             }
         });
 
-        // Tgl Selesai tidak boleh sebelum Tgl Mulai yang sudah dipilih
         dpTglSelesai.setDayCellFactory(picker -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
                 super.updateItem(date, empty);
-                LocalDate batasAwal = dpTglMulai.getValue() != null ? dpTglMulai.getValue() : LocalDate.now();
-                setDisable(empty || date.isBefore(batasAwal));
+                LocalDate acuanMulai = dpTglMulai.getValue() != null ? dpTglMulai.getValue() : LocalDate.now();
+                LocalDate batasMin = acuanMulai.plusMonths(1);
+                LocalDate batasMaks = acuanMulai.plusYears(5);
+                setDisable(empty || date.isBefore(batasMin) || date.isAfter(batasMaks));
             }
         });
 
-        // Kalau Tgl Mulai berubah dan Tgl Selesai jadi tidak valid, kosongkan Tgl Selesai
         dpTglMulai.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null && dpTglSelesai.getValue() != null && dpTglSelesai.getValue().isBefore(newVal)) {
                 dpTglSelesai.setValue(null);

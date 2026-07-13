@@ -4,7 +4,11 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.RadioMenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -17,9 +21,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Rectangle?>
 
-<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;"
-            xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.sigap.controller.KaryawanController">
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sigap.controller.KaryawanController">
     <content>
         <VBox spacing="20.0">
             <padding>
@@ -63,14 +65,8 @@
                             </rowConstraints>
                             <children>
 
-                                <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;"
-                                       text="ID Karyawan"
-                                       GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                                <TextField fx:id="txtIdKaryawan" editable="false"
-                                           maxWidth="1.7976931348623157E308"
-                                           promptText="Auto-generate"
-                                           style="-fx-background-color: #F8F9FC; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;"
-                                           GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;" text="ID Karyawan" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                <TextField fx:id="txtIdKaryawan" editable="false" maxWidth="1.7976931348623157E308" promptText="Auto-generate" style="-fx-background-color: #F8F9FC; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
                                 <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
                                     <children>
@@ -78,11 +74,7 @@
                                         <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
                                     </children>
                                 </HBox>
-                                <TextField fx:id="txtNamaKaryawan"
-                                           maxWidth="1.7976931348623157E308"
-                                           promptText="Masukkan nama karyawan"
-                                           style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;"
-                                           GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                <TextField fx:id="txtNamaKaryawan" maxWidth="1.7976931348623157E308" promptText="Masukkan nama karyawan" style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
                                 <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="2">
                                     <children>
@@ -90,11 +82,7 @@
                                         <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
                                     </children>
                                 </HBox>
-                                <ComboBox fx:id="cmbJabatan"
-                                          maxWidth="1.7976931348623157E308"
-                                          promptText="Pilih jabatan"
-                                          style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-font-size: 13px;"
-                                          GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                <ComboBox fx:id="cmbJabatan" maxWidth="1.7976931348623157E308" promptText="Pilih jabatan" style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
                                 <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="3">
                                     <children>
@@ -102,11 +90,7 @@
                                         <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
                                     </children>
                                 </HBox>
-                                <TextField fx:id="txtNoTelp"
-                                           maxWidth="1.7976931348623157E308"
-                                           promptText="08xxxxxxxxxx"
-                                           style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;"
-                                           GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                <TextField fx:id="txtNoTelp" maxWidth="1.7976931348623157E308" promptText="08xxxxxxxxxx" style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                                 <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="0">
                                     <children>
@@ -114,11 +98,7 @@
                                         <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
                                     </children>
                                 </HBox>
-                                <TextField fx:id="txtEmail"
-                                           maxWidth="1.7976931348623157E308"
-                                           promptText="contoh@email.com"
-                                           style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;"
-                                           GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                                <TextField fx:id="txtEmail" maxWidth="1.7976931348623157E308" promptText="contoh@email.com" style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;" GridPane.columnIndex="3" GridPane.rowIndex="0" />
 
                                 <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
                                     <children>
@@ -126,11 +106,7 @@
                                         <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
                                     </children>
                                 </HBox>
-                                <TextField fx:id="txtUsername"
-                                           maxWidth="1.7976931348623157E308"
-                                           promptText="Masukkan username"
-                                           style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;"
-                                           GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                <TextField fx:id="txtUsername" maxWidth="1.7976931348623157E308" promptText="Masukkan username" style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;" GridPane.columnIndex="3" GridPane.rowIndex="1" />
 
                                 <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
                                     <children>
@@ -138,19 +114,7 @@
                                         <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
                                     </children>
                                 </HBox>
-                                <PasswordField fx:id="txtPassword"
-                                               maxWidth="1.7976931348623157E308"
-                                               promptText="Masukkan password (khusus Tambah)"
-                                               style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;"
-                                               GridPane.columnIndex="3" GridPane.rowIndex="2" />
-
-                                <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;"
-                                       text="Status"
-                                       GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                                <TextField fx:id="txtStatus"
-                                           maxWidth="1.7976931348623157E308"
-                                           style="-fx-background-color: #F0F0F0; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px; -fx-text-fill: #888;"
-                                           GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                <PasswordField fx:id="txtPassword" maxWidth="1.7976931348623157E308" promptText="Masukkan password (khusus Tambah)" style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;" GridPane.columnIndex="3" GridPane.rowIndex="2" />
 
                                 <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="4">
                                     <children>
@@ -158,16 +122,10 @@
                                         <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
                                     </children>
                                 </HBox>
-                                <HBox alignment="CENTER_LEFT" spacing="10.0"
-                                      GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4">
+                                <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4">
                                     <children>
-                                        <Button fx:id="btnPilihFotoKtp" onAction="#onPilihFotoKtp"
-                                                prefHeight="32" prefWidth="140"
-                                                style="-fx-background-color: #F0F4FF; -fx-text-fill: #1A3A8F; -fx-font-size: 12px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-border-color: #1A3A8F; -fx-border-radius: 6; -fx-cursor: hand;"
-                                                text="Pilih Gambar" />
-                                        <Label fx:id="lblFotoKtpNama"
-                                               style="-fx-font-size: 12px; -fx-text-fill: #888;"
-                                               text="Belum ada gambar dipilih" />
+                                        <Button fx:id="btnPilihFotoKtp" onAction="#onPilihFotoKtp" prefHeight="32" prefWidth="140" style="-fx-background-color: #F0F4FF; -fx-text-fill: #1A3A8F; -fx-font-size: 12px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-border-color: #1A3A8F; -fx-border-radius: 6; -fx-cursor: hand;" text="Pilih Gambar" />
+                                        <Label fx:id="lblFotoKtpNama" style="-fx-font-size: 12px; -fx-text-fill: #888;" text="Belum ada gambar dipilih" />
                                     </children>
                                 </HBox>
 
@@ -181,31 +139,48 @@
                         <HBox spacing="8.0" HBox.hgrow="ALWAYS">
                             <children>
 
-                                <Button fx:id="btnSimpan" onAction="#onSimpan" prefHeight="38" prefWidth="120"
-                                        style="-fx-background-color: #1A3A8F; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;"
-                                        text="SIMPAN" />
-                                <Button fx:id="btnUbah" onAction="#onUbah" prefHeight="38" prefWidth="110"
-                                        style="-fx-background-color: #E8A020; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;"
-                                        text="UBAH" />
-                                <Button fx:id="btnHapus" onAction="#onHapus" prefHeight="38" prefWidth="130"
-                                        style="-fx-background-color: #D63030; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;"
-                                        text="HAPUS" />
-                                <Button fx:id="btnUbahPassword" onAction="#onUbahPassword" prefHeight="38" prefWidth="150"
-                                        style="-fx-background-color: #6C4FCE; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;"
-                                        text="UBAH PASSWORD" />
-                                <Button onAction="#onBersih" prefHeight="38" prefWidth="110"
-                                        style="-fx-background-color: #A0A8B8; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;"
-                                        text="BATAL" />
+                                <Button fx:id="btnSimpan" onAction="#onSimpan" prefHeight="38" prefWidth="120" style="-fx-background-color: #1A3A8F; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;" text="SIMPAN" />
+                                <Button fx:id="btnUbah" onAction="#onUbah" prefHeight="38" prefWidth="110" style="-fx-background-color: #E8A020; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;" text="UBAH" />
+                                <Button fx:id="btnHapus" onAction="#onHapus" prefHeight="38" prefWidth="130" style="-fx-background-color: #D63030; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;" text="HAPUS" />
+                                <Button fx:id="btnUbahPassword" onAction="#onUbahPassword" prefHeight="38" prefWidth="150" style="-fx-background-color: #6C4FCE; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;" text="UBAH PASSWORD" />
+                                <Button onAction="#onBersih" prefHeight="38" prefWidth="110" style="-fx-background-color: #A0A8B8; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;" text="BATAL" />
                             </children>
                         </HBox>
                         <HBox spacing="8.0">
                             <children>
-                                <TextField fx:id="txtCari" prefHeight="38" prefWidth="260"
-                                           promptText="Cari ID / Nama / Jabatan / Username"
-                                           style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 14; -fx-font-size: 13px;" />
-                                <Button onAction="#onCari" prefHeight="38" prefWidth="94"
-                                        style="-fx-background-color: #1A3A8F; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;"
-                                        text="CARI" />
+                                <TextField fx:id="txtCari" prefHeight="38" prefWidth="260" promptText="Cari ID / Nama / Jabatan / Username" style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 14; -fx-font-size: 13px;" />
+                                <Button onAction="#onCari" prefHeight="38" prefWidth="94" style="-fx-background-color: #1A3A8F; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;" text="CARI" />
+                                <MenuButton fx:id="btnFilter" contentDisplay="GRAPHIC_ONLY" prefHeight="38" style="-fx-background-color: #1A3A8F; -fx-background-radius: 6; -fx-cursor: hand; -fx-mark-color: WHITE; -fx-padding: 6 6 6 14;">
+                                    <graphic>
+                                        <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                            <children>
+                                                <Label style="-fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700;" text="FILTER" />
+                                            </children>
+                                        </HBox>
+                                    </graphic>
+                                    <items>
+                                        <Menu style="-fx-text-fill: #333333;" text="Urutkan Nama">
+                                            <items>
+                                                <RadioMenuItem fx:id="rmNamaAZ" onAction="#onFilterNama" style="-fx-text-fill: #333333;" text="A - Z" />
+                                                <RadioMenuItem fx:id="rmNamaZA" onAction="#onFilterNama" style="-fx-text-fill: #333333;" text="Z - A" />
+                                            </items>
+                                        </Menu>
+                                        <Menu style="-fx-text-fill: #333333;" text="Jabatan">
+                                            <items>
+                                                <RadioMenuItem fx:id="rmJabatanAdmin" onAction="#onFilterJabatan" style="-fx-text-fill: #333333;" text="Admin" />
+                                                <RadioMenuItem fx:id="rmJabatanKasir" onAction="#onFilterJabatan" style="-fx-text-fill: #333333;" text="Kasir" />
+                                                <RadioMenuItem fx:id="rmJabatanManajer" onAction="#onFilterJabatan" style="-fx-text-fill: #333333;" text="Manajer" />
+                                            </items>
+                                        </Menu>
+                                        <Menu style="-fx-text-fill: #333333;" text="Status">
+                                            <items>
+                                                <RadioMenuItem fx:id="rmStatusAktif" onAction="#onFilterStatusKaryawan" style="-fx-text-fill: #333333;" text="Aktif" />
+                                                <RadioMenuItem fx:id="rmStatusTidakAktif" onAction="#onFilterStatusKaryawan" style="-fx-text-fill: #333333;" text="Tidak Aktif" />
+                                            </items>
+                                        </Menu>
+                                        <MenuItem onAction="#onResetFilter" style="-fx-text-fill: #333333;" text="Reset Filter" />
+                                    </items>
+                                </MenuButton>
                             </children>
                         </HBox>
                     </children>
@@ -224,19 +199,16 @@
                             </children>
                         </HBox>
 
-                        <TableView fx:id="tabelKaryawan" onMouseClicked="#onTableClick"
-                                   prefHeight="320"
-                                   style="-fx-background-color: transparent; -fx-border-color: transparent;"
-                                   VBox.vgrow="ALWAYS">
+                        <TableView fx:id="tabelKaryawan" onMouseClicked="#onTableClick" prefHeight="320" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn fx:id="colId"       prefWidth="90"  text="ID" />
-                                <TableColumn fx:id="colNama"     prefWidth="160" text="Nama Karyawan" />
-                                <TableColumn fx:id="colJabatan"  prefWidth="100" text="Jabatan" />
-                                <TableColumn fx:id="colNoTelp"   prefWidth="120" text="No. Telepon" />
-                                <TableColumn fx:id="colEmail"    prefWidth="160" text="Email" />
+                                <TableColumn fx:id="colId" prefWidth="90" text="ID" />
+                                <TableColumn fx:id="colNama" prefWidth="160" text="Nama Karyawan" />
+                                <TableColumn fx:id="colJabatan" prefWidth="100" text="Jabatan" />
+                                <TableColumn fx:id="colNoTelp" prefWidth="120" text="No. Telepon" />
+                                <TableColumn fx:id="colEmail" prefWidth="160" text="Email" />
                                 <TableColumn fx:id="colUsername" prefWidth="110" text="Username" />
-                                <TableColumn fx:id="colStatus"   prefWidth="90"  text="Status" />
-                                <TableColumn fx:id="colFoto"     prefWidth="110" text="Foto KTP" />
+                                <TableColumn fx:id="colStatus" prefWidth="90" text="Status" />
+                                <TableColumn fx:id="colFoto" prefWidth="110" text="Foto KTP" />
                             </columns>
                             <placeholder>
                                 <Label style="-fx-font-size: 13px; -fx-text-fill: #AAA;" text="Tidak ada data karyawan." />
@@ -248,26 +220,13 @@
 
                         <HBox alignment="CENTER_RIGHT" spacing="10.0">
                             <children>
-                                <Label fx:id="lblTotal"
-                                       style="-fx-font-size: 13px; -fx-text-fill: #555; -fx-font-weight: 600;"
-                                       text="Total Data : 0"
-                                       HBox.hgrow="ALWAYS" />
+                                <Label fx:id="lblTotal" style="-fx-font-size: 13px; -fx-text-fill: #555; -fx-font-weight: 600;" text="Total Data : 0" HBox.hgrow="ALWAYS" />
                                 <Region HBox.hgrow="ALWAYS" />
-                                <Button onAction="#onFirstPage" prefHeight="28" prefWidth="34"
-                                        style="-fx-background-color: #F0F4FF; -fx-text-fill: #1A3A8F; -fx-font-weight: 700; -fx-background-radius: 5; -fx-cursor: hand;"
-                                        text="«" />
-                                <Button onAction="#onPrevPage" prefHeight="28" prefWidth="34"
-                                        style="-fx-background-color: #F0F4FF; -fx-text-fill: #1A3A8F; -fx-font-weight: 700; -fx-background-radius: 5; -fx-cursor: hand;"
-                                        text="‹" />
-                                <Label fx:id="lblPage" prefHeight="28" prefWidth="34"
-                                       style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: WHITE; -fx-background-color: #1A3A8F; -fx-background-radius: 5; -fx-alignment: CENTER;"
-                                       text="1" />
-                                <Button onAction="#onNextPage" prefHeight="28" prefWidth="34"
-                                        style="-fx-background-color: #F0F4FF; -fx-text-fill: #1A3A8F; -fx-font-weight: 700; -fx-background-radius: 5; -fx-cursor: hand;"
-                                        text="›" />
-                                <Button onAction="#onLastPage" prefHeight="28" prefWidth="34"
-                                        style="-fx-background-color: #F0F4FF; -fx-text-fill: #1A3A8F; -fx-font-weight: 700; -fx-background-radius: 5; -fx-cursor: hand;"
-                                        text="»" />
+                                <Button onAction="#onFirstPage" prefHeight="28" prefWidth="34" style="-fx-background-color: #F0F4FF; -fx-text-fill: #1A3A8F; -fx-font-weight: 700; -fx-background-radius: 5; -fx-cursor: hand;" text="«" />
+                                <Button onAction="#onPrevPage" prefHeight="28" prefWidth="34" style="-fx-background-color: #F0F4FF; -fx-text-fill: #1A3A8F; -fx-font-weight: 700; -fx-background-radius: 5; -fx-cursor: hand;" text="‹" />
+                                <Label fx:id="lblPage" prefHeight="28" prefWidth="34" style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: WHITE; -fx-background-color: #1A3A8F; -fx-background-radius: 5; -fx-alignment: CENTER;" text="1" />
+                                <Button onAction="#onNextPage" prefHeight="28" prefWidth="34" style="-fx-background-color: #F0F4FF; -fx-text-fill: #1A3A8F; -fx-font-weight: 700; -fx-background-radius: 5; -fx-cursor: hand;" text="›" />
+                                <Button onAction="#onLastPage" prefHeight="28" prefWidth="34" style="-fx-background-color: #F0F4FF; -fx-text-fill: #1A3A8F; -fx-font-weight: 700; -fx-background-radius: 5; -fx-cursor: hand;" text="»" />
                             </children>
                         </HBox>
 

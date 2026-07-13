@@ -34,28 +34,6 @@ public class CRUD_Karyawan {
         return list;
     }
 
-    public static List<Karyawan> getActive() throws SQLException {
-        List<Karyawan> list = new ArrayList<>();
-        try (Connection conn = new DBConnect().conn;
-             PreparedStatement ps = conn.prepareStatement("SELECT * FROM vwKaryawan");
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) list.add(mapRow(rs));
-        }
-        return list;
-    }
-
-    public static Karyawan getById(String idKaryawan) throws SQLException {
-        try (Connection conn = new DBConnect().conn;
-             PreparedStatement ps = conn.prepareStatement(
-                     "SELECT * FROM vwKaryawanAll WHERE Id_Karyawan = ?")) {
-            ps.setString(1, idKaryawan);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return mapRow(rs);
-            }
-        }
-        return null;
-    }
-
     public static Karyawan findByUsername(String username) throws SQLException {
         try (Connection conn = new DBConnect().conn;
              CallableStatement cs = conn.prepareCall("{CALL spGetKaryawanByUsername(?)}")) {
@@ -111,27 +89,6 @@ public class CRUD_Karyawan {
         }
     }
 
-    public static List<Karyawan> search(String keyword) throws SQLException {
-        List<Karyawan> list = new ArrayList<>();
-        String sql = """
-                SELECT * FROM vwKaryawanAll
-                WHERE Id_Karyawan      LIKE ?
-                   OR Nama_Karyawan    LIKE ?
-                   OR Jabatan_Karyawan LIKE ?
-                   OR Username         LIKE ?
-                   OR Email            LIKE ?
-                """;
-        try (Connection conn = new DBConnect().conn;
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            String kw = "%" + keyword.trim() + "%";
-            for (int i = 1; i <= 5; i++) ps.setString(i, kw);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapRow(rs));
-            }
-        }
-        return list;
-    }
-
     public static String generateNextId() throws SQLException {
         try (Connection conn = new DBConnect().conn;
              PreparedStatement ps = conn.prepareStatement(
@@ -150,7 +107,7 @@ public class CRUD_Karyawan {
                 rs.getString("No_Telp"),
                 rs.getString("Email"),
                 rs.getString("Username"),
-                "",   // memang sngaja kosong: view tidak menyertakan Password
+                "",
                 rs.getString("Sts_Karyawan")
         );
         k.setFotoKtp(rs.getString("Foto_KTP"));

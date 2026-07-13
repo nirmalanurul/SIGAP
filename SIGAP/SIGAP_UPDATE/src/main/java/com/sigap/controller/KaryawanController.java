@@ -19,11 +19,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -39,6 +42,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -59,6 +64,22 @@ public class KaryawanController implements Initializable {
     private Button btnPilihFotoKtp;
     @FXML
     private ComboBox<String> cmbJabatan;
+    @FXML
+    private MenuButton btnFilter;
+    @FXML
+    private RadioMenuItem rmNamaAZ;
+    @FXML
+    private RadioMenuItem rmNamaZA;
+    @FXML
+    private RadioMenuItem rmJabatanAdmin;
+    @FXML
+    private RadioMenuItem rmJabatanKasir;
+    @FXML
+    private RadioMenuItem rmJabatanManajer;
+    @FXML
+    private RadioMenuItem rmStatusAktif;
+    @FXML
+    private RadioMenuItem rmStatusTidakAktif;
     @FXML
     private TableColumn<Karyawan, String> colEmail;
     @FXML
@@ -82,6 +103,8 @@ public class KaryawanController implements Initializable {
     @FXML
     private Label lblPassword;
     @FXML
+    private Label lblPasswordRequired;
+    @FXML
     private Label lblFotoKtpNama;
     @FXML
     private TableView<Karyawan> tabelKaryawan;
@@ -98,14 +121,17 @@ public class KaryawanController implements Initializable {
     @FXML
     private PasswordField txtPassword;
     @FXML
-    private TextField txtStatus;
-    @FXML
     private TextField txtUsername;
 
+    private List<Karyawan> semuaData = new ArrayList<>();
     private final ObservableList<Karyawan> masterList = FXCollections.observableArrayList();
     private static final int PAGE_SIZE = 10;
     private int currentPage = 1;
     private int totalPage = 1;
+
+    private String urutanNama = null;
+    private String filterJabatan = null;
+    private String filterStatus = null;
 
     private static final String FOLDER_FOTO_KTP =
             new File("uploads" + File.separator + "ktp").getAbsolutePath() + File.separator;
@@ -123,8 +149,6 @@ public class KaryawanController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         txtIdKaryawan.setEditable(false);
-        txtStatus.setEditable(false);
-        txtStatus.setStyle(STYLE_READONLY);
 
         cmbJabatan.setItems(FXCollections.observableArrayList(
                 "Admin", "Kasir", "Manajer"
@@ -132,18 +156,20 @@ public class KaryawanController implements Initializable {
 
         setupTable();
         setupListeners();
+        setupFilter();
         setFormState(false, false);
 
         Platform.runLater(() -> {
             loadData();
             autoGenerateId();
-            txtStatus.setText("Aktif");
         });
     }
 
     private void showPasswordField(boolean visible) {
         lblPassword.setVisible(visible);
         lblPassword.setManaged(visible);
+        lblPasswordRequired.setVisible(visible);
+        lblPasswordRequired.setManaged(visible);
         txtPassword.setVisible(visible);
         txtPassword.setManaged(visible);
         txtPassword.clear();
@@ -161,6 +187,21 @@ public class KaryawanController implements Initializable {
             if (filtered.length() > 15) filtered = filtered.substring(0, 15);
             if (!filtered.equals(newVal)) txtNoTelp.setText(filtered);
         });
+    }
+
+    private void setupFilter() {
+        ToggleGroup grupNama = new ToggleGroup();
+        rmNamaAZ.setToggleGroup(grupNama);
+        rmNamaZA.setToggleGroup(grupNama);
+
+        ToggleGroup grupJabatan = new ToggleGroup();
+        rmJabatanAdmin.setToggleGroup(grupJabatan);
+        rmJabatanKasir.setToggleGroup(grupJabatan);
+        rmJabatanManajer.setToggleGroup(grupJabatan);
+
+        ToggleGroup grupStatus = new ToggleGroup();
+        rmStatusAktif.setToggleGroup(grupStatus);
+        rmStatusTidakAktif.setToggleGroup(grupStatus);
     }
 
     private void setupTable() {
@@ -242,8 +283,8 @@ public class KaryawanController implements Initializable {
 
     private void loadData() {
         try {
-            List<Karyawan> list = CRUD_Karyawan.getAll();
-            masterList.setAll(list);
+            semuaData = CRUD_Karyawan.getAll();
+            masterList.setAll(semuaData);
             currentPage = 1;
             refreshTable();
         } catch (Exception e) {
@@ -408,7 +449,6 @@ public class KaryawanController implements Initializable {
         txtEmail.clear();
         txtUsername.clear();
         txtPassword.clear();
-        txtStatus.clear();
         fotoKtpPath = null;
         lblFotoKtpNama.setText("Belum ada gambar dipilih");
     }
@@ -507,7 +547,9 @@ public class KaryawanController implements Initializable {
         showPasswordField(true);
         tabelKaryawan.getSelectionModel().clearSelection();
         autoGenerateId();
-        txtStatus.setText("Aktif");
+        txtCari.clear();
+        resetFilterState();
+        loadData();
         txtNamaKaryawan.requestFocus();
     }
 
@@ -522,7 +564,6 @@ public class KaryawanController implements Initializable {
         txtNoTelp.setText(k.getNoTelp());
         txtEmail.setText(k.getEmail());
         txtUsername.setText(k.getUsername());
-        txtStatus.setText(k.getStsKaryawan());
 
         fotoKtpPath = k.getFotoKtp();
         lblFotoKtpNama.setText(
@@ -541,26 +582,81 @@ public class KaryawanController implements Initializable {
 
     @FXML
     void onCari(ActionEvent event) {
-        String kw = txtCari.getText().trim();
-        if (kw.isEmpty()) { loadData(); return; }
-        try {
-            List<Karyawan> all = CRUD_Karyawan.getAll();
-            String kwLower = kw.toLowerCase();
-            List<Karyawan> hasil = all.stream()
-                    .filter(k ->
-                            (k.getIdKaryawan() != null && k.getIdKaryawan().toLowerCase().contains(kwLower))
-                                    || (k.getNamaKaryawan() != null && k.getNamaKaryawan().toLowerCase().contains(kwLower))
-                                    || (k.getJabatanKaryawan() != null && k.getJabatanKaryawan().toLowerCase().contains(kwLower))
-                                    || (k.getUsername() != null && k.getUsername().toLowerCase().contains(kwLower))
-                                    || (k.getStsKaryawan() != null && k.getStsKaryawan().toLowerCase().contains(kwLower))
-                    )
-                    .collect(Collectors.toList());
-            masterList.setAll(hasil);
-            currentPage = 1;
-            refreshTable();
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Cari", "Error: " + e.getMessage());
+        terapkanFilter();
+    }
+
+    // FILTER: Nama (A-Z / Z-A), Jabatan (Admin/Kasir/Manajer), Status (Aktif/Tidak Aktif)
+    @FXML
+    void onFilterNama(ActionEvent event) {
+        urutanNama = rmNamaAZ.isSelected() ? "asc"
+                : rmNamaZA.isSelected() ? "desc" : null;
+        terapkanFilter();
+    }
+
+    @FXML
+    void onFilterJabatan(ActionEvent event) {
+        filterJabatan = rmJabatanAdmin.isSelected() ? "Admin"
+                : rmJabatanKasir.isSelected() ? "Kasir"
+                : rmJabatanManajer.isSelected() ? "Manajer" : null;
+        terapkanFilter();
+    }
+
+    @FXML
+    void onFilterStatusKaryawan(ActionEvent event) {
+        filterStatus = rmStatusAktif.isSelected() ? "Aktif"
+                : rmStatusTidakAktif.isSelected() ? "Tidak Aktif" : null;
+        terapkanFilter();
+    }
+
+    private void terapkanFilter() {
+        String kw = txtCari.getText() == null ? "" : txtCari.getText().trim().toLowerCase();
+
+        List<Karyawan> hasil = semuaData.stream()
+                .filter(k -> kw.isEmpty()
+                        || (k.getIdKaryawan() != null && k.getIdKaryawan().toLowerCase().contains(kw))
+                        || (k.getNamaKaryawan() != null && k.getNamaKaryawan().toLowerCase().contains(kw))
+                        || (k.getJabatanKaryawan() != null && k.getJabatanKaryawan().toLowerCase().contains(kw))
+                        || (k.getUsername() != null && k.getUsername().toLowerCase().contains(kw))
+                        || (k.getEmail() != null && k.getEmail().toLowerCase().contains(kw))
+                )
+                .filter(k -> filterJabatan == null
+                        || (k.getJabatanKaryawan() != null && k.getJabatanKaryawan().equalsIgnoreCase(filterJabatan))
+                )
+                .filter(k -> filterStatus == null
+                        || (k.getStsKaryawan() != null && k.getStsKaryawan().equalsIgnoreCase(filterStatus))
+                )
+                .collect(Collectors.toList());
+
+        if (urutanNama != null) {
+            Comparator<Karyawan> byNama = Comparator.comparing(
+                    k -> k.getNamaKaryawan() == null ? "" : k.getNamaKaryawan().toLowerCase());
+            if (urutanNama.equals("desc")) byNama = byNama.reversed();
+            hasil.sort(byNama);
         }
+
+        masterList.setAll(hasil);
+        currentPage = 1;
+        refreshTable();
+    }
+
+    private void resetFilterState() {
+        urutanNama = null;
+        filterJabatan = null;
+        filterStatus = null;
+        rmNamaAZ.setSelected(false);
+        rmNamaZA.setSelected(false);
+        rmJabatanAdmin.setSelected(false);
+        rmJabatanKasir.setSelected(false);
+        rmJabatanManajer.setSelected(false);
+        rmStatusAktif.setSelected(false);
+        rmStatusTidakAktif.setSelected(false);
+    }
+
+    @FXML
+    void onResetFilter(ActionEvent event) {
+        resetFilterState();
+        txtCari.clear();
+        loadData();
     }
 
     @FXML
@@ -647,7 +743,7 @@ public class KaryawanController implements Initializable {
                     txtNoTelp.getText().trim(),
                     txtEmail.getText().trim(),
                     txtUsername.getText().trim(),
-                    ""   // password tidak diubah lewat form ini
+                    ""
             );
             k.setFotoKtp(fotoKtpPath);
             CRUD_Karyawan.updateData(k);
@@ -684,7 +780,5 @@ public class KaryawanController implements Initializable {
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Gagal Membuka Dialog", "Error: " + e.getMessage());
         }
-
-
     }
 }

@@ -52,7 +52,7 @@
                         <Label style="-fx-text-fill: #6080B0; -fx-font-size: 10px; -fx-font-weight: 700;" text="" />
                         <Label style="-fx-text-fill: #6080B0; -fx-font-size: 10px; -fx-font-weight: 700;" text="TRANSAKSI" />
 
-                        <Button maxWidth="1.7976931348623157E308" prefHeight="40" style="-fx-background-color: transparent; -fx-text-fill: #6080B0; -fx-font-size: 13px; -fx-font-weight: 700; -fx-alignment: CENTER_LEFT; -fx-padding: 0 16; -fx-background-radius: 6; -fx-cursor: hand;" text="  Penyewaan" />
+                        <Button fx:id="btnMenuPenyewaan" maxWidth="1.7976931348623157E308" onAction="#onMenuPenyewaan" prefHeight="40" style="-fx-background-color: transparent; -fx-text-fill: #A0C0F0; -fx-font-size: 13px; -fx-font-weight: 700; -fx-alignment: CENTER_LEFT; -fx-padding: 0 16; -fx-background-radius: 6; -fx-cursor: hand;" text="  Penyewaan" />
 
                         <Button maxWidth="1.7976931348623157E308" prefHeight="40" style="-fx-background-color: transparent; -fx-text-fill: #6080B0; -fx-font-size: 13px; -fx-font-weight: 700; -fx-alignment: CENTER_LEFT; -fx-padding: 0 16; -fx-background-radius: 6; -fx-cursor: hand;" text="  Tagihan" />
 

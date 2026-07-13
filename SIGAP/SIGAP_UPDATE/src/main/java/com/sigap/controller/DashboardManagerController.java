@@ -1,7 +1,7 @@
 package com.sigap.controller;
 
 import com.sigap.ADT.Karyawan;
-import com.sigap.Util.Session;
+import com.sigap.util.Session;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;

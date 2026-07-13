@@ -1,7 +1,7 @@
 package com.sigap.controller;
 
 import com.sigap.ADT.Karyawan;
-import com.sigap.Util.Session;
+import com.sigap.util.Session;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -83,7 +83,7 @@ public class DashboardKasirController implements Initializable {
 
     @FXML
     public void onMenuPenyewaan() {
-        loadView(COMING_SOON_FXML, "Penyewaan");
+        loadView("/com/sigap/view/Penyewaan/PenyewaanView.fxml", null);
         btnMenuPenyewa.setStyle(STYLE_INACTIVE);
         btnMenuPenyewaan.setStyle(STYLE_ACTIVE);
         btnMenuTagihan.setStyle(STYLE_INACTIVE);

@@ -2,7 +2,7 @@ package com.sigap.controller;
 
 import com.sigap.ADT.Karyawan;
 import com.sigap.APP.CRUD_Karyawan;
-import com.sigap.Util.Session;
+import com.sigap.util.Session;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

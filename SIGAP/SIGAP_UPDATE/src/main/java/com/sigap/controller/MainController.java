@@ -26,7 +26,8 @@ public class MainController implements Initializable {
     @FXML private Button    btnMenuPenyewa;
     @FXML private Button    btnMenuKios;
     @FXML private Button    btnMenuDenda;
-    @FXML private Button btnMenuKaryawan;
+    @FXML private Button    btnMenuKaryawan;
+    @FXML private Button    btnMenuPenyewaan;
 
     private static final String STYLE_ACTIVE =
             "-fx-background-color: #2356C8; -fx-text-fill: WHITE; " +
@@ -43,13 +44,24 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupClock();
-        // Default tampilkan Penyewa saat pertama buka
-        onMenuPenyewa();
+        // Default tampilkan Penyewaan saat pertama buka (kasir langsung siap transaksi)
+        onMenuPenyewaan();
+    }
+
+    @FXML
+    public void onMenuPenyewaan() {
+        loadView("/com/sigap/view/Penyewaan/PenyewaanView.fxml");
+        btnMenuPenyewaan.setStyle(STYLE_ACTIVE);
+        btnMenuPenyewa.setStyle(STYLE_INACTIVE);
+        btnMenuKios.setStyle(STYLE_INACTIVE);
+        btnMenuDenda.setStyle(STYLE_INACTIVE);
+        btnMenuKaryawan.setStyle(STYLE_INACTIVE);
     }
 
     @FXML
     public void onMenuPenyewa() {
         loadView("/com/sigap/view/PenyewaView.fxml");
+        btnMenuPenyewaan.setStyle(STYLE_INACTIVE);
         btnMenuKios.setStyle(STYLE_INACTIVE);
         btnMenuPenyewa.setStyle(STYLE_ACTIVE);
         btnMenuDenda.setStyle(STYLE_INACTIVE);
@@ -59,16 +71,17 @@ public class MainController implements Initializable {
     @FXML
     public void onMenuKios() {
         loadView("/com/sigap/view/KiosView.fxml");
+        btnMenuPenyewaan.setStyle(STYLE_INACTIVE);
         btnMenuKios.setStyle(STYLE_ACTIVE);
         btnMenuPenyewa.setStyle(STYLE_INACTIVE);
         btnMenuDenda.setStyle(STYLE_INACTIVE);
         btnMenuKaryawan.setStyle(STYLE_INACTIVE);
-
     }
 
     @FXML
     public void onMenuDenda(){
         loadView("/com/sigap/view/BiayaTambahanView.fxml");
+        btnMenuPenyewaan.setStyle(STYLE_INACTIVE);
         btnMenuKios.setStyle(STYLE_INACTIVE);
         btnMenuPenyewa.setStyle(STYLE_INACTIVE);
         btnMenuDenda.setStyle(STYLE_ACTIVE);
@@ -78,24 +91,36 @@ public class MainController implements Initializable {
     @FXML
     public void onMenuKaryawan() {
         loadView("/com/sigap/view/KaryawanView.fxml");
+        btnMenuPenyewaan.setStyle(STYLE_INACTIVE);
         btnMenuPenyewa.setStyle(STYLE_INACTIVE);
         btnMenuKios.setStyle(STYLE_INACTIVE);
         btnMenuDenda.setStyle(STYLE_INACTIVE);
         btnMenuKaryawan.setStyle(STYLE_ACTIVE);
     }
 
-
     private void loadView(String fxmlPath) {
         try {
             URL url = getClass().getResource(fxmlPath);
             if (url == null) {
-                System.err.println("[MainController] FXML tidak ditemukan: " + fxmlPath);
+                System.err.println("[MainController] FXML tidak ditemukan di classpath: " + fxmlPath);
                 return;
             }
-            Parent view = FXMLLoader.load(url);
+
+            FXMLLoader loader = new FXMLLoader(url);
+            Parent view = loader.load();
             contentArea.getChildren().setAll(view);
+
+            System.out.println("[MainController] Berhasil memuat: " + fxmlPath);
+
         } catch (Exception e) {
-            System.err.println("[MainController] Gagal memuat view: " + e.getMessage());
+            System.err.println("[MainController] Gagal memuat view: " + fxmlPath);
+            System.err.println("[MainController] Exception: " + e.getClass().getName() + " - " + e.getMessage());
+
+            Throwable cause = e.getCause();
+            if (cause != null) {
+                System.err.println("[MainController] Penyebab akar (cause): " + cause.getClass().getName() + " - " + cause.getMessage());
+            }
+
             e.printStackTrace();
         }
     }

@@ -13,17 +13,25 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
 
 import java.net.URL;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -32,13 +40,13 @@ public class BiayaTambahanController implements Initializable {
     @FXML
     private Button btnBersih;
     @FXML
+    private MenuButton btnFilter;
+    @FXML
     private Button btnHapus;
     @FXML
     private Button btnSimpan;
     @FXML
     private Button btnUbah;
-    @FXML
-    private ComboBox<String> cmbjenis;
     @FXML
     private TableColumn<BiayaTambahan, String> colId;
     @FXML
@@ -54,7 +62,39 @@ public class BiayaTambahanController implements Initializable {
     @FXML
     private Label lblTotal;
     @FXML
+    private MenuItem miResetFilter;
+    @FXML
+    private RadioButton rbKerusakanFasilitas;
+    @FXML
+    private RadioButton rbKeterlambatanBayarSewa;
+    @FXML
+    private RadioMenuItem rmiHargaTermahal;
+    @FXML
+    private RadioMenuItem rmiHargaTermurah;
+    @FXML
+    private RadioMenuItem rmiJenisKerusakan;
+    @FXML
+    private RadioMenuItem rmiJenisTerlambat;
+    @FXML
+    private RadioMenuItem rmiNamaAZ;
+    @FXML
+    private RadioMenuItem rmiNamaZA;
+    @FXML
+    private RadioMenuItem rmiStatusAktif;
+    @FXML
+    private RadioMenuItem rmiStatusTidakAktif;
+    @FXML
     private TableView<BiayaTambahan> tabelBiayaTambahan;
+    @FXML
+    private ToggleGroup tgFilterHarga;
+    @FXML
+    private ToggleGroup tgFilterJenis;
+    @FXML
+    private ToggleGroup tgFilterNama;
+    @FXML
+    private ToggleGroup tgFilterStatus;
+    @FXML
+    private ToggleGroup tgJenis;
     @FXML
     private TextField txtBiayaTambahan;
     @FXML
@@ -63,10 +103,18 @@ public class BiayaTambahanController implements Initializable {
     private TextField txtNominal;
     @FXML
     private TextField txtcari;
-    @FXML
-    private TextField txtstatus;
+
+    private static final String KERUSAKAN = "Kerusakan Fasilitas";
+    private static final String KETERLAMBATAN = "Keterlambatan Bayar Sewa";
+    private static final String AKTIF = "Aktif";
+    private static final String TIDAK_AKTIF = "Tidak Aktif";
+    private static final NumberFormat RIBUAN_FORMAT = NumberFormat.getInstance(new Locale("in", "ID"));
+
 
     private final ObservableList<BiayaTambahan> masterList = FXCollections.observableArrayList();
+
+    private final ObservableList<BiayaTambahan> displayList = FXCollections.observableArrayList();
+
     private static final int PAGE_SIZE = 10;
     private int currentPage = 1;
     private int totalPage = 1;
@@ -83,20 +131,14 @@ public class BiayaTambahanController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         txtBiayaTambahan.setEditable(false);
-        txtstatus.setEditable(false);
-        txtstatus.setStyle(STYLE_READONLY);
-
-        cmbjenis.setItems(FXCollections.observableArrayList(
-                "Kerusakan Fasilitas", "Keterlambatan Bayar Sewa"
-        ));
 
         setupTable();
+        setupNominalFormatter();
         setFormState(false, false);
 
         Platform.runLater(() -> {
             loadData();
             autoGenerateId();
-            txtstatus.setText("Aktif");
         });
     }
 
@@ -147,21 +189,54 @@ public class BiayaTambahanController implements Initializable {
         try {
             List<BiayaTambahan> list = CRUD_BiayaTambahan.getAll();
             masterList.setAll(list);
-            currentPage = 1;
-            refreshTable();
+            applyFilters();
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Error Koneksi",
                     "Gagal memuat data.\nDetail: " + e.getMessage());
         }
     }
 
+    private void applyFilters() {
+        List<BiayaTambahan> filtered = new ArrayList<>(masterList);
+
+        if (rmiJenisKerusakan != null && rmiJenisKerusakan.isSelected()) {
+            filtered.removeIf(d -> !KERUSAKAN.equalsIgnoreCase(d.getJenisBiayaTambahan()));
+        } else if (rmiJenisTerlambat != null && rmiJenisTerlambat.isSelected()) {
+            filtered.removeIf(d -> !KETERLAMBATAN.equalsIgnoreCase(d.getJenisBiayaTambahan()));
+        }
+
+        if (rmiStatusAktif != null && rmiStatusAktif.isSelected()) {
+            filtered.removeIf(d -> !AKTIF.equalsIgnoreCase(
+                    d.getStsDenda() != null ? d.getStsDenda().trim() : ""));
+        } else if (rmiStatusTidakAktif != null && rmiStatusTidakAktif.isSelected()) {
+            filtered.removeIf(d -> !TIDAK_AKTIF.equalsIgnoreCase(
+                    d.getStsDenda() != null ? d.getStsDenda().trim() : ""));
+        }
+
+        if (rmiHargaTermahal != null && rmiHargaTermahal.isSelected()) {
+            filtered.sort((a, b) -> Double.compare(b.getNominalDenda(), a.getNominalDenda()));
+        } else if (rmiHargaTermurah != null && rmiHargaTermurah.isSelected()) {
+            filtered.sort(Comparator.comparingDouble(BiayaTambahan::getNominalDenda));
+        }
+
+        if (rmiNamaAZ != null && rmiNamaAZ.isSelected()) {
+            filtered.sort(Comparator.comparing(BiayaTambahan::getJenisBiayaTambahan, String.CASE_INSENSITIVE_ORDER));
+        } else if (rmiNamaZA != null && rmiNamaZA.isSelected()) {
+            filtered.sort(Comparator.comparing(BiayaTambahan::getJenisBiayaTambahan, String.CASE_INSENSITIVE_ORDER).reversed());
+        }
+
+        displayList.setAll(filtered);
+        currentPage = 1;
+        refreshTable();
+    }
+
     private void refreshTable() {
-        int total = masterList.size();
+        int total = displayList.size();
         totalPage = (total == 0) ? 1 : (int) Math.ceil((double) total / PAGE_SIZE);
         if (currentPage > totalPage) currentPage = totalPage;
         int from = (currentPage - 1) * PAGE_SIZE;
         int to = Math.min(from + PAGE_SIZE, total);
-        tabelBiayaTambahan.setItems(FXCollections.observableArrayList(masterList.subList(from, to)));
+        tabelBiayaTambahan.setItems(FXCollections.observableArrayList(displayList.subList(from, to)));
         lblTotal.setText("Total Data : " + total);
         lblPage.setText(String.valueOf(currentPage));
     }
@@ -174,12 +249,66 @@ public class BiayaTambahanController implements Initializable {
         }
     }
 
+
+    private void setupNominalFormatter() {
+        txtNominal.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null || newVal.equals(oldVal)) return;
+
+            String digits = newVal.replaceAll("[^\\d]", "");
+            if (digits.isEmpty()) {
+                if (!newVal.isEmpty()) txtNominal.setText("");
+                return;
+            }
+            // buang angka nol di depan (kecuali angka itu sendiri "0")
+            digits = digits.replaceFirst("^0+(?=\\d)", "");
+
+            String formatted = formatRibuan(digits);
+            if (!formatted.equals(newVal)) {
+                txtNominal.setText(formatted);
+                txtNominal.positionCaret(formatted.length());
+            }
+        });
+    }
+
+
+    private String formatRibuan(String digits) {
+        try {
+            long value = Long.parseLong(digits);
+            return RIBUAN_FORMAT.format(value);
+        } catch (NumberFormatException e) {
+            return digits;
+        }
+    }
+
+    private double parseNominal(String text) {
+        String digits = text == null ? "" : text.replaceAll("[^\\d]", "");
+        return digits.isEmpty() ? 0 : Double.parseDouble(digits);
+    }
+
+
+    private String getSelectedJenis() {
+        if (rbKerusakanFasilitas.isSelected()) return KERUSAKAN;
+        if (rbKeterlambatanBayarSewa.isSelected()) return KETERLAMBATAN;
+        return null;
+    }
+
+    private void setSelectedJenis(String jenis) {
+        if (KERUSAKAN.equalsIgnoreCase(jenis)) {
+            rbKerusakanFasilitas.setSelected(true);
+        } else if (KETERLAMBATAN.equalsIgnoreCase(jenis)) {
+            rbKeterlambatanBayarSewa.setSelected(true);
+        } else if (tgJenis != null) {
+            tgJenis.selectToggle(null);
+        }
+    }
+
     private void setFormState(boolean editMode, boolean locked) {
         btnSimpan.setDisable(editMode || locked);
         btnUbah.setDisable(!editMode || locked);
         btnHapus.setDisable(!editMode || locked);
 
-        cmbjenis.setDisable(locked);
+        rbKerusakanFasilitas.setDisable(locked);
+        rbKeterlambatanBayarSewa.setDisable(locked);
         txtNominal.setEditable(!locked);
         txtKeterangan.setEditable(!locked);
 
@@ -190,16 +319,16 @@ public class BiayaTambahanController implements Initializable {
     private boolean validasi() {
         StringBuilder sb = new StringBuilder();
 
-        if (cmbjenis.getValue() == null || cmbjenis.getValue().isEmpty()) {
+        if (getSelectedJenis() == null) {
             sb.append("• Jenis Biaya Tambahan wajib dipilih (Kerusakan Fasilitas / Keterlambatan Bayar Sewa).\n");
         }
 
-        String nominalStr = txtNominal.getText().trim();
+        String nominalStr = txtNominal.getText() == null ? "" : txtNominal.getText().trim();
         if (nominalStr.isEmpty()) {
             sb.append("• Nominal wajib diisi.\n");
         } else {
             try {
-                double nominal = Double.parseDouble(nominalStr);
+                double nominal = parseNominal(nominalStr);
                 if (nominal <= 0) {
                     sb.append("• Nominal harus lebih besar dari 0.\n");
                 }
@@ -222,10 +351,9 @@ public class BiayaTambahanController implements Initializable {
 
     private void bersihForm() {
         txtBiayaTambahan.clear();
-        cmbjenis.setValue(null);
+        if (tgJenis != null) tgJenis.selectToggle(null);
         txtNominal.clear();
         txtKeterangan.clear();
-        txtstatus.clear();
     }
 
     private void showAlert(Alert.AlertType type, String title, String msg) {
@@ -248,8 +376,7 @@ public class BiayaTambahanController implements Initializable {
         setFormState(false, false);
         tabelBiayaTambahan.getSelectionModel().clearSelection();
         autoGenerateId();
-        txtstatus.setText("Aktif");
-        cmbjenis.requestFocus();
+        rbKerusakanFasilitas.requestFocus();
     }
 
     @FXML
@@ -258,10 +385,9 @@ public class BiayaTambahanController implements Initializable {
         if (d == null) return;
 
         txtBiayaTambahan.setText(d.getIdBiayaTambahan());
-        cmbjenis.setValue(d.getJenisBiayaTambahan());
-        txtNominal.setText(String.valueOf(d.getNominalDenda()));
+        setSelectedJenis(d.getJenisBiayaTambahan());
+        txtNominal.setText(formatRibuan(String.valueOf((long) d.getNominalDenda())));
         txtKeterangan.setText(d.getKeterangan());
-        txtstatus.setText(d.getStsDenda());
 
         boolean isTidakAktif = "Tidak Aktif".equalsIgnoreCase(
                 d.getStsDenda() != null ? d.getStsDenda().trim() : ""
@@ -276,8 +402,7 @@ public class BiayaTambahanController implements Initializable {
         try {
             List<BiayaTambahan> hasil = CRUD_BiayaTambahan.search(kw);
             masterList.setAll(hasil);
-            currentPage = 1;
-            refreshTable();
+            applyFilters();
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Gagal Cari", "Error: " + e.getMessage());
         }
@@ -303,6 +428,55 @@ public class BiayaTambahanController implements Initializable {
     @FXML
     void onPrevPage(ActionEvent event) {
         if (currentPage > 1) { currentPage--; refreshTable(); }
+    }
+
+    @FXML
+    void onFilterJenisKerusakan(ActionEvent event) {
+        applyFilters();
+    }
+
+    @FXML
+    void onFilterJenisTerlambat(ActionEvent event) {
+        applyFilters();
+    }
+
+    @FXML
+    void onFilterStatusAktif(ActionEvent event) {
+        applyFilters();
+    }
+
+    @FXML
+    void onFilterStatusTidakAktif(ActionEvent event) {
+        applyFilters();
+    }
+
+    @FXML
+    void onFilterHargaTermahal(ActionEvent event) {
+        applyFilters();
+    }
+
+    @FXML
+    void onFilterHargaTermurah(ActionEvent event) {
+        applyFilters();
+    }
+
+    @FXML
+    void onFilterNamaAZ(ActionEvent event) {
+        applyFilters();
+    }
+
+    @FXML
+    void onFilterNamaZA(ActionEvent event) {
+        applyFilters();
+    }
+
+    @FXML
+    void onResetFilter(ActionEvent event) {
+        if (tgFilterJenis != null) tgFilterJenis.selectToggle(null);
+        if (tgFilterStatus != null) tgFilterStatus.selectToggle(null);
+        if (tgFilterHarga != null) tgFilterHarga.selectToggle(null);
+        if (tgFilterNama != null) tgFilterNama.selectToggle(null);
+        applyFilters();
     }
 
     @FXML
@@ -339,8 +513,8 @@ public class BiayaTambahanController implements Initializable {
         try {
             BiayaTambahan d = new BiayaTambahan(
                     txtBiayaTambahan.getText().trim(),
-                    cmbjenis.getValue(),
-                    Double.parseDouble(txtNominal.getText().trim()),
+                    getSelectedJenis(),
+                    parseNominal(txtNominal.getText()),
                     txtKeterangan.getText() == null ? "" : txtKeterangan.getText().trim()
             );
             CRUD_BiayaTambahan.insert(d);
@@ -358,8 +532,8 @@ public class BiayaTambahanController implements Initializable {
         try {
             BiayaTambahan d = new BiayaTambahan(
                     txtBiayaTambahan.getText().trim(),
-                    cmbjenis.getValue(),
-                    Double.parseDouble(txtNominal.getText().trim()),
+                    getSelectedJenis(),
+                    parseNominal(txtNominal.getText()),
                     txtKeterangan.getText() == null ? "" : txtKeterangan.getText().trim()
             );
             CRUD_BiayaTambahan.update(d);

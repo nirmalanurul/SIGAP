@@ -40,7 +40,7 @@
                     <Label style="-fx-font-size:13px;-fx-text-fill:#888;" text="Kelola data biaya tambahan sistem SIGAP" />
                 </children>
             </VBox>
-
+//p
 
             <VBox spacing="16" style="-fx-background-color:white;                          -fx-background-radius:10;                          -fx-effect:dropshadow(gaussian,rgba(0,0,0,0.07),10,0,0,2);">
 
@@ -147,7 +147,7 @@
                     <children>
 
                         <TextField fx:id="txtcari" prefHeight="38" prefWidth="250" promptText="Cari ID / Jenis Biaya Tambahan / Status" />
-         
+
                         <Button onAction="#oncari" prefHeight="42.0" prefWidth="107.0" style="-fx-background-color:#1A3A8F;                                        -fx-text-fill:white;                                        -fx-font-weight:700;                                        -fx-font-size:13px;                                        -fx-background-radius:6;                                        -fx-padding:8 20;                                        -fx-cursor:hand;" text="CARI" />
 
                         <MenuButton fx:id="btnFilter" prefHeight="38.0" prefWidth="121.0" style="-fx-background-color:#1A3A8F;                                            -fx-text-fill:white;                                            -fx-font-weight:700;                                            -fx-font-size:13px;                                            -fx-background-radius:6;                                            -fx-mark-color:white;                                            -fx-padding:8 20;                                            -fx-cursor:hand;">

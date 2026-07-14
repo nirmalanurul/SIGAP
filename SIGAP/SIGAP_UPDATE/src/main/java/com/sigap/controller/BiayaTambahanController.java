@@ -486,7 +486,7 @@ public class BiayaTambahanController implements Initializable {
             showAlert(Alert.AlertType.WARNING, "Peringatan", "Pilih data biaya tambahan yang ingin dinonaktifkan.");
             return;
         }
-
+//p
         Alert konfirmasi = new Alert(Alert.AlertType.CONFIRMATION);
         konfirmasi.setTitle("Konfirmasi Nonaktifkan");
         konfirmasi.setHeaderText("Nonaktifkan Biaya Tambahan");

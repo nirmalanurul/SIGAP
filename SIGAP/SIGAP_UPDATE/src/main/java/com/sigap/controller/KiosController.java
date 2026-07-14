@@ -20,7 +20,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -36,7 +35,6 @@ import java.nio.file.StandardCopyOption;
 import java.text.NumberFormat;
 import java.util.*;
 
-import javafx.scene.control.MenuButton;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ToggleGroup;
 
@@ -79,8 +77,6 @@ public class KiosController implements Initializable {
     @FXML
     private FlowPane flowKios;
     @FXML
-    private MenuButton btnFilter;
-    @FXML
     private RadioMenuItem rmHargaTermurah;
     @FXML
     private RadioMenuItem rmHargaTermahal;
@@ -97,8 +93,6 @@ public class KiosController implements Initializable {
     private RadioMenuItem rmStatusTidakAktif;
 
     @FXML
-    private MenuButton btnJumlahTampil;
-    @FXML
     private RadioMenuItem rmTampil12;
     @FXML
     private RadioMenuItem rmTampil18;
@@ -112,14 +106,6 @@ public class KiosController implements Initializable {
     private Label lblPage;
     @FXML
     private Label lblTotal;
-    @FXML
-    private Button btnFirstPage;
-    @FXML
-    private Button btnPrevPage;
-    @FXML
-    private Button btnNextPage;
-    @FXML
-    private Button btnLastPage;
 
     // 5. STATE
     private List<Kios> semuaData = new ArrayList<>();

@@ -111,7 +111,7 @@
                                 <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
                                     <children>
                                         <Label fx:id="lblPassword" style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;" text="Password" />
-                                        <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
+                                        <Label fx:id="lblPasswordRequired" style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
                                     </children>
                                 </HBox>
                                 <PasswordField fx:id="txtPassword" maxWidth="1.7976931348623157E308" promptText="Masukkan password (khusus Tambah)" style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;" GridPane.columnIndex="3" GridPane.rowIndex="2" />

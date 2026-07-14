@@ -1,137 +1,119 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Rectangle?>
 
-<ScrollPane xmlns="http://javafx.com/javafx/26"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.sigap.controller.BiayaTambahanController"
-            fitToWidth="true"
-            style="-fx-background-color: transparent; -fx-background-insets:0; -fx-padding:0;">
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background-insets:0; -fx-padding:0;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sigap.controller.BiayaTambahanController">
 
     <content>
         <VBox spacing="20">
 
             <padding>
-                <Insets top="20" right="24" bottom="24" left="24"/>
+                <Insets bottom="24" left="24" right="24" top="20" />
             </padding>
 
 
             <VBox spacing="4">
                 <children>
-                    <Label text="Master Data  ›  Biaya Tambahan"
-                           style="-fx-font-size:12px;-fx-text-fill:#888;"/>
-                    <Label text="Data Biaya Tambahan"
-                           style="-fx-font-size:26px;-fx-font-weight:900;-fx-text-fill:#1A2340;"/>
-                    <Label text="Kelola data biaya tambahan sistem SIGAP"
-                           style="-fx-font-size:13px;-fx-text-fill:#888;"/>
+                    <Label style="-fx-font-size:12px;-fx-text-fill:#888;" text="Master Data  ›  Biaya Tambahan" />
+                    <Label style="-fx-font-size:26px;-fx-font-weight:900;-fx-text-fill:#1A2340;" text="Data Biaya Tambahan" />
+                    <Label style="-fx-font-size:13px;-fx-text-fill:#888;" text="Kelola data biaya tambahan sistem SIGAP" />
                 </children>
             </VBox>
 
 
-            <VBox spacing="16"
-                  style="-fx-background-color:white;
-                         -fx-background-radius:10;
-                         -fx-effect:dropshadow(gaussian,rgba(0,0,0,0.07),10,0,0,2);">
+            <VBox spacing="16" style="-fx-background-color:white;                          -fx-background-radius:10;                          -fx-effect:dropshadow(gaussian,rgba(0,0,0,0.07),10,0,0,2);">
 
                 <padding>
-                    <Insets top="20" right="20" bottom="20" left="20"/>
+                    <Insets bottom="20" left="20" right="20" top="20" />
                 </padding>
 
                 <children>
 
                     <HBox alignment="CENTER_LEFT" spacing="8">
                         <children>
-                            <Rectangle width="4"
-                                       height="20"
-                                       arcWidth="4"
-                                       arcHeight="4"
-                                       fill="#1A3A8F"/>
+                            <Rectangle arcHeight="4" arcWidth="4" fill="#1A3A8F" height="20" width="4" />
 
-                            <Label text="Form Input Biaya Tambahan"
-                                   style="-fx-font-size:15px;
-                                          -fx-font-weight:700;
-                                          -fx-text-fill:#1A3A8F;"/>
+                            <Label style="-fx-font-size:15px;                                           -fx-font-weight:700;                                           -fx-text-fill:#1A3A8F;" text="Form Input Biaya Tambahan" />
                         </children>
                     </HBox>
 
                     <GridPane hgap="30" vgap="14">
 
                         <columnConstraints>
-                            <ColumnConstraints prefWidth="130"/>
-                            <ColumnConstraints hgrow="ALWAYS"/>
-                            <ColumnConstraints prefWidth="120"/>
-                            <ColumnConstraints hgrow="ALWAYS"/>
+                            <ColumnConstraints prefWidth="130" />
+                            <ColumnConstraints hgrow="ALWAYS" />
+                            <ColumnConstraints prefWidth="120" />
+                            <ColumnConstraints hgrow="ALWAYS" />
                         </columnConstraints>
 
                         <rowConstraints>
-                            <RowConstraints/>
-                            <RowConstraints/>
-                            <RowConstraints/>
+                            <RowConstraints />
+                            <RowConstraints />
+                            <RowConstraints />
                         </rowConstraints>
 
                         <children>
 
 
 
-                            <Label text="ID Biaya Tambahan"
-                                   GridPane.columnIndex="0"
-                                   GridPane.rowIndex="0"/>
+                            <Label text="ID Biaya Tambahan" GridPane.columnIndex="0" GridPane.rowIndex="0" />
 
-                            <TextField fx:id="txtBiayaTambahan"
-                                       editable="false"
-                                       promptText="Auto Generate"
-                                       style="-fx-background-color:#F0F0F0;-fx-border-color:#D0D8E8;
-                                              -fx-border-radius:6;-fx-background-radius:6;-fx-padding:6 12;
-                                              -fx-font-size:13px;-fx-text-fill:#888;"
-                                       GridPane.columnIndex="1"
-                                       GridPane.rowIndex="0"/>
+                            <TextField fx:id="txtBiayaTambahan" editable="false" promptText="Auto Generate" style="-fx-background-color:#F0F0F0;-fx-border-color:#D0D8E8;                                               -fx-border-radius:6;-fx-background-radius:6;-fx-padding:6 12;                                               -fx-font-size:13px;-fx-text-fill:#888;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-                            <Label text="Jenis Biaya Tambahan"
-                                   GridPane.columnIndex="0"
-                                   GridPane.rowIndex="1"/>
+                            <HBox alignment="CENTER_LEFT" spacing="2" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                <children>
+                                    <Label text="Jenis Biaya Tambahan" />
+                                    <Label style="-fx-text-fill:#E23636;-fx-font-weight:900;-fx-font-size:14px;" text="*" />
+                                </children>
+                            </HBox>
 
-                            <ComboBox fx:id="cmbjenis"
-                                      prefWidth="250"
-                                      promptText="Pilih jenis biaya tambahan"
-                                      GridPane.columnIndex="1"
-                                      GridPane.rowIndex="1"/>
+                            <HBox alignment="CENTER_LEFT" spacing="20" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                <children>
+                                    <RadioButton fx:id="rbKerusakanFasilitas" style="-fx-font-size:13px;" text="Kerusakan Fasilitas">
+                                        <toggleGroup>
+                                            <ToggleGroup fx:id="tgJenis" />
+                                        </toggleGroup>
+                                    </RadioButton>
 
-                            <Label text="Nominal"
-                                   GridPane.columnIndex="0"
-                                   GridPane.rowIndex="2"/>
+                                    <RadioButton fx:id="rbKeterlambatanBayarSewa" style="-fx-font-size:13px;" text="Keterlambatan Bayar Sewa" toggleGroup="$tgJenis" />
+                                </children>
+                            </HBox>
 
-                            <TextField fx:id="txtNominal"
-                                       promptText="Masukkan Nominal"
-                                       GridPane.columnIndex="1"
-                                       GridPane.rowIndex="2"/>
+                            <HBox alignment="CENTER_LEFT" spacing="2" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                                <children>
+                                    <Label text="Nominal" />
+                                    <Label style="-fx-text-fill:#E23636;-fx-font-weight:900;-fx-font-size:14px;" text="*" />
+                                </children>
+                            </HBox>
+
+                            <TextField fx:id="txtNominal" prefHeight="36.0" prefWidth="327.0" promptText="Masukkan Nominal" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
 
 
-                            <Label text="Keterangan"
-                                   GridPane.columnIndex="2"
-                                   GridPane.rowIndex="0"/>
+                            <Label text="Keterangan" GridPane.columnIndex="2" GridPane.rowIndex="0" />
 
-                            <TextArea fx:id="txtKeterangan"
-                                      prefRowCount="3"
-                                      promptText="Masukkan Keterangan"
-                                      GridPane.columnIndex="3"
-                                      GridPane.rowIndex="0"
-                                      GridPane.rowSpan="2"/>
-
-                            <Label text="Status"
-                                   GridPane.columnIndex="2"
-                                   GridPane.rowIndex="2"/>
-
-                            <TextField fx:id="txtstatus"
-                                       editable="false"
-                                       style="-fx-background-color:#F0F0F0;-fx-border-color:#D0D8E8;
-                                              -fx-border-radius:6;-fx-background-radius:6;-fx-padding:6 12;
-                                              -fx-font-size:13px;-fx-text-fill:#888;"
-                                       GridPane.columnIndex="3"
-                                       GridPane.rowIndex="2"/>
+                            <TextArea fx:id="txtKeterangan" prefRowCount="3" promptText="Masukkan Keterangan" GridPane.columnIndex="3" GridPane.rowIndex="0" GridPane.rowSpan="2" />
 
                         </children>
 
@@ -148,81 +130,83 @@
 
                     <children>
 
-                        <Button fx:id="btnSimpan"
-                                text="SIMPAN"
-                                prefWidth="130"
-                                prefHeight="38"
-                                onAction="#onsimpan"
-                                style="-fx-background-color:#1A3A8F;
-                                       -fx-text-fill:white;
-                                       -fx-font-weight:700;
-                                       -fx-font-size:13px;
-                                       -fx-background-radius:6;
-                                       -fx-padding:8 16;
-                                       -fx-cursor:hand;"/>
+                        <Button fx:id="btnSimpan" onAction="#onsimpan" prefHeight="38" prefWidth="130" style="-fx-background-color:#1A3A8F;                                        -fx-text-fill:white;                                        -fx-font-weight:700;                                        -fx-font-size:13px;                                        -fx-background-radius:6;                                        -fx-padding:8 16;                                        -fx-cursor:hand;" text="SIMPAN" />
 
-                        <Button fx:id="btnUbah"
-                                text="UBAH"
-                                prefWidth="130"
-                                prefHeight="38"
-                                onAction="#onubah"
-                                style="-fx-background-color:#D9B36C;
-                                       -fx-text-fill:white;
-                                       -fx-font-weight:700;
-                                       -fx-font-size:13px;
-                                       -fx-background-radius:6;
-                                       -fx-padding:8 16;
-                                       -fx-cursor:hand;"/>
+                        <Button fx:id="btnUbah" onAction="#onubah" prefHeight="38" prefWidth="130" style="-fx-background-color:#D9B36C;                                        -fx-text-fill:white;                                        -fx-font-weight:700;                                        -fx-font-size:13px;                                        -fx-background-radius:6;                                        -fx-padding:8 16;                                        -fx-cursor:hand;" text="UBAH" />
 
-                        <Button fx:id="btnHapus"
-                                text="HAPUS"
-                                prefWidth="130"
-                                prefHeight="38"
-                                onAction="#onhapus"
-                                style="-fx-background-color:#E29797;
-                                       -fx-text-fill:white;
-                                       -fx-font-weight:700;
-                                       -fx-font-size:13px;
-                                       -fx-background-radius:6;
-                                       -fx-padding:8 16;
-                                       -fx-cursor:hand;"/>
+                        <Button fx:id="btnHapus" onAction="#onhapus" prefHeight="38" prefWidth="130" style="-fx-background-color:#E29797;                                        -fx-text-fill:white;                                        -fx-font-weight:700;                                        -fx-font-size:13px;                                        -fx-background-radius:6;                                        -fx-padding:8 16;                                        -fx-cursor:hand;" text="HAPUS" />
 
-                        <Button fx:id="btnBersih"
-                                text="BATAL"
-                                prefWidth="130"
-                                prefHeight="38"
-                                onAction="#onbersih"
-                                style="-fx-background-color:#A9AEB8;
-                                       -fx-text-fill:white;
-                                       -fx-font-weight:700;
-                                       -fx-font-size:13px;
-                                       -fx-background-radius:6;
-                                       -fx-padding:8 16;
-                                       -fx-cursor:hand;"/>
+                        <Button fx:id="btnBersih" onAction="#onbersih" prefHeight="38" prefWidth="130" style="-fx-background-color:#A9AEB8;                                        -fx-text-fill:white;                                        -fx-font-weight:700;                                        -fx-font-size:13px;                                        -fx-background-radius:6;                                        -fx-padding:8 16;                                        -fx-cursor:hand;" text="BATAL" />
 
                     </children>
 
                 </HBox>
 
-                <HBox spacing="8">
+                <HBox alignment="CENTER_LEFT" spacing="8">
 
                     <children>
 
-                        <TextField fx:id="txtcari"
-                                   prefWidth="250"
-                                   prefHeight="38"
-                                   promptText="Cari ID / Jenis Biaya Tambahan / Status"/>
+                        <TextField fx:id="txtcari" prefHeight="38" prefWidth="250" promptText="Cari ID / Jenis Biaya Tambahan / Status" />
 
-                        <Button text="CARI"
-                                prefHeight="38"
-                                onAction="#oncari"
-                                style="-fx-background-color:#1A3A8F;
-                                       -fx-text-fill:white;
-                                       -fx-font-weight:700;
-                                       -fx-font-size:13px;
-                                       -fx-background-radius:6;
-                                       -fx-padding:8 20;
-                                       -fx-cursor:hand;"/>
+                        <Button onAction="#oncari" prefHeight="42.0" prefWidth="107.0" style="-fx-background-color:#1A3A8F;                                        -fx-text-fill:white;                                        -fx-font-weight:700;                                        -fx-font-size:13px;                                        -fx-background-radius:6;                                        -fx-padding:8 20;                                        -fx-cursor:hand;" text="CARI" />
+
+                        <MenuButton fx:id="btnFilter" prefHeight="38.0" prefWidth="121.0" style="-fx-background-color:#1A3A8F;                                            -fx-text-fill:white;                                            -fx-font-weight:700;                                            -fx-font-size:13px;                                            -fx-background-radius:6;                                            -fx-mark-color:white;                                            -fx-padding:8 20;                                            -fx-cursor:hand;">
+                            <items>
+
+                                <Menu text="Urutkan Nama">
+                                    <items>
+                                        <RadioMenuItem fx:id="rmiNamaAZ" onAction="#onFilterNamaAZ" text="A - Z">
+                                            <toggleGroup>
+                                                <ToggleGroup fx:id="tgFilterNama" />
+                                            </toggleGroup>
+                                        </RadioMenuItem>
+                                        <RadioMenuItem fx:id="rmiNamaZA" onAction="#onFilterNamaZA" text="Z - A" toggleGroup="$tgFilterNama" />
+                                    </items>
+                                </Menu>
+
+                                <Menu text="Urutkan Harga">
+                                    <items>
+                                        <RadioMenuItem fx:id="rmiHargaTermahal" onAction="#onFilterHargaTermahal" text="Termahal - Termurah">
+                                            <toggleGroup>
+                                                <ToggleGroup fx:id="tgFilterHarga" />
+                                            </toggleGroup>
+                                        </RadioMenuItem>
+                                        <RadioMenuItem fx:id="rmiHargaTermurah" onAction="#onFilterHargaTermurah" text="Termurah - Termahal" toggleGroup="$tgFilterHarga" />
+                                    </items>
+                                </Menu>
+
+                                <Menu text="Jenis">
+                                    <items>
+                                        <RadioMenuItem fx:id="rmiJenisKerusakan" onAction="#onFilterJenisKerusakan" text="Kerusakan Fasilitas">
+                                            <toggleGroup>
+                                                <ToggleGroup fx:id="tgFilterJenis" />
+                                            </toggleGroup>
+                                        </RadioMenuItem>
+                                        <RadioMenuItem fx:id="rmiJenisTerlambat" onAction="#onFilterJenisTerlambat" text="Keterlambatan Bayar Sewa" toggleGroup="$tgFilterJenis" />
+                                    </items>
+                                </Menu>
+
+                                <Menu text="Status">
+                                    <items>
+                                        <RadioMenuItem fx:id="rmiStatusAktif" onAction="#onFilterStatusAktif" text="Aktif">
+                                            <toggleGroup>
+                                                <ToggleGroup fx:id="tgFilterStatus" />
+                                            </toggleGroup>
+                                        </RadioMenuItem>
+                                        <RadioMenuItem fx:id="rmiStatusTidakAktif" onAction="#onFilterStatusTidakAktif" text="Tidak Aktif" toggleGroup="$tgFilterStatus" />
+                                    </items>
+                                </Menu>
+
+                                <SeparatorMenuItem />
+
+                                <MenuItem fx:id="miResetFilter" onAction="#onResetFilter" text="Reset Filter" />
+
+                            </items>
+                     <graphic>
+                        <Label text="FILTER" textFill="WHITE" />
+                     </graphic>
+                        </MenuButton>
+
 
                     </children>
 
@@ -231,14 +215,10 @@
             </HBox>
 
 
-            <VBox spacing="16"
-                  VBox.vgrow="ALWAYS"
-                  style="-fx-background-color:white;
-                         -fx-background-radius:10;
-                         -fx-effect:dropshadow(gaussian,rgba(0,0,0,0.07),10,0,0,2);">
+            <VBox spacing="16" style="-fx-background-color:white;                          -fx-background-radius:10;                          -fx-effect:dropshadow(gaussian,rgba(0,0,0,0.07),10,0,0,2);" VBox.vgrow="ALWAYS">
 
                 <padding>
-                    <Insets top="16" right="20" bottom="16" left="20"/>
+                    <Insets bottom="16" left="20" right="20" top="16" />
                 </padding>
 
                 <children>
@@ -247,55 +227,36 @@
 
                         <children>
 
-                            <Rectangle width="4"
-                                       height="20"
-                                       arcWidth="4"
-                                       arcHeight="4"
-                                       fill="#1A3A8F"/>
+                            <Rectangle arcHeight="4" arcWidth="4" fill="#1A3A8F" height="20" width="4" />
 
-                            <Label text="Daftar Biaya Tambahan"
-                                   style="-fx-font-size:15px;
-                                          -fx-font-weight:700;
-                                          -fx-text-fill:#1A3A8F;"/>
+                            <Label style="-fx-font-size:15px;                                           -fx-font-weight:700;                                           -fx-text-fill:#1A3A8F;" text="Daftar Biaya Tambahan" />
 
                         </children>
 
                     </HBox>
 
-                    <TableView fx:id="tabelBiayaTambahan"
-                               VBox.vgrow="ALWAYS"
-                               onMouseClicked="#onTableClick">
+                    <TableView fx:id="tabelBiayaTambahan" onMouseClicked="#onTableClick" VBox.vgrow="ALWAYS">
 
                         <columns>
 
-                            <TableColumn fx:id="colId"
-                                         text="ID Biaya Tambahan"
-                                         prefWidth="140"/>
+                            <TableColumn fx:id="colId" prefWidth="140" text="ID Biaya Tambahan" />
 
-                            <TableColumn fx:id="coljenispelanggaran"
-                                         text="Jenis Biaya Tambahan"
-                                         prefWidth="220"/>
+                            <TableColumn fx:id="coljenispelanggaran" prefWidth="220" text="Jenis Biaya Tambahan" />
 
-                            <TableColumn fx:id="colnominal"
-                                         text="Nominal"
-                                         prefWidth="140"/>
+                            <TableColumn fx:id="colnominal" prefWidth="140" text="Nominal" />
 
-                            <TableColumn fx:id="colketerangan"
-                                         text="Keterangan"
-                                         prefWidth="260"/>
+                            <TableColumn fx:id="colketerangan" prefWidth="260" text="Keterangan" />
 
-                            <TableColumn fx:id="colstatus"
-                                         text="Status"
-                                         prefWidth="100"/>
+                            <TableColumn fx:id="colstatus" prefWidth="100" text="Status" />
 
                         </columns>
 
                         <placeholder>
-                            <Label text="Tidak ada data biaya tambahan."/>
+                            <Label text="Tidak ada data biaya tambahan." />
                         </placeholder>
 
                         <columnResizePolicy>
-                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                         </columnResizePolicy>
 
                     </TableView>
@@ -304,70 +265,19 @@
 
                         <children>
 
-                            <Label fx:id="lblTotal"
-                                   text="Total Data : 0"
-                                   style="-fx-font-size:13px;-fx-text-fill:#555;"/>
+                            <Label fx:id="lblTotal" style="-fx-font-size:13px;-fx-text-fill:#555;" text="Total Data : 0" />
 
-                            <Region HBox.hgrow="ALWAYS"/>
+                            <Region HBox.hgrow="ALWAYS" />
 
-                            <Button text="«"
-                                    prefWidth="36"
-                                    prefHeight="34"
-                                    onAction="#onFirstPage"
-                                    style="-fx-background-color:white;
-                                           -fx-border-color:#D0D8E8;
-                                           -fx-border-radius:6;
-                                           -fx-background-radius:6;
-                                           -fx-text-fill:#1A3A8F;
-                                           -fx-font-weight:700;
-                                           -fx-cursor:hand;"/>
+                            <Button onAction="#onFirstPage" prefHeight="34" prefWidth="36" style="-fx-background-color:white;                                            -fx-border-color:#D0D8E8;                                            -fx-border-radius:6;                                            -fx-background-radius:6;                                            -fx-text-fill:#1A3A8F;                                            -fx-font-weight:700;                                            -fx-cursor:hand;" text="«" />
 
-                            <Button text="‹"
-                                    prefWidth="36"
-                                    prefHeight="34"
-                                    onAction="#onPrevPage"
-                                    style="-fx-background-color:white;
-                                           -fx-border-color:#D0D8E8;
-                                           -fx-border-radius:6;
-                                           -fx-background-radius:6;
-                                           -fx-text-fill:#1A3A8F;
-                                           -fx-font-weight:700;
-                                           -fx-cursor:hand;"/>
+                            <Button onAction="#onPrevPage" prefHeight="34" prefWidth="36" style="-fx-background-color:white;                                            -fx-border-color:#D0D8E8;                                            -fx-border-radius:6;                                            -fx-background-radius:6;                                            -fx-text-fill:#1A3A8F;                                            -fx-font-weight:700;                                            -fx-cursor:hand;" text="‹" />
 
-                            <Label fx:id="lblPage"
-                                   text="1"
-                                   alignment="CENTER"
-                                   prefWidth="36"
-                                   prefHeight="34"
-                                   style="-fx-background-color:#1A3A8F;
-                                          -fx-text-fill:white;
-                                          -fx-font-weight:700;
-                                          -fx-background-radius:6;
-                                          -fx-alignment:center;"/>
+                            <Label fx:id="lblPage" alignment="CENTER" prefHeight="34" prefWidth="36" style="-fx-background-color:#1A3A8F;                                           -fx-text-fill:white;                                           -fx-font-weight:700;                                           -fx-background-radius:6;                                           -fx-alignment:center;" text="1" />
 
-                            <Button text="›"
-                                    prefWidth="36"
-                                    prefHeight="34"
-                                    onAction="#onNextPage"
-                                    style="-fx-background-color:white;
-                                           -fx-border-color:#D0D8E8;
-                                           -fx-border-radius:6;
-                                           -fx-background-radius:6;
-                                           -fx-text-fill:#1A3A8F;
-                                           -fx-font-weight:700;
-                                           -fx-cursor:hand;"/>
+                            <Button onAction="#onNextPage" prefHeight="34" prefWidth="36" style="-fx-background-color:white;                                            -fx-border-color:#D0D8E8;                                            -fx-border-radius:6;                                            -fx-background-radius:6;                                            -fx-text-fill:#1A3A8F;                                            -fx-font-weight:700;                                            -fx-cursor:hand;" text="›" />
 
-                            <Button text="»"
-                                    prefWidth="36"
-                                    prefHeight="34"
-                                    onAction="#onLastPage"
-                                    style="-fx-background-color:white;
-                                           -fx-border-color:#D0D8E8;
-                                           -fx-border-radius:6;
-                                           -fx-background-radius:6;
-                                           -fx-text-fill:#1A3A8F;
-                                           -fx-font-weight:700;
-                                           -fx-cursor:hand;"/>
+                            <Button onAction="#onLastPage" prefHeight="34" prefWidth="36" style="-fx-background-color:white;                                            -fx-border-color:#D0D8E8;                                            -fx-border-radius:6;                                            -fx-background-radius:6;                                            -fx-text-fill:#1A3A8F;                                            -fx-font-weight:700;                                            -fx-cursor:hand;" text="»" />
 
                         </children>
 

@@ -78,12 +78,11 @@ public class PilihKiosController implements Initializable {
 
     private void loadData() {
         try {
-            // Hanya kios berstatus Aktif yang boleh dipilih untuk transaksi baru
             List<Kios> semua = CRUD_Kios.getAll();
-            List<Kios> aktifSaja = semua.stream()
-                    .filter(k -> "Aktif".equalsIgnoreCase(k.getStsKios()))
+            List<Kios> tersediaSaja = semua.stream()
+                    .filter(k -> "Tersedia".equalsIgnoreCase(k.getStsKios()))
                     .collect(Collectors.toList());
-            masterList.setAll(aktifSaja);
+            masterList.setAll(tersediaSaja);
             tabelKios.setItems(masterList);
         } catch (Exception e) {
             showAlert("Gagal memuat data kios. Periksa koneksi ke database atau hubungi admin sistem.");
@@ -109,7 +108,7 @@ public class PilihKiosController implements Initializable {
         if (kw.isEmpty()) { loadData(); return; }
         try {
             List<Kios> hasil = CRUD_Kios.search(kw).stream()
-                    .filter(k -> "Aktif".equalsIgnoreCase(k.getStsKios()))
+                    .filter(k -> "Tersedia".equalsIgnoreCase(k.getStsKios()))
                     .collect(Collectors.toList());
             tabelKios.setItems(FXCollections.observableArrayList(hasil));
         } catch (Exception e) {

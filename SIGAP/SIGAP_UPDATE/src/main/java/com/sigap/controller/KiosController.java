@@ -548,6 +548,10 @@ public class KiosController implements Initializable {
             alert.setTitle(title);
             alert.setHeaderText(null);
             alert.setContentText(msg);
+
+
+
+
             if (txtIdKios != null && txtIdKios.getScene() != null)
                 alert.initOwner(txtIdKios.getScene().getWindow());
             alert.showAndWait();

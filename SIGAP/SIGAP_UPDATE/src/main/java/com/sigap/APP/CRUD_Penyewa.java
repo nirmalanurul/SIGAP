@@ -11,13 +11,14 @@ public class CRUD_Penyewa {
 
     public static void insert(Penyewa p) throws SQLException {
         try (Connection conn = new DBConnect().conn;
-             CallableStatement cs = conn.prepareCall("{CALL spInsertPenyewa(?,?,?,?,?,?)}")) {
+             CallableStatement cs = conn.prepareCall("{CALL spInsertPenyewa(?,?,?,?,?,?,?)}")) {
             cs.setString(1, p.getIdPenyewa());
             cs.setString(2, p.getNamaPenyewa());
             cs.setString(3, p.getNik());
             cs.setString(4, p.getNoTelp());
             cs.setString(5, p.getAlamat());
             cs.setDate(6, Date.valueOf(p.getTglDaftar()));
+            cs.setString(7, p.getFotoKtp());
             cs.executeUpdate();
         }
     }
@@ -60,13 +61,14 @@ public class CRUD_Penyewa {
 
     public static void update(Penyewa p) throws SQLException {
         DBConnect db = new DBConnect();
-        CallableStatement cs = db.conn.prepareCall("{CALL spUpdatePenyewa(?,?,?,?,?,?)}");
+        CallableStatement cs = db.conn.prepareCall("{CALL spUpdatePenyewa(?,?,?,?,?,?,?)}");
         cs.setString(1, p.getIdPenyewa());
         cs.setString(2, p.getNamaPenyewa());
         cs.setString(3, p.getNik());
         cs.setString(4, p.getNoTelp());
         cs.setString(5, p.getAlamat());
         cs.setDate(6, Date.valueOf(p.getTglDaftar()));
+        cs.setString(7, p.getFotoKtp());
         cs.executeUpdate();
         cs.close();
         db.conn.close();
@@ -121,7 +123,8 @@ public class CRUD_Penyewa {
                 rs.getString("No_Telp"),
                 rs.getString("Alamat"),
                 rs.getDate("Tgl_Daftar").toLocalDate(),
-                rs.getString("Sts_Penyewa")
+                rs.getString("Sts_Penyewa"),
+                rs.getString("Foto_KTP")
         );
     }
 }

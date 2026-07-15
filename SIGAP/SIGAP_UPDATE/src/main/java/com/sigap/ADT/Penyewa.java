@@ -11,6 +11,7 @@ public class Penyewa {
     private String alamat;
     private LocalDate tglDaftar;
     private String stsPenyewa;
+    private String fotoKtp;
 
     public Penyewa() {
     }
@@ -25,6 +26,19 @@ public class Penyewa {
         this.alamat = alamat;
         this.tglDaftar = tglDaftar;
         this.stsPenyewa = stsPenyewa;
+    }
+
+    public Penyewa(String idPenyewa, String namaPenyewa, String nik,
+                   String noTelp, String alamat, LocalDate tglDaftar,
+                   String stsPenyewa, String fotoKtp) {
+        this.idPenyewa = idPenyewa;
+        this.namaPenyewa = namaPenyewa;
+        this.nik = nik;
+        this.noTelp = noTelp;
+        this.alamat = alamat;
+        this.tglDaftar = tglDaftar;
+        this.stsPenyewa = stsPenyewa;
+        this.fotoKtp = fotoKtp;
     }
 
     public String getIdPenyewa() {
@@ -81,6 +95,14 @@ public class Penyewa {
 
     public void setStsPenyewa(String stsPenyewa) {
         this.stsPenyewa = stsPenyewa;
+    }
+
+    public String getFotoKtp() {
+        return fotoKtp;
+    }
+
+    public void setFotoKtp(String fotoKtp) {
+        this.fotoKtp = fotoKtp;
     }
 
     @Override

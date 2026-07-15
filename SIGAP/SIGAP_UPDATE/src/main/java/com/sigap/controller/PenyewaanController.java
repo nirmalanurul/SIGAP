@@ -224,6 +224,7 @@ public class PenyewaanController implements Initializable {
             currentPage = 1;
             refreshTable();
         } catch (Exception e) {
+            e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error Koneksi",
                     "Gagal memuat data penyewaan. Periksa koneksi ke database atau hubungi admin sistem.");
         }

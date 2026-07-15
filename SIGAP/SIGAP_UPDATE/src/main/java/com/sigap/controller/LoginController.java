@@ -28,6 +28,10 @@ public class LoginController implements Initializable {
     @FXML private PasswordField passwordField;
     @FXML private Label errorLabel;
     @FXML private Button loginButton;
+    @FXML private Button exitButton;
+    // Tambahkan komponen baru ini
+    @FXML private TextField passwordTextField;
+    @FXML private Button togglePasswordButton;
 
     private static final String DASHBOARD_ADMIN_FXML   = "/com/sigap/view/DashboardAdminView.fxml";
     private static final String DASHBOARD_KASIR_FXML   = "/com/sigap/view/DashboardKasirView.fxml";
@@ -42,6 +46,27 @@ public class LoginController implements Initializable {
         // tapi jaga-jaga kalau fokus di username lalu tekan Enter)
         usernameField.setOnAction(this::onLogin);
         passwordField.setOnAction(this::onLogin);
+        passwordTextField.setOnAction(this::onLogin);// Tambahkan ini agar enter di textfield juga bisa login
+        exitButton.setOnAction(event -> {
+            javafx.application.Platform.exit(); // Menutup engine JavaFX dengan bersih
+            System.exit(0);                    // Memastikan proses JVM berhenti total
+        });
+        // Logika Klik Tombol Mata
+        togglePasswordButton.setOnAction(event -> {
+            if (passwordField.isVisible()) {
+                // Salin teks dari passwordField ke textField biasa, lalu balik visibilitas
+                passwordTextField.setText(passwordField.getText());
+                passwordTextField.setVisible(true);
+                passwordField.setVisible(false);
+                togglePasswordButton.setText("⌣"); // Ubah ikon mata tutup
+            } else {
+                // Salin balik ke passwordField
+                passwordField.setText(passwordTextField.getText());
+                passwordField.setVisible(true);
+                passwordTextField.setVisible(false);
+                togglePasswordButton.setText("\uD83D\uDC41"); // Ubah ikon mata buka
+            }
+        });
     }
 
     @FXML
@@ -49,7 +74,12 @@ public class LoginController implements Initializable {
         hideError();
 
         String username = usernameField.getText() == null ? "" : usernameField.getText().trim();
-        String password = passwordField.getText() == null ? "" : passwordField.getText().trim();
+        String password;
+        if (passwordField.isVisible()) {
+            password = passwordField.getText() == null ? "" : passwordField.getText().trim();
+        } else {
+            password = passwordTextField.getText() == null ? "" : passwordTextField.getText().trim();
+        }
 
         if (username.isEmpty() || password.isEmpty()) {
             showError("Username dan password wajib diisi.");

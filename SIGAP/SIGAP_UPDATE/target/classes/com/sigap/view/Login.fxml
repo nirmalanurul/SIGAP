@@ -123,23 +123,41 @@
                     </padding>
                 </TextField>
 
-                <!-- Password -->
+                <!-- Password Section (Menggunakan StackPane untuk menumpuk 2 komponen input) -->
                 <Label layoutX="46.0" layoutY="272.0" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #4A5578;" text="PASSWORD" />
-                <PasswordField fx:id="passwordField" layoutX="46.0" layoutY="290.0" prefHeight="44.0" prefWidth="328.0" promptText="Masukkan password" style="-fx-background-color: #F5F7FC; -fx-background-radius: 12; -fx-border-color: #E3E8F5; -fx-border-radius: 12; -fx-border-width: 1.2; -fx-font-size: 13px; -fx-prompt-text-fill: #A9B1C9;">
-                    <padding>
-                        <Insets left="14.0" right="14.0" />
-                    </padding>
-                </PasswordField>
+                <StackPane layoutX="46.0" layoutY="290.0" prefHeight="44.0" prefWidth="328.0">
+                    <children>
+                        <!-- 1. TextField biasa untuk melihat password terang (default tersembunyi / visible="false") -->
+                        <TextField fx:id="passwordTextField" prefHeight="44.0" prefWidth="328.0" promptText="Masukkan password" style="-fx-background-color: #F5F7FC; -fx-background-radius: 12; -fx-border-color: #E3E8F5; -fx-border-radius: 12; -fx-border-width: 1.2; -fx-font-size: 13px; -fx-prompt-text-fill: #A9B1C9;" visible="false">
+                            <padding>
+                                <Insets left="14.0" right="42.0" />
+                            </padding>
+                        </TextField>
 
+                        <!-- 2. PasswordField standar untuk menyembunyikan password (default terlihat) -->
+                        <PasswordField fx:id="passwordField" prefHeight="44.0" prefWidth="328.0" promptText="Masukkan password" style="-fx-background-color: #F5F7FC; -fx-background-radius: 12; -fx-border-color: #E3E8F5; -fx-border-radius: 12; -fx-border-width: 1.2; -fx-font-size: 13px; -fx-prompt-text-fill: #A9B1C9;">
+                            <padding>
+                                <Insets left="14.0" right="42.0" />
+                            </padding>
+                        </PasswordField>
+
+                        <!-- 3. Tombol Mata di pojok kanan -->
+                        <Button fx:id="togglePasswordButton" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: #8792AC; -fx-font-size: 14px;" text="👁" StackPane.alignment="CENTER_RIGHT">
+                            <StackPane.margin>
+                                <Insets right="10.0" />
+                            </StackPane.margin>
+                        </Button>
+                    </children>
+                </StackPane>
 
                 <Label fx:id="errorLabel" layoutX="46.0" layoutY="342.0" managed="false" prefWidth="328.0" style="-fx-font-size: 12px; -fx-text-fill: #E85252; -fx-font-weight: bold;" text="Username atau password salah" visible="false" wrapText="true" />
-
 
                 <Button fx:id="loginButton" defaultButton="true" layoutX="46.0" layoutY="378.0" mnemonicParsing="false" prefHeight="46.0" prefWidth="328.0" style="-fx-background-color: linear-gradient(to right, #1A3A8F, #3A7BD5); -fx-background-radius: 12; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="Masuk">
                     <effect>
                         <DropShadow blurType="GAUSSIAN" color="#1A3A8F55" offsetY="6.0" radius="14.0" />
                     </effect>
                 </Button>
+                <Button fx:id="exitButton" layoutX="46.0" layoutY="440.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="328.0" style="-fx-background-color: transparent; -fx-text-fill: #E85252; -fx-font-size: 13px; -fx-font-weight: bold; -fx-cursor: hand;" text="Keluar Aplikasi" />
 
             </children>
         </AnchorPane>

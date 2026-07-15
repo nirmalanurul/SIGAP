@@ -4,12 +4,14 @@ import com.sigap.ADT.Penyewa;
 import com.sigap.APP.CRUD_Penyewa;
 
 import javafx.application.Platform;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -21,12 +23,25 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -38,6 +53,8 @@ public class PenyewaController implements Initializable {
     private Button btnSimpan;
     @FXML
     private Button btnUbah;
+    @FXML
+    private Button btnPilihFotoKtp;
     @FXML
     private TableColumn<Penyewa, String> colAlamat;
     @FXML
@@ -53,11 +70,15 @@ public class PenyewaController implements Initializable {
     @FXML
     private TableColumn<Penyewa, String> colTgl;
     @FXML
+    private TableColumn<Penyewa, Penyewa> colFoto;
+    @FXML
     private DatePicker dpTglDaftar;
     @FXML
     private Label lblPage;
     @FXML
     private Label lblTotal;
+    @FXML
+    private Label lblFotoKtpNama;
     @FXML
     private TableView<Penyewa> tabelPenyewa;
     @FXML
@@ -79,6 +100,14 @@ public class PenyewaController implements Initializable {
     private static final int PAGE_SIZE = 10;
     private int currentPage = 1;
     private int totalPage = 1;
+
+    // Formatter tanggal dengan nama bulan berbahasa Indonesia, contoh: 14 Juli 2026
+    private static final DateTimeFormatter FORMAT_TGL =
+            DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("id", "ID"));
+
+    private static final String FOLDER_FOTO_KTP =
+            new File("uploads" + File.separator + "ktp_penyewa").getAbsolutePath() + File.separator;
+    private String fotoKtpPath;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -132,7 +161,7 @@ public class PenyewaController implements Initializable {
         colAlamat.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getAlamat()));
         colTgl.setCellValueFactory(d    -> new SimpleStringProperty(
                 d.getValue().getTglDaftar() == null ? "" :
-                        d.getValue().getTglDaftar().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+                        d.getValue().getTglDaftar().format(FORMAT_TGL)));
         colStatus.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getStsPenyewa()));
 
         colStatus.setCellFactory(col -> new TableCell<>() {
@@ -156,6 +185,39 @@ public class PenyewaController implements Initializable {
                 if (empty || nama == null) { setText(null); setStyle(""); return; }
                 setText(nama);
                 setStyle("-fx-text-fill:#1A3A8F;-fx-font-weight:600;");
+            }
+        });
+
+        // Kolom Foto KTP: tombol "Lihat Gambar" di setiap baris
+        colFoto.setCellValueFactory(d -> new SimpleObjectProperty<>(d.getValue()));
+        colFoto.setCellFactory(col -> new TableCell<>() {
+            private static final String STYLE_NORMAL =
+                    "-fx-background-color: linear-gradient(to bottom, #2647B8, #1A3A8F);" +
+                            "-fx-text-fill:WHITE;-fx-font-size:11px;-fx-font-weight:700;" +
+                            "-fx-background-radius:20;-fx-cursor:hand;-fx-padding:6 14 6 12;" +
+                            "-fx-effect: dropshadow(gaussian, rgba(26,58,143,0.35), 6, 0, 0, 2);";
+            private static final String STYLE_HOVER =
+                    "-fx-background-color: linear-gradient(to bottom, #3355CC, #1F45A8);" +
+                            "-fx-text-fill:WHITE;-fx-font-size:11px;-fx-font-weight:700;" +
+                            "-fx-background-radius:20;-fx-cursor:hand;-fx-padding:6 14 6 12;" +
+                            "-fx-effect: dropshadow(gaussian, rgba(26,58,143,0.55), 9, 0, 0, 3);" +
+                            "-fx-scale-x:1.05;-fx-scale-y:1.05;";
+
+            private final Button btnLihat = new Button("\uD83D\uDDBC  Lihat Gambar");
+            {
+                btnLihat.setStyle(STYLE_NORMAL);
+                btnLihat.setOnMouseEntered(e -> btnLihat.setStyle(STYLE_HOVER));
+                btnLihat.setOnMouseExited(e -> btnLihat.setStyle(STYLE_NORMAL));
+                btnLihat.setOnAction(e -> {
+                    Penyewa p = getItem();
+                    if (p != null) tampilkanFotoKtp(p.getFotoKtp());
+                });
+            }
+
+            @Override
+            protected void updateItem(Penyewa item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic((empty || item == null) ? null : btnLihat);
             }
         });
     }
@@ -195,6 +257,7 @@ public class PenyewaController implements Initializable {
         btnSimpan.setDisable(editMode || isNonaktif);
         btnUbah.setDisable(!editMode || isNonaktif);
         btnHapus.setDisable(!editMode || isNonaktif);
+        btnPilihFotoKtp.setDisable(isNonaktif);
 
         txtNama.setEditable(!isNonaktif);
         txtNIK.setEditable(!isNonaktif);
@@ -215,7 +278,25 @@ public class PenyewaController implements Initializable {
         txtAlamat.setStyle(isNonaktif ? styleReadOnly : styleNormal);
     }
 
-    private boolean validasi() {
+    private String pesanErrorRamah(Exception e) {
+        String msg = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
+
+        if (msg.contains("uq_nik") || (msg.contains("unique") && msg.contains("nik"))) {
+            return "NIK sudah terdaftar atas nama penyewa lain. Silakan periksa kembali data Anda.";
+        }
+        if (msg.contains("unique") || msg.contains("duplicate key")) {
+            return "Data yang Anda masukkan sudah terdaftar sebelumnya. Silakan periksa kembali data Anda.";
+        }
+        if (msg.contains("foreign key") || msg.contains("reference constraint")) {
+            return "Data ini masih terhubung dengan data lain sehingga tidak dapat diproses.";
+        }
+        if (msg.contains("connection") || msg.contains("timeout")) {
+            return "Koneksi ke database bermasalah. Silakan periksa jaringan Anda dan coba lagi.";
+        }
+        return "Terjadi kesalahan saat memproses data. Silakan coba lagi atau hubungi admin sistem.";
+    }
+
+    private boolean validasi(boolean isInsert) {
         StringBuilder sb = new StringBuilder();
 
         String nama = txtNama.getText().trim();
@@ -262,6 +343,10 @@ public class PenyewaController implements Initializable {
             sb.append("• Tanggal Daftar tidak boleh sebelum tahun 2000.\n");
         }
 
+        if (isInsert && (fotoKtpPath == null || fotoKtpPath.isBlank())) {
+            sb.append("• Foto KTP wajib diunggah.\n");
+        }
+
         if (sb.length() > 0) {
             showAlert(Alert.AlertType.WARNING, "Validasi Input", sb.toString());
             return false;
@@ -277,6 +362,8 @@ public class PenyewaController implements Initializable {
         txtAlamat.clear();
         dpTglDaftar.setValue(LocalDate.now());
         txtStatus.setText("Aktif");
+        fotoKtpPath = null;
+        lblFotoKtpNama.setText("Belum ada gambar dipilih");
     }
 
     private void showAlert(Alert.AlertType type, String title, String msg) {
@@ -291,6 +378,78 @@ public class PenyewaController implements Initializable {
         };
         if (Platform.isFxApplicationThread()) show.run();
         else Platform.runLater(show);
+    }
+
+    private void tampilkanFotoKtp(String pathFoto) {
+        if (pathFoto == null || pathFoto.isBlank()) {
+            showAlert(Alert.AlertType.WARNING, "Tidak Ada Gambar", "Data penyewa ini belum memiliki foto KTP.");
+            return;
+        }
+        File file = new File(pathFoto);
+        if (!file.exists()) {
+            showAlert(Alert.AlertType.ERROR, "Gambar Tidak Ditemukan",
+                    "File gambar tidak ditemukan pada path:\n" + pathFoto);
+            return;
+        }
+        try {
+            Image image = new Image(file.toURI().toString());
+            ImageView imageView = new ImageView(image);
+            imageView.setPreserveRatio(true);
+            imageView.setFitWidth(480);
+
+            VBox box = new VBox(imageView);
+            box.setStyle("-fx-padding:16;-fx-background-color:WHITE;-fx-alignment:CENTER;");
+
+            Stage dialog = new Stage();
+            dialog.setTitle("Foto KTP Penyewa");
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            if (tabelPenyewa.getScene() != null) dialog.initOwner(tabelPenyewa.getScene().getWindow());
+            dialog.setScene(new Scene(box));
+            dialog.showAndWait();
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Gagal Menampilkan Gambar", "Error: " + e.getMessage());
+        }
+    }
+
+    private String sanitizeNamaFile(String nama) {
+        return nama.trim()
+                .replaceAll("\\s+", "_")
+                .replaceAll("[^A-Za-z0-9_]", "");
+    }
+
+    @FXML
+    void onPilihFotoKtp(ActionEvent event) {
+        String nama = txtNama.getText().trim();
+        if (nama.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Peringatan",
+                    "Isi Nama Penyewa terlebih dahulu sebelum mengunggah foto KTP.");
+            return;
+        }
+
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Pilih Foto KTP");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Gambar (*.jpg, *.jpeg, *.png)", "*.jpg", "*.jpeg", "*.png")
+        );
+        File file = chooser.showOpenDialog(btnPilihFotoKtp.getScene().getWindow());
+        if (file == null) return;
+
+        try {
+            File folder = new File(FOLDER_FOTO_KTP);
+            if (!folder.exists()) folder.mkdirs();
+
+            String namaAsli = file.getName();
+            String ekstensi = namaAsli.substring(namaAsli.lastIndexOf('.'));
+            String namaFile = "KTP_" + sanitizeNamaFile(nama) + ekstensi;
+
+            Path target = Paths.get(FOLDER_FOTO_KTP + namaFile).toAbsolutePath().normalize();
+            Files.copy(file.toPath(), target, StandardCopyOption.REPLACE_EXISTING);
+
+            fotoKtpPath = target.toString();
+            lblFotoKtpNama.setText(namaAsli);
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Gagal Upload", "Gagal menyimpan gambar: " + e.getMessage());
+        }
     }
 
     @FXML
@@ -367,7 +526,7 @@ public class PenyewaController implements Initializable {
 
     @FXML
     void onSimpan(ActionEvent event) {
-        if (!validasi()) return;
+        if (!validasi(true)) return;
         try {
             Penyewa p = new Penyewa(
                     txtIdPenyewa.getText().trim(),
@@ -378,12 +537,13 @@ public class PenyewaController implements Initializable {
                     dpTglDaftar.getValue(),
                     "Aktif"
             );
+            p.setFotoKtp(fotoKtpPath);
             CRUD_Penyewa.insert(p);
             showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Data penyewa berhasil disimpan.");
             loadData();
             onTambah(null);
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Simpan", "Error: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Gagal Simpan", pesanErrorRamah(e));
         }
     }
 
@@ -399,6 +559,13 @@ public class PenyewaController implements Initializable {
         txtAlamat.setText(p.getAlamat());
         dpTglDaftar.setValue(p.getTglDaftar());
         txtStatus.setText(p.getStsPenyewa() != null ? p.getStsPenyewa().trim() : "Aktif");
+
+        fotoKtpPath = p.getFotoKtp();
+        lblFotoKtpNama.setText(
+                (p.getFotoKtp() == null || p.getFotoKtp().isBlank())
+                        ? "Belum ada gambar dipilih"
+                        : new File(p.getFotoKtp()).getName()
+        );
 
         boolean isNonaktif = "Tidak Aktif".equalsIgnoreCase(
                 p.getStsPenyewa() != null ? p.getStsPenyewa().trim() : ""
@@ -416,7 +583,7 @@ public class PenyewaController implements Initializable {
 
     @FXML
     void onUbah(ActionEvent event) {
-        if (!validasi()) return;
+        if (!validasi(false)) return;
         try {
             Penyewa p = new Penyewa(
                     txtIdPenyewa.getText().trim(),
@@ -427,12 +594,13 @@ public class PenyewaController implements Initializable {
                     dpTglDaftar.getValue(),
                     txtStatus.getText()
             );
+            p.setFotoKtp(fotoKtpPath);
             CRUD_Penyewa.update(p);
             showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Data penyewa berhasil diubah.");
             loadData();
             onBersih(null);
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Ubah", "Error: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Gagal Ubah", pesanErrorRamah(e));
         }
     }
 }

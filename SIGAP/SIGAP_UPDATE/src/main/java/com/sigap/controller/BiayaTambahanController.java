@@ -110,6 +110,9 @@ public class BiayaTambahanController implements Initializable {
     private static final String TIDAK_AKTIF = "Tidak Aktif";
     private static final NumberFormat RIBUAN_FORMAT = NumberFormat.getInstance(new Locale("in", "ID"));
 
+    // Flag: apakah data "Keterlambatan Bayar Sewa" yang berstatus Aktif sudah ada di DB.
+    // Kalau true -> radio Keterlambatan dikunci, hanya boleh Ubah/Hapus data yang sudah ada.
+    private boolean keterlambatanTerpakai = false;
 
     private final ObservableList<BiayaTambahan> masterList = FXCollections.observableArrayList();
 
@@ -180,7 +183,12 @@ public class BiayaTambahanController implements Initializable {
             @Override
             protected void updateItem(Double val, boolean empty) {
                 super.updateItem(val, empty);
-                setText(empty || val == null ? null : String.format("Rp %,.0f", val));
+                if (empty || val == null) {
+                    setText(null);
+                } else {
+                    setText(RIBUAN_FORMAT.format(val));
+                }
+                setStyle("-fx-alignment: CENTER-RIGHT; -fx-padding: 0 10 0 0;");
             }
         });
     }
@@ -189,11 +197,25 @@ public class BiayaTambahanController implements Initializable {
         try {
             List<BiayaTambahan> list = CRUD_BiayaTambahan.getAll();
             masterList.setAll(list);
+            cekStatusKeterlambatan();
             applyFilters();
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Error Koneksi",
                     "Gagal memuat data.\nDetail: " + e.getMessage());
         }
+    }
+
+    /**
+     * Cek apakah data "Keterlambatan Bayar Sewa" berstatus Aktif sudah ada.
+     * Kalau sudah ada, radio Keterlambatan dikunci (tidak bisa input baru)
+     * sampai data lama dihapus (dinonaktifkan) terlebih dahulu.
+     */
+    private void cekStatusKeterlambatan() {
+        keterlambatanTerpakai = masterList.stream()
+                .anyMatch(d -> KETERLAMBATAN.equalsIgnoreCase(d.getJenisBiayaTambahan())
+                        && AKTIF.equalsIgnoreCase(
+                        d.getStsDenda() != null ? d.getStsDenda().trim() : ""));
+        rbKeterlambatanBayarSewa.setDisable(keterlambatanTerpakai);
     }
 
     private void applyFilters() {
@@ -374,6 +396,7 @@ public class BiayaTambahanController implements Initializable {
     void onbersih(ActionEvent event) {
         bersihForm();
         setFormState(false, false);
+        cekStatusKeterlambatan();
         tabelBiayaTambahan.getSelectionModel().clearSelection();
         autoGenerateId();
         rbKerusakanFasilitas.requestFocus();
@@ -402,6 +425,7 @@ public class BiayaTambahanController implements Initializable {
         try {
             List<BiayaTambahan> hasil = CRUD_BiayaTambahan.search(kw);
             masterList.setAll(hasil);
+            cekStatusKeterlambatan();
             applyFilters();
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Gagal Cari", "Error: " + e.getMessage());
@@ -486,7 +510,7 @@ public class BiayaTambahanController implements Initializable {
             showAlert(Alert.AlertType.WARNING, "Peringatan", "Pilih data biaya tambahan yang ingin dinonaktifkan.");
             return;
         }
-//p
+
         Alert konfirmasi = new Alert(Alert.AlertType.CONFIRMATION);
         konfirmasi.setTitle("Konfirmasi Nonaktifkan");
         konfirmasi.setHeaderText("Nonaktifkan Biaya Tambahan");
@@ -510,6 +534,14 @@ public class BiayaTambahanController implements Initializable {
     @FXML
     void onsimpan(ActionEvent event) {
         if (!validasi()) return;
+
+        if (KETERLAMBATAN.equalsIgnoreCase(getSelectedJenis()) && keterlambatanTerpakai) {
+            showAlert(Alert.AlertType.WARNING, "Tidak Diizinkan",
+                    "Data Keterlambatan Bayar Sewa sudah ada dan masih aktif.\n" +
+                            "Hapus (nonaktifkan) data lama terlebih dahulu untuk menambahkan yang baru.");
+            return;
+        }
+
         try {
             BiayaTambahan d = new BiayaTambahan(
                     txtBiayaTambahan.getText().trim(),

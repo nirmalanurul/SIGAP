@@ -80,7 +80,7 @@ public class PilihKiosController implements Initializable {
         try {
             List<Kios> semua = CRUD_Kios.getAll();
             List<Kios> tersediaSaja = semua.stream()
-                    .filter(k -> "Tersedia".equalsIgnoreCase(k.getStsKios()))
+                    .filter(k -> "Aktif".equalsIgnoreCase(k.getStsKios()))
                     .collect(Collectors.toList());
             masterList.setAll(tersediaSaja);
             tabelKios.setItems(masterList);
@@ -108,7 +108,7 @@ public class PilihKiosController implements Initializable {
         if (kw.isEmpty()) { loadData(); return; }
         try {
             List<Kios> hasil = CRUD_Kios.search(kw).stream()
-                    .filter(k -> "Tersedia".equalsIgnoreCase(k.getStsKios()))
+                    .filter(k -> "Aktif".equalsIgnoreCase(k.getStsKios()))
                     .collect(Collectors.toList());
             tabelKios.setItems(FXCollections.observableArrayList(hasil));
         } catch (Exception e) {

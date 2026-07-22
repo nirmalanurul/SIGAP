@@ -26,15 +26,10 @@ import java.util.ResourceBundle;
 /**
  * Dashboard untuk role Kasir.
  * Hak akses: Penyewa, Penyewaan, Tagihan Pembayaran Sewa.
- *
- * Catatan: modul Penyewaan dan Tagihan Pembayaran Sewa belum memiliki
- * Controller/FXML/CRUD sendiri, sehingga untuk sementara ditampilkan
- * sebagai placeholder "Coming Soon" (lihat ComingSoonController).
  */
 public class DashboardKasirController implements Initializable {
 
     private static final String LOGIN_FXML = "/com/sigap/view/Login.fxml";
-    private static final String COMING_SOON_FXML = "/com/sigap/view/ComingSoonView.fxml";
 
     @FXML private StackPane contentArea;
     @FXML private Label     lblTanggal;
@@ -91,7 +86,7 @@ public class DashboardKasirController implements Initializable {
 
     @FXML
     public void onMenuTagihan() {
-        loadView(COMING_SOON_FXML, "Tagihan Pembayaran Sewa");
+        loadView("/com/sigap/view/Tagihan Pembayaran/TagihanView.fxml", null);
         btnMenuPenyewa.setStyle(STYLE_INACTIVE);
         btnMenuPenyewaan.setStyle(STYLE_INACTIVE);
         btnMenuTagihan.setStyle(STYLE_ACTIVE);

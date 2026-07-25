@@ -38,14 +38,7 @@ public class CRUD_TagihanPembayaranSewa {
             cs.executeUpdate();
         }
     }
-
-    public static void batalkan(String idTagihanPembayaran) throws SQLException {
-        try (Connection conn = new DBConnect().conn;
-             CallableStatement cs = conn.prepareCall("{CALL spBatalkanTagihan(?)}")) {
-            cs.setString(1, idTagihanPembayaran);
-            cs.executeUpdate();
-        }
-    }
+    // hanya lewat bayar(idTagihan, nominal, metode).
 
     public static void refreshStatus() throws SQLException {
         try (Connection conn = new DBConnect().conn;

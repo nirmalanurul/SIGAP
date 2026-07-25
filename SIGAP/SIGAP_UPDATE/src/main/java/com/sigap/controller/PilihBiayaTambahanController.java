@@ -82,10 +82,11 @@ public class PilihBiayaTambahanController implements Initializable {
     private LocalDate tglJatuhTempo;
     private LocalDate tglBayar;
 
-    // Kata kunci penanda jenis biaya "denda keterlambatan" -- field Jumlah_Hari
-    // untuk jenis ini OTOMATIS terhitung (bukan input manual). Jenis biaya lain
-    // (mis. Kerusakan Fasilitas) TETAP pakai input manual seperti biasa; field
-    // Jumlah_Hari di situ bukan representasi hari terlambat.
+    // Kata kunci penanda jenis biaya "denda keterlambatan" -- SATU-SATUNYA jenis
+    // yang Jumlah_Hari-nya OTOMATIS terhitung dari (Tgl_Bayar - Tgl_Jatuh_Tempo).
+    // Jenis biaya lain (mis. Kerusakan Fasilitas) itu FLAT/one-time: field
+    // Jumlah_Hari dikunci total (disabled), tidak bisa diisi manual maupun
+    // otomatis, dan Sub_total = Nominal saja tanpa dikali apa pun.
     private static final String KATA_KUNCI_KETERLAMBATAN = "keterlambatan";
 
     /** True kalau dialog ditutup lewat "Selesai" (bukan dibatalkan / ditutup paksa). */
@@ -102,10 +103,16 @@ public class PilihBiayaTambahanController implements Initializable {
         BarisBiayaTerpilih(BiayaTambahan biaya, int jumlahHari) {
             this.biaya = biaya;
             this.jumlahHari = jumlahHari;
-            // Sub_total = Nominal (nominalDenda) x Jumlah_Hari, dibulatkan ke int
-            // karena kolom Sub_total di PDM (Detail_Tagihan_Biaya) bertipe INT.
-            // Kalau rumusnya beda (mis. flat, atau ada minimum), ubah di sini saja.
-            this.subTotal = (int) Math.round(biaya.getNominalDenda() * jumlahHari);
+            // Sub_total HANYA dikali Jumlah_Hari untuk jenis "Keterlambatan Bayar
+            // Sewa" (biaya per-hari, tarifnya di kolom Nominal / Hari). Untuk
+            // jenis lain (mis. Kerusakan Fasilitas) Nominal itu FLAT/one-time,
+            // jadi Sub_total = Nominal saja, Jumlah_Hari diabaikan di kalkulasi
+            // (tetap disimpan = 1 di DB, cuma buat konsistensi skema).
+            boolean perHari = biaya.getJenisBiayaTambahan() != null
+                    && biaya.getJenisBiayaTambahan().toLowerCase().contains(KATA_KUNCI_KETERLAMBATAN);
+            this.subTotal = perHari
+                    ? (int) Math.round(biaya.getNominalDenda() * jumlahHari)
+                    : (int) Math.round(biaya.getNominalDenda());
         }
     }
 
@@ -113,6 +120,12 @@ public class PilihBiayaTambahanController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         setupTabelTersedia();
         setupTabelDipilih();
+        // Field dikunci dari awal -- baru terisi/terbuka setelah kasir klik
+        // salah satu baris di tabelTersedia (lihat onRowTersediaClicked).
+        txtJumlahHari.setDisable(true);
+        txtJumlahHari.setEditable(false);
+        txtJumlahHari.setPromptText("Pilih jenis biaya dulu");
+        txtJumlahHari.setStyle("-fx-background-color:#F0F0F0;-fx-text-fill:#AAA;");
         Platform.runLater(this::muatBiayaTersedia);
     }
 
@@ -130,7 +143,12 @@ public class PilihBiayaTambahanController implements Initializable {
     private void setupTabelDipilih() {
         colIdDipilih.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().biaya.getIdBiayaTambahan()));
         colJenisDipilih.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().biaya.getJenisBiayaTambahan()));
-        colJumlahHariDipilih.setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().jumlahHari)));
+        colJumlahHariDipilih.setCellValueFactory(d -> {
+            BarisBiayaTerpilih b = d.getValue();
+            boolean perHari = b.biaya.getJenisBiayaTambahan() != null
+                    && b.biaya.getJenisBiayaTambahan().toLowerCase().contains(KATA_KUNCI_KETERLAMBATAN);
+            return new SimpleStringProperty(perHari ? String.valueOf(b.jumlahHari) : "-");
+        });
         colSubtotalDipilih.setCellValueFactory(d -> new SimpleStringProperty(
                 "Rp " + FMT_RUPIAH.format((long) d.getValue().subTotal)));
 
@@ -193,14 +211,23 @@ public class PilihBiayaTambahanController implements Initializable {
         if (biayaTerpilihSementara == null) return;
 
         if (isJenisKeterlambatan(biayaTerpilihSementara)) {
+            // Biaya per-hari: field diaktifkan hanya untuk MENAMPILKAN angka
+            // otomatis (Tgl_Bayar - Tgl_Jatuh_Tempo), tetap tidak bisa diketik.
             long hariTerlambat = hitungHariTerlambat();
-            txtJumlahHari.setText(String.valueOf(hariTerlambat));
+            txtJumlahHari.setDisable(false);
             txtJumlahHari.setEditable(false);
+            txtJumlahHari.setText(String.valueOf(hariTerlambat));
+            txtJumlahHari.setPromptText("");
             txtJumlahHari.setStyle("-fx-background-color:#F0F0F0;-fx-text-fill:#888;");
         } else {
+            // Biaya flat / one-time (mis. Kerusakan Fasilitas): field dikunci
+            // TOTAL (disabled, bukan cuma non-editable) karena Jumlah_Hari
+            // tidak relevan di sini -- Sub_total = Nominal saja.
             txtJumlahHari.clear();
-            txtJumlahHari.setEditable(true);
-            txtJumlahHari.setStyle(null);
+            txtJumlahHari.setDisable(true);
+            txtJumlahHari.setEditable(false);
+            txtJumlahHari.setPromptText("Tidak berlaku (biaya flat)");
+            txtJumlahHari.setStyle("-fx-background-color:#F0F0F0;-fx-text-fill:#AAA;");
         }
     }
 
@@ -234,24 +261,30 @@ public class PilihBiayaTambahanController implements Initializable {
             showAlert(Alert.AlertType.WARNING, "Peringatan", "Pilih dulu jenis biaya tambahan dari daftar di atas.");
             return;
         }
-        String teksHari = txtJumlahHari.getText() == null ? "" : txtJumlahHari.getText().trim();
-        int jumlahHari;
-        try {
-            jumlahHari = Integer.parseInt(teksHari);
-        } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.WARNING, "Validasi Input", "Jumlah hari harus berupa angka bulat.");
-            return;
-        }
-
         boolean keterlambatan = isJenisKeterlambatan(biayaTerpilihSementara);
-        if (jumlahHari <= 0) {
-            if (keterlambatan) {
+        int jumlahHari;
+
+        if (keterlambatan) {
+            // Jenis per-hari: Jumlah_Hari WAJIB dari angka otomatis di field
+            // (hasil hitungHariTerlambat()), bukan input manual.
+            String teksHari = txtJumlahHari.getText() == null ? "" : txtJumlahHari.getText().trim();
+            try {
+                jumlahHari = Integer.parseInt(teksHari);
+            } catch (NumberFormatException e) {
+                showAlert(Alert.AlertType.WARNING, "Validasi Input", "Jumlah hari harus berupa angka bulat.");
+                return;
+            }
+            if (jumlahHari <= 0) {
                 showAlert(Alert.AlertType.WARNING, "Belum Terlambat",
                         "Tanggal bayar belum melewati jatuh tempo, denda keterlambatan tidak perlu ditambahkan.");
-            } else {
-                showAlert(Alert.AlertType.WARNING, "Validasi Input", "Jumlah hari harus lebih dari 0.");
+                return;
             }
-            return;
+        } else {
+            // Jenis flat / one-time (mis. Kerusakan Fasilitas): field Jumlah_Hari
+            // dikunci & tidak dipakai untuk kalkulasi -- selalu diisi 1 di sini
+            // supaya konsisten dengan skema Detail_Tagihan_Biaya, Sub_total tetap
+            // = Nominal (lihat BarisBiayaTerpilih constructor).
+            jumlahHari = 1;
         }
 
         boolean sudahAda = daftarDipilih.stream()
@@ -264,9 +297,13 @@ public class PilihBiayaTambahanController implements Initializable {
 
         daftarDipilih.add(new BarisBiayaTerpilih(biayaTerpilihSementara, jumlahHari));
         biayaTerpilihSementara = null;
+        // Field Jumlah_Hari SELALU dikunci sampai baris tersedia diklik lagi --
+        // tidak pernah dibuka jadi editable manual (lihat terapkanModeJumlahHari()).
         txtJumlahHari.clear();
-        txtJumlahHari.setEditable(true);
-        txtJumlahHari.setStyle(null);
+        txtJumlahHari.setDisable(true);
+        txtJumlahHari.setEditable(false);
+        txtJumlahHari.setPromptText("Pilih jenis biaya dulu");
+        txtJumlahHari.setStyle("-fx-background-color:#F0F0F0;-fx-text-fill:#AAA;");
         hitungUlangTotal();
     }
 

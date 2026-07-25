@@ -39,7 +39,16 @@ public final class PeriodeTagihanUtil {
 
         while (!bulanBerjalan.isAfter(batasBulan)) {
             int hariValid = Math.min(hariAcuan, bulanBerjalan.lengthOfMonth());
-            hasil.add(bulanBerjalan.withDayOfMonth(hariValid));
+            LocalDate slot = bulanBerjalan.withDayOfMonth(hariValid);
+            // Slot bulan terakhir bisa melebihi Tgl_Selesai kalau tanggal
+            // acuan (hari Tgl_Mulai) lebih besar dari tanggal Tgl_Selesai
+            // (mis. mulai tgl 15, selesai tgl 10 di bulan yang sama dengan
+            // slot ini) -- clamp ke Tgl_Selesai supaya tidak pernah melewati
+            // periode kontrak dan ditolak spInsertTagihanPembayaran.
+            if (slot.isAfter(tglSelesai)) {
+                slot = tglSelesai;
+            }
+            hasil.add(slot);
             bulanBerjalan = bulanBerjalan.plusMonths(1);
         }
         return hasil;

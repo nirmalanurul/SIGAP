@@ -125,6 +125,18 @@ public class CRUD_Kios {
         return CRUD_DetailGambarKios.getByIdKios(idKios);
     }
 
+    /**
+     * Mengembalikan status kios yang sedang Maintenance dan sudah
+     * melewati 1 hari kembali menjadi Aktif.
+     * Dipanggil berkala oleh MaintenanceScheduler.
+     */
+    public static void selesaikanMaintenanceOverdue() throws SQLException {
+        try (Connection conn = new DBConnect().conn;
+             CallableStatement cs = conn.prepareCall("{CALL spSelesaikanMaintenanceKios}")) {
+            cs.executeUpdate();
+        }
+    }
+
     private static Kios mapRow(ResultSet rs) throws SQLException {
         return new Kios(
                 rs.getString("Id_Kios"),

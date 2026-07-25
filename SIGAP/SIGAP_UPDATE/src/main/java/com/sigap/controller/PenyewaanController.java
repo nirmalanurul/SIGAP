@@ -424,6 +424,7 @@ public class PenyewaanController implements Initializable {
             loadData();
             onBersih(null);
         } catch (Exception e) {
+            e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Gagal Simpan",
                     "Transaksi penyewaan gagal disimpan. Pastikan data yang dimasukkan valid, lalu coba lagi.");
         }
@@ -459,6 +460,7 @@ public class PenyewaanController implements Initializable {
                 loadData();
                 onBersih(null);
             } catch (Exception e) {
+                e.printStackTrace();
                 showAlert(Alert.AlertType.ERROR, "Gagal Membatalkan",
                         "Transaksi gagal dibatalkan. Silakan coba lagi atau hubungi admin sistem.");
             }

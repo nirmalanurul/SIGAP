@@ -225,7 +225,7 @@
 
                             <TableColumn fx:id="coljenispelanggaran" prefWidth="220" text="Jenis Biaya Tambahan" />
 
-                            <TableColumn fx:id="colnominal" prefWidth="140" text="Nominal (Rp)" />
+                            <TableColumn fx:id="colnominal" prefWidth="140" text="Nominal (Rp) " />
 
                             <TableColumn fx:id="colketerangan" prefWidth="260" text="Keterangan" />
 

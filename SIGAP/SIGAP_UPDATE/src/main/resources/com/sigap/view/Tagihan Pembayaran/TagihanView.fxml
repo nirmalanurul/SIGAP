@@ -135,7 +135,7 @@
                                 </HBox>
                                 <DatePicker fx:id="dpTglJatuhTempo"
                                             maxWidth="1.7976931348623157E308"
-                                            promptText="Pilih tanggal jatuh tempo"
+                                            promptText="Otomatis dari Pilih Penyewaan"
                                             style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-font-size: 13px;"
                                             GridPane.columnIndex="3" GridPane.rowIndex="0" />
 
@@ -175,6 +175,54 @@
 
                             </children>
                         </GridPane>
+                    </children>
+                </VBox>
+
+                <!-- Panel Biaya Tambahan — daftar Detail_Tagihan_Biaya yang disiapkan untuk
+                     tagihan ini. Tombol & tabel dikunci lewat setFormState() saat baris
+                     tagihan existing dipilih (btnPilihBiayaTambahan.setDisable). -->
+                <VBox spacing="12.0" style="-fx-background-color: WHITE; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.07),10,0,0,2);">
+                    <padding>
+                        <Insets bottom="16.0" left="20.0" right="20.0" top="16.0" />
+                    </padding>
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                            <children>
+                                <Rectangle arcHeight="4" arcWidth="4" fill="#1A3A8F" height="20" width="4" />
+                                <Label style="-fx-font-size: 15px; -fx-font-weight: 700; -fx-text-fill: #1A3A8F;" text="Biaya Tambahan" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Button fx:id="btnPilihBiayaTambahan" onAction="#onPilihBiayaTambahan"
+                                        prefHeight="32" prefWidth="160"
+                                        style="-fx-background-color: #F0F4FF; -fx-text-fill: #1A3A8F; -fx-font-size: 12px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-border-color: #1A3A8F; -fx-border-radius: 6; -fx-cursor: hand;"
+                                        text="+ Biaya Tambahan" />
+                            </children>
+                        </HBox>
+
+                        <TableView fx:id="tabelBiayaTambahan"
+                                   prefHeight="140"
+                                   style="-fx-background-color: transparent; -fx-border-color: transparent;"
+                                   VBox.vgrow="NEVER">
+                            <columns>
+                                <TableColumn fx:id="colJenisBiayaTambahan" prefWidth="220" text="Jenis Biaya" />
+                                <TableColumn fx:id="colJumlahHariBiaya"    prefWidth="90"  text="Jml Hari" />
+                                <TableColumn fx:id="colSubtotalBiaya"      prefWidth="130" text="Sub Total" />
+                            </columns>
+                            <placeholder>
+                                <Label style="-fx-font-size: 13px; -fx-text-fill: #AAA;" text="Belum ada biaya tambahan." />
+                            </placeholder>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                            </columnResizePolicy>
+                        </TableView>
+
+                        <HBox alignment="CENTER_RIGHT" spacing="6.0">
+                            <children>
+                                <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;" text="Total Biaya Tambahan:" />
+                                <Label fx:id="lblTotalBiayaTambahan"
+                                       style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #1A3A8F;"
+                                       text="Rp 0" />
+                            </children>
+                        </HBox>
                     </children>
                 </VBox>
 

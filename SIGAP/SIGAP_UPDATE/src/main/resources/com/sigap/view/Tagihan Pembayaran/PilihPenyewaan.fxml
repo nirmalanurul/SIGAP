@@ -28,7 +28,7 @@
                         <Label style="-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #1A2340;" text="Pilih Penyewaan" />
                     </children>
                 </HBox>
-                <Label style="-fx-font-size: 12px; -fx-text-fill: #888;" text="Hanya menampilkan penyewaan yang belum memiliki tagihan aktif dan belum dibatalkan" />
+                <Label style="-fx-font-size: 12px; -fx-text-fill: #888;" text="Hanya menampilkan penyewaan yang belum dibatalkan dan masih punya bulan yang belum ditagih" />
             </children>
         </VBox>
 

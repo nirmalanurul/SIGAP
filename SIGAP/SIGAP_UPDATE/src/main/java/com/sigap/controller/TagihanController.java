@@ -1,9 +1,13 @@
 package com.sigap.controller;
 
+import com.sigap.ADT.BiayaTambahan;
+import com.sigap.ADT.DetailTagihanBiaya;
 import com.sigap.ADT.Karyawan;
 import com.sigap.ADT.Penyewa;
 import com.sigap.ADT.Penyewaan;
 import com.sigap.ADT.TagihanPembayaranSewa;
+import com.sigap.APP.CRUD_BiayaTambahan;
+import com.sigap.APP.CRUD_DetailTagihanBiaya;
 import com.sigap.APP.CRUD_TagihanPembayaranSewa;
 import com.sigap.util.Session;
 
@@ -72,6 +76,20 @@ public class TagihanController implements Initializable {
     @FXML
     private Button btnBatalkan;
 
+    // 2b. FXML FIELDS — PANEL BIAYA TAMBAHAN (Biaya_Tambahan / Detail_Tagihan_Biaya)
+    @FXML
+    private Button btnPilihBiayaTambahan;
+    @FXML
+    private TableView<DetailTagihanBiaya> tabelBiayaTambahan;
+    @FXML
+    private TableColumn<DetailTagihanBiaya, String> colJenisBiayaTambahan;
+    @FXML
+    private TableColumn<DetailTagihanBiaya, String> colJumlahHariBiaya;
+    @FXML
+    private TableColumn<DetailTagihanBiaya, String> colSubtotalBiaya;
+    @FXML
+    private Label lblTotalBiayaTambahan;
+
     // 2. FXML FIELDS — PANEL TAMBAH PEMBAYARAN
     @FXML
     private TextField txtSudahDibayar;
@@ -120,6 +138,13 @@ public class TagihanController implements Initializable {
     // Baris yang sedang dipilih di tabel (untuk aksi Bayar/Batalkan)
     private TagihanPembayaranSewa selectedTagihan = null;
 
+    // Daftar Detail_Tagihan_Biaya yang sedang disiapkan untuk tagihan baru
+    // (atau daftar existing kalau sedang melihat tagihan yang sudah tersimpan).
+    private final ObservableList<DetailTagihanBiaya> daftarBiayaTambahan = FXCollections.observableArrayList();
+    // Master data Biaya_Tambahan, dimuat sekali untuk keperluan lookup nama Jenis
+    // di tabel mini pada form ini (Detail_Tagihan_Biaya sendiri cuma simpan Id).
+    private List<BiayaTambahan> masterBiayaTambahan = List.of();
+
     private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static final NumberFormat FMT_RUPIAH = NumberFormat.getNumberInstance(new Locale("id", "ID"));
 
@@ -140,21 +165,60 @@ public class TagihanController implements Initializable {
         txtTotalTagihan.setEditable(false);
         txtTotalTagihan.setStyle(STYLE_READONLY);
         txtSudahDibayar.setEditable(false);
+        // Tgl. Jatuh Tempo sekarang selalu otomatis dari slot bulan yang dipilih
+        // lewat dialog Pilih Penyewaan -> Pilih Bulan Tagihan, tidak diketik manual lagi.
+        dpTglJatuhTempo.setStyle(STYLE_READONLY);
 
         cbMetodeBayar.setItems(FXCollections.observableArrayList(
                 "Tunai", "Transfer Bank", "QRIS", "Kartu Debit", "Kartu Kredit"));
 
         setupTable();
+        setupTabelBiayaTambahan();
         setupDatePicker();
         setFormState(false);
 
         Platform.runLater(() -> {
             loadData();
+            muatMasterBiayaTambahan();
             autoGenerateId();
             isiKaryawanLogin();
             txtTglBayar.setText(LocalDate.now().format(FMT_TGL));
             txtStatus.setText("Belum Lunas");
         });
+    }
+
+    // 8b. TABEL MINI — BIAYA TAMBAHAN (Detail_Tagihan_Biaya untuk tagihan ini)
+    private void setupTabelBiayaTambahan() {
+        colJenisBiayaTambahan.setCellValueFactory(d -> new SimpleStringProperty(
+                cariJenisBiaya(d.getValue().getIdBiayaTambahan())));
+        colJumlahHariBiaya.setCellValueFactory(d -> new SimpleStringProperty(
+                String.valueOf(d.getValue().getJumlahHari())));
+        colSubtotalBiaya.setCellValueFactory(d -> new SimpleStringProperty(
+                "Rp " + FMT_RUPIAH.format((long) d.getValue().getSubTotal())));
+        tabelBiayaTambahan.setItems(daftarBiayaTambahan);
+    }
+
+    private void muatMasterBiayaTambahan() {
+        try {
+            // SESUAIKAN: nama method di CRUD_BiayaTambahan kalau berbeda.
+            masterBiayaTambahan = CRUD_BiayaTambahan.getAll();
+        } catch (Exception e) {
+            masterBiayaTambahan = List.of();
+        }
+    }
+
+    private String cariJenisBiaya(String idBiayaTambahan) {
+        return masterBiayaTambahan.stream()
+                .filter(b -> b.getIdBiayaTambahan().equals(idBiayaTambahan))
+                .map(BiayaTambahan::getJenisBiayaTambahan)
+                .findFirst()
+                .orElse(idBiayaTambahan);
+    }
+
+    private void refreshTabelBiayaTambahan() {
+        tabelBiayaTambahan.refresh();
+        double total = daftarBiayaTambahan.stream().mapToDouble(DetailTagihanBiaya::getSubTotal).sum();
+        lblTotalBiayaTambahan.setText("Rp " + FMT_RUPIAH.format((long) total));
     }
 
     // 7. DATE PICKER — jatuh tempo tidak boleh sebelum hari ini
@@ -263,9 +327,28 @@ public class TagihanController implements Initializable {
     private void setFormState(boolean adaBarisTerpilih) {
         btnSimpan.setDisable(adaBarisTerpilih);
         btnPilihPenyewaan.setDisable(adaBarisTerpilih);
+        // Biaya tambahan hanya boleh disusun sebelum tagihan disimpan --
+        // sama seperti data inti lainnya, Detail_Tagihan_Biaya jadi final
+        // setelah insert (lihat catatan di CRUD_TagihanPembayaranSewa).
+        btnPilihBiayaTambahan.setDisable(adaBarisTerpilih);
         cbMetodeBayar.setDisable(adaBarisTerpilih);
-        dpTglJatuhTempo.setDisable(adaBarisTerpilih);
-        txtTotalDibayarAwal.setDisable(adaBarisTerpilih);
+        // Tgl. Jatuh Tempo tidak lagi diketik manual — nilainya selalu datang dari
+        // slot bulan yang dipilih di dialog Pilih Penyewaan -> Pilih Bulan Tagihan.
+        dpTglJatuhTempo.setDisable(true);
+
+        // Dibayar di Awal (DP) hanya boleh diisi kalau penyewaan yang dipilih
+        // berstatus "Menunggu". Probis tidak mengizinkan cicilan/DP untuk
+        // penyewaan yang sudah Berlangsung/Selesai/Dibatalkan.
+        boolean bolehDp = !adaBarisTerpilih
+                && penyewaanTerpilih != null
+                && "Menunggu".equalsIgnoreCase(penyewaanTerpilih.getStsPenyewaan());
+        txtTotalDibayarAwal.setDisable(!bolehDp);
+        if (bolehDp) {
+            txtTotalDibayarAwal.setPromptText("0");
+        } else {
+            txtTotalDibayarAwal.clear();
+            txtTotalDibayarAwal.setPromptText(adaBarisTerpilih ? "-" : "Hanya untuk penyewaan berstatus Menunggu");
+        }
 
         boolean bisaDibatalkan = adaBarisTerpilih
                 && selectedTagihan != null
@@ -295,6 +378,8 @@ public class TagihanController implements Initializable {
         txtNominalBayar.clear();
         penyewaanTerpilih = null;
         selectedTagihan = null;
+        daftarBiayaTambahan.clear();
+        refreshTabelBiayaTambahan();
     }
 
     // 11. VALIDASI
@@ -305,13 +390,15 @@ public class TagihanController implements Initializable {
         if (cbMetodeBayar.getValue() == null) sb.append("• Metode bayar wajib dipilih.\n");
         if (dpTglJatuhTempo.getValue() == null) sb.append("• Tanggal jatuh tempo wajib diisi.\n");
 
-        String dpAwalText = txtTotalDibayarAwal.getText() == null ? "" : txtTotalDibayarAwal.getText().trim();
-        if (!dpAwalText.isEmpty()) {
-            try {
-                double nilai = Double.parseDouble(dpAwalText);
-                if (nilai < 0) sb.append("• Nominal dibayar di awal tidak boleh negatif.\n");
-            } catch (NumberFormatException e) {
-                sb.append("• Nominal dibayar di awal harus berupa angka.\n");
+        if (!txtTotalDibayarAwal.isDisabled()) {
+            String dpAwalText = txtTotalDibayarAwal.getText() == null ? "" : txtTotalDibayarAwal.getText().trim();
+            if (!dpAwalText.isEmpty()) {
+                try {
+                    double nilai = Double.parseDouble(dpAwalText);
+                    if (nilai < 0) sb.append("• Nominal dibayar di awal tidak boleh negatif.\n");
+                } catch (NumberFormatException e) {
+                    sb.append("• Nominal dibayar di awal harus berupa angka.\n");
+                }
             }
         }
 
@@ -337,35 +424,83 @@ public class TagihanController implements Initializable {
         else Platform.runLater(show);
     }
 
-    // 13. EVENT HANDLER — PILIH PENYEWAAN (buka dialog modal)
+    // 13. EVENT HANDLER — PILIH PENYEWAAN (2 tahap: pilih Penyewaan, lalu pilih bulan tagihan)
     @FXML
     void onPilihPenyewaan(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sigap/view/Tagihan Pembayaran/PilihPenyewaan.fxml"));
-            Parent root = loader.load();
+            // Tahap 1: pilih Penyewaan (yang masih punya sisa bulan belum ditagih).
+            FXMLLoader loaderPenyewaan = new FXMLLoader(getClass().getResource("/com/sigap/view/Tagihan Pembayaran/PilihPenyewaan.fxml"));
+            Parent rootPenyewaan = loaderPenyewaan.load();
+            PilihPenyewaanController controllerPenyewaan = loaderPenyewaan.getController();
 
-            PilihPenyewaanController controller = loader.getController();
+            Stage dialogPenyewaan = new Stage();
+            dialogPenyewaan.setTitle("Pilih Penyewaan");
+            dialogPenyewaan.initModality(Modality.APPLICATION_MODAL);
+            if (txtPenyewaanTerpilih.getScene() != null) dialogPenyewaan.initOwner(txtPenyewaanTerpilih.getScene().getWindow());
+            dialogPenyewaan.setScene(new Scene(rootPenyewaan));
+            dialogPenyewaan.showAndWait();
 
-            Stage dialog = new Stage();
-            dialog.setTitle("Pilih Penyewaan");
-            dialog.initModality(Modality.APPLICATION_MODAL);
-            if (txtPenyewaanTerpilih.getScene() != null) dialog.initOwner(txtPenyewaanTerpilih.getScene().getWindow());
-            dialog.setScene(new Scene(root));
-            dialog.showAndWait();
+            Penyewaan hasilPenyewaan = controllerPenyewaan.getPenyewaanTerpilih();
+            if (hasilPenyewaan == null) return; // dibatalkan di tahap 1
 
-            Penyewaan hasil = controller.getPenyewaanTerpilih();
-            if (hasil != null) {
-                penyewaanTerpilih = hasil;
-                txtPenyewaanTerpilih.setText(hasil.getIdPenyewaan() + " - Kios " + hasil.getIdKios());
-                lblInfoSewa.setText("Kios: " + hasil.getIdKios()
-                        + "  |  Periode: " + hasil.getTglMulai().format(FMT_TGL)
-                        + " s/d " + hasil.getTglSelesai().format(FMT_TGL)
-                        + "  |  Status Sewa: " + hasil.getStsPenyewaan());
-            }
+            // Tahap 2: dari penyewaan itu, pilih 1 slot bulan (virtual) yang belum ditagih.
+            FXMLLoader loaderBulan = new FXMLLoader(getClass().getResource("/com/sigap/view/Tagihan Pembayaran/PilihBulanTagihan.fxml"));
+            Parent rootBulan = loaderBulan.load();
+            PilihBulanTagihanController controllerBulan = loaderBulan.getController();
+            controllerBulan.setPenyewaan(hasilPenyewaan);
+
+            Stage dialogBulan = new Stage();
+            dialogBulan.setTitle("Pilih Bulan Tagihan");
+            dialogBulan.initModality(Modality.APPLICATION_MODAL);
+            if (txtPenyewaanTerpilih.getScene() != null) dialogBulan.initOwner(txtPenyewaanTerpilih.getScene().getWindow());
+            dialogBulan.setScene(new Scene(rootBulan));
+            dialogBulan.showAndWait();
+
+            LocalDate jatuhTempoTerpilih = controllerBulan.getJatuhTempoTerpilih();
+            if (jatuhTempoTerpilih == null) return; // dibatalkan di tahap 2, jangan ubah apa pun di form
+
+            penyewaanTerpilih = hasilPenyewaan;
+            txtPenyewaanTerpilih.setText(hasilPenyewaan.getIdPenyewaan() + " - Kios " + hasilPenyewaan.getIdKios());
+            lblInfoSewa.setText("Kios: " + hasilPenyewaan.getIdKios()
+                    + "  |  Periode: " + hasilPenyewaan.getTglMulai().format(FMT_TGL)
+                    + " s/d " + hasilPenyewaan.getTglSelesai().format(FMT_TGL)
+                    + "  |  Status Sewa: " + hasilPenyewaan.getStsPenyewaan());
+            dpTglJatuhTempo.setValue(jatuhTempoTerpilih);
+            // Refresh status field DP: hanya terbuka jika status penyewaan "Menunggu".
+            setFormState(false);
         } catch (Exception e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Gagal Membuka Dialog",
                     "Dialog pilih penyewaan gagal dibuka. Silakan coba lagi.");
+        }
+    }
+
+    // 13b. EVENT HANDLER — PILIH BIAYA TAMBAHAN (buka dialog PilihBiayaTambahan)
+    @FXML
+    void onPilihBiayaTambahan(ActionEvent event) {
+        try {
+            FXMLLoader loaderBiaya = new FXMLLoader(getClass().getResource("/com/sigap/view/Tagihan Pembayaran/PilihBiayaTambahan.fxml"));
+            Parent rootBiaya = loaderBiaya.load();
+            PilihBiayaTambahanController controllerBiaya = loaderBiaya.getController();
+            controllerBiaya.setDaftarAwal(daftarBiayaTambahan, masterBiayaTambahan);
+
+            Stage dialogBiaya = new Stage();
+            dialogBiaya.setTitle("Tambah Biaya Tambahan");
+            dialogBiaya.initModality(Modality.APPLICATION_MODAL);
+            if (txtPenyewaanTerpilih.getScene() != null) dialogBiaya.initOwner(txtPenyewaanTerpilih.getScene().getWindow());
+            dialogBiaya.setScene(new Scene(rootBiaya));
+            dialogBiaya.showAndWait();
+
+            // isSelesaiDiklik() dipakai supaya "Selesai tanpa pilih apa-apa" (list kosong)
+            // tidak salah dianggap sama dengan "Batal" (list juga kosong).
+            if (controllerBiaya.isSelesaiDiklik()) {
+                daftarBiayaTambahan.setAll(controllerBiaya.getDaftarBiayaTerpilih());
+                refreshTabelBiayaTambahan();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Gagal Membuka Dialog",
+                    "Dialog pilih biaya tambahan gagal dibuka. Silakan coba lagi.");
         }
     }
 
@@ -411,8 +546,11 @@ public class TagihanController implements Initializable {
         }
 
         try {
-            String dpAwalText = txtTotalDibayarAwal.getText() == null ? "" : txtTotalDibayarAwal.getText().trim();
-            double dibayarAwal = dpAwalText.isEmpty() ? 0 : Double.parseDouble(dpAwalText);
+            double dibayarAwal = 0;
+            if (!txtTotalDibayarAwal.isDisabled()) {
+                String dpAwalText = txtTotalDibayarAwal.getText() == null ? "" : txtTotalDibayarAwal.getText().trim();
+                dibayarAwal = dpAwalText.isEmpty() ? 0 : Double.parseDouble(dpAwalText);
+            }
 
             TagihanPembayaranSewa t = new TagihanPembayaranSewa(
                     txtIdTagihan.getText().trim(),
@@ -427,6 +565,33 @@ public class TagihanController implements Initializable {
             );
 
             CRUD_TagihanPembayaranSewa.insert(t);
+
+            // Simpan Detail_Tagihan_Biaya SETELAH Id_Tagihan_Pembayaran tersimpan --
+            // FK Detail_Tagihan_Biaya.Id_Tagihan_Pembayaran butuh baris induknya ada dulu.
+            // SESUAIKAN: kalau spInsertDetailTagihanBiaya kamu juga bertugas
+            // mengisi ulang Total_Biaya_Tambahan & Total_Tagihan di
+            // Tagihan_Pembayaran_Sewa, tidak perlu langkah tambahan apa pun di
+            // sini. Kalau totalnya masih perlu di-refresh terpisah, tambahkan
+            // pemanggilannya di sini juga.
+            if (!daftarBiayaTambahan.isEmpty()) {
+                boolean semuaBiayaSukses = true;
+                for (DetailTagihanBiaya d : daftarBiayaTambahan) {
+                    try {
+                        DetailTagihanBiaya detailFinal = new DetailTagihanBiaya(
+                                t.getIdTagihanPembayaran(), d.getIdBiayaTambahan(),
+                                d.getJumlahHari(), d.getSubTotal());
+                        CRUD_DetailTagihanBiaya.insert(detailFinal);
+                    } catch (Exception exDetail) {
+                        semuaBiayaSukses = false;
+                    }
+                }
+                if (!semuaBiayaSukses) {
+                    showAlert(Alert.AlertType.WARNING, "Sebagian Biaya Tambahan Gagal",
+                            "Tagihan tersimpan, tapi ada biaya tambahan yang gagal dicatat. "
+                                    + "Periksa kembali tagihan [" + t.getIdTagihanPembayaran() + "].");
+                }
+            }
+
             showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Tagihan pembayaran sewa berhasil disimpan.");
             loadData();
             onBersih(null);
@@ -556,7 +721,21 @@ public class TagihanController implements Initializable {
         lblInfoSewa.setText("Penyewaan: " + t.getIdPenyewaan());
         txtNominalBayar.clear();
 
+        muatBiayaTambahanUntukTagihan(t.getIdTagihanPembayaran());
         setFormState(true);
+    }
+
+    /** Tampilkan Detail_Tagihan_Biaya yang sudah tersimpan untuk tagihan yang sedang dilihat. */
+    private void muatBiayaTambahanUntukTagihan(String idTagihanPembayaran) {
+        try {
+            // SESUAIKAN: nama method di CRUD_DetailTagihanBiaya kalau berbeda
+            // (mis. getByIdTagihan / findByTagihan).
+            List<DetailTagihanBiaya> existing = CRUD_DetailTagihanBiaya.getByIdTagihanPembayaran(idTagihanPembayaran);
+            daftarBiayaTambahan.setAll(existing);
+        } catch (Exception e) {
+            daftarBiayaTambahan.clear();
+        }
+        refreshTabelBiayaTambahan();
     }
 
     // 18. EVENT HANDLER — PENCARIAN

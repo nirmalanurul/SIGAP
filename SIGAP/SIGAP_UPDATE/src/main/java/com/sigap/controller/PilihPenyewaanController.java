@@ -4,6 +4,7 @@ import com.sigap.ADT.Penyewaan;
 import com.sigap.ADT.TagihanPembayaranSewa;
 import com.sigap.APP.CRUD_Penyewaan;
 import com.sigap.APP.CRUD_TagihanPembayaranSewa;
+import com.sigap.util.PeriodeTagihanUtil;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -22,10 +23,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class PilihPenyewaanController implements Initializable {
@@ -96,7 +98,7 @@ public class PilihPenyewaanController implements Initializable {
     private void loadData() {
         try {
             List<Penyewaan> semua = CRUD_Penyewaan.getAll();
-            masterList.setAll(filterBelumDitagih(semua));
+            masterList.setAll(filterMasihAdaSisaBulan(semua));
             tabelPenyewaan.setItems(masterList);
         } catch (Exception e) {
             showAlert("Gagal memuat data penyewaan. Periksa koneksi ke database atau hubungi admin sistem.");
@@ -106,24 +108,34 @@ public class PilihPenyewaanController implements Initializable {
     /**
      * Hanya menampilkan penyewaan yang:
      *  1) statusnya belum 'Dibatalkan', dan
-     *  2) belum memiliki tagihan pembayaran aktif (selain yang sudah 'Dibatalkan').
-     * Konsisten dengan aturan spInsertTagihanPembayaran di database (1 penyewaan -> maksimal 1 tagihan aktif).
+     *  2) masih punya minimal satu slot bulan (dari Tgl_Mulai s/d Tgl_Selesai)
+     *     yang belum punya tagihan aktif (selain yang sudah 'Dibatalkan').
+     * Satu penyewaan sekarang bisa punya banyak tagihan aktif sekaligus (satu per
+     * bulan kontrak) — bukan lagi "belum pernah ditagih sama sekali" seperti
+     * sebelumnya, tapi "masih ada sisa bulan yang belum ditagih". Bulan mana saja
+     * yang tersedia baru ditentukan di dialog Pilih Bulan Tagihan (tahap 2).
      */
-    private List<Penyewaan> filterBelumDitagih(List<Penyewaan> semua) {
-        Set<String> sudahDitagih;
+    private List<Penyewaan> filterMasihAdaSisaBulan(List<Penyewaan> semua) {
+        Map<String, List<TagihanPembayaranSewa>> tagihanPerPenyewaan;
         try {
             List<TagihanPembayaranSewa> tagihanList = CRUD_TagihanPembayaranSewa.getAll();
-            sudahDitagih = tagihanList.stream()
+            tagihanPerPenyewaan = tagihanList.stream()
                     .filter(t -> !"Dibatalkan".equalsIgnoreCase(t.getStsTagihanPembayaran()))
-                    .map(TagihanPembayaranSewa::getIdPenyewaan)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.groupingBy(TagihanPembayaranSewa::getIdPenyewaan));
         } catch (Exception e) {
-            sudahDitagih = Set.of();
+            tagihanPerPenyewaan = Map.of();
         }
-        final Set<String> finalSudahDitagih = sudahDitagih;
+        final Map<String, List<TagihanPembayaranSewa>> finalTagihanPerPenyewaan = tagihanPerPenyewaan;
+
         return semua.stream()
                 .filter(p -> !"Dibatalkan".equalsIgnoreCase(p.getStsPenyewaan()))
-                .filter(p -> !finalSudahDitagih.contains(p.getIdPenyewaan()))
+                .filter(p -> {
+                    List<LocalDate> slotBulanan = PeriodeTagihanUtil.generateJatuhTempoBulanan(
+                            p.getTglMulai(), p.getTglSelesai());
+                    List<TagihanPembayaranSewa> tagihanAktif =
+                            finalTagihanPerPenyewaan.getOrDefault(p.getIdPenyewaan(), List.of());
+                    return slotBulanan.stream().anyMatch(slot -> !PeriodeTagihanUtil.sudahDitagih(slot, tagihanAktif));
+                })
                 .collect(Collectors.toList());
     }
 
@@ -145,7 +157,7 @@ public class PilihPenyewaanController implements Initializable {
         String kw = txtCari.getText().trim();
         if (kw.isEmpty()) { loadData(); return; }
         try {
-            List<Penyewaan> hasil = filterBelumDitagih(CRUD_Penyewaan.search(kw));
+            List<Penyewaan> hasil = filterMasihAdaSisaBulan(CRUD_Penyewaan.search(kw));
             tabelPenyewaan.setItems(FXCollections.observableArrayList(hasil));
         } catch (Exception e) {
             showAlert("Pencarian gagal. Error: " + e.getMessage());

@@ -27,8 +27,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.DateCell;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -59,9 +57,7 @@ public class TagihanController implements Initializable {
     @FXML
     private ComboBox<String> cbMetodeBayar;
     @FXML
-    private Label lblInfoSewa;
-    @FXML
-    private DatePicker dpTglJatuhTempo;
+    private TextField txtTglJatuhTempo;
     @FXML
     private TextField txtTglBayar;
     @FXML
@@ -70,6 +66,8 @@ public class TagihanController implements Initializable {
     private TextField txtStatus;
     @FXML
     private TextField txtTotalTagihan;
+    @FXML
+    private TextField txtTotalBiayaSewa;
 
     @FXML
     private Button btnPilihPenyewaan;
@@ -89,8 +87,10 @@ public class TagihanController implements Initializable {
     private TableColumn<DetailTagihanBiaya, String> colSubtotalBiaya;
     @FXML
     private Label lblTotalBiayaTambahan;
+    @FXML
+    private TextField txtTotalBiayaTambahan;
 
-    // 2. FXML FIELDS — PANEL TAMBAH PEMBAYARAN
+    // 2. FXML FIELDS — PANEL TAMBAH PEMBAYARAN (kini menyatu di sel grid "Total Dibayar")
     @FXML
     private TextField txtSudahDibayar;
     @FXML
@@ -143,6 +143,12 @@ public class TagihanController implements Initializable {
     // kebenaran, cuma biar kasir bisa lihat estimasi sebelum klik Simpan.
     private double hargaSewaTerpilih = 0;
 
+    // Nilai LocalDate jatuh tempo yang sedang aktif di form (dari Pilih Penyewaan
+    // -> Pilih Bulan Tagihan, atau dari baris tagihan tersimpan yang diklik).
+    // txtTglJatuhTempo hanya menampilkan teksnya (readonly); ini sumber kebenarannya
+    // di sisi klien -- dulu disimpan langsung oleh dpTglJatuhTempo.getValue().
+    private LocalDate tglJatuhTempoTerpilih = null;
+
     // Baris yang sedang dipilih di tabel (untuk aksi Bayar/Batalkan)
     private TagihanPembayaranSewa selectedTagihan = null;
 
@@ -172,17 +178,21 @@ public class TagihanController implements Initializable {
         txtStatus.setStyle(STYLE_READONLY);
         txtTotalTagihan.setEditable(false);
         txtTotalTagihan.setStyle(STYLE_READONLY);
+        txtTotalBiayaSewa.setEditable(false);
+        txtTotalBiayaSewa.setStyle(STYLE_READONLY);
+        txtTotalBiayaTambahan.setEditable(false);
+        txtTotalBiayaTambahan.setStyle(STYLE_READONLY);
         txtSudahDibayar.setEditable(false);
         // Tgl. Jatuh Tempo sekarang selalu otomatis dari slot bulan yang dipilih
         // lewat dialog Pilih Penyewaan -> Pilih Bulan Tagihan, tidak diketik manual lagi.
-        dpTglJatuhTempo.setStyle(STYLE_READONLY);
+        txtTglJatuhTempo.setEditable(false);
+        txtTglJatuhTempo.setStyle(STYLE_READONLY);
 
         cbMetodeBayar.setItems(FXCollections.observableArrayList(
                 "Tunai", "Transfer Bank", "Kartu Debit"));
 
         setupTable();
         setupTabelBiayaTambahan();
-        setupDatePicker();
         setupNominalBayarFormatter();
         setFormState(false);
 
@@ -228,6 +238,7 @@ public class TagihanController implements Initializable {
         tabelBiayaTambahan.refresh();
         double total = daftarBiayaTambahan.stream().mapToDouble(DetailTagihanBiaya::getSubTotal).sum();
         lblTotalBiayaTambahan.setText("Rp " + FMT_RUPIAH.format((long) total));
+        txtTotalBiayaTambahan.setText(FMT_RUPIAH.format((long) total));
     }
 
     /**
@@ -241,17 +252,7 @@ public class TagihanController implements Initializable {
         double totalBiayaTambahan = daftarBiayaTambahan.stream().mapToDouble(DetailTagihanBiaya::getSubTotal).sum();
         double preview = hargaSewaTerpilih + totalBiayaTambahan;
         txtTotalTagihan.setText(FMT_RUPIAH.format((long) preview));
-    }
-
-    // 7. DATE PICKER — jatuh tempo tidak boleh sebelum hari ini
-    private void setupDatePicker() {
-        dpTglJatuhTempo.setDayCellFactory(picker -> new DateCell() {
-            @Override
-            public void updateItem(LocalDate date, boolean empty) {
-                super.updateItem(date, empty);
-                setDisable(empty || date.isBefore(LocalDate.now()));
-            }
-        });
+        txtTotalBiayaSewa.setText(FMT_RUPIAH.format((long) hargaSewaTerpilih));
     }
 
     // 7b. FORMAT OTOMATIS — nominal bayar diketik manual otomatis dapat pemisah
@@ -381,7 +382,7 @@ public class TagihanController implements Initializable {
         cbMetodeBayar.setDisable(adaBarisTerpilih);
         // Tgl. Jatuh Tempo tidak lagi diketik manual — nilainya selalu datang dari
         // slot bulan yang dipilih di dialog Pilih Penyewaan -> Pilih Bulan Tagihan.
-        dpTglJatuhTempo.setDisable(true);
+        // txtTglJatuhTempo sudah readonly permanen (editable=false), tidak perlu disable lagi.
 
         // Dibayar di Awal (DP) hanya boleh diisi kalau penyewaan yang dipilih
         // berstatus "Menunggu". Probis tidak mengizinkan cicilan/DP untuk
@@ -409,12 +410,14 @@ public class TagihanController implements Initializable {
     private void bersihForm() {
         txtPenyewaanTerpilih.clear();
         cbMetodeBayar.setValue(null);
-        dpTglJatuhTempo.setValue(null);
+        tglJatuhTempoTerpilih = null;
+        txtTglJatuhTempo.clear();
         txtTglBayar.setText(LocalDate.now().format(FMT_TGL));
         txtTotalDibayarAwal.clear();
         txtStatus.setText("Belum Lunas");
         txtTotalTagihan.clear();
-        lblInfoSewa.setText("-");
+        txtTotalBiayaSewa.clear();
+        txtTotalBiayaTambahan.clear();
         txtSudahDibayar.clear();
         txtNominalBayar.clear();
         penyewaanTerpilih = null;
@@ -430,7 +433,7 @@ public class TagihanController implements Initializable {
 
         if (penyewaanTerpilih == null) sb.append("• Penyewaan wajib dipilih.\n");
         if (cbMetodeBayar.getValue() == null) sb.append("• Metode bayar wajib dipilih.\n");
-        if (dpTglJatuhTempo.getValue() == null) sb.append("• Tanggal jatuh tempo wajib diisi.\n");
+        if (tglJatuhTempoTerpilih == null) sb.append("• Tanggal jatuh tempo wajib diisi.\n");
 
         if (!txtTotalDibayarAwal.isDisabled()) {
             String dpAwalText = txtTotalDibayarAwal.getText() == null ? "" : txtTotalDibayarAwal.getText().trim();
@@ -503,11 +506,8 @@ public class TagihanController implements Initializable {
 
             penyewaanTerpilih = hasilPenyewaan;
             txtPenyewaanTerpilih.setText(hasilPenyewaan.getIdPenyewaan() + " - Kios " + hasilPenyewaan.getIdKios());
-            lblInfoSewa.setText("Kios: " + hasilPenyewaan.getIdKios()
-                    + "  |  Periode: " + hasilPenyewaan.getTglMulai().format(FMT_TGL)
-                    + " s/d " + hasilPenyewaan.getTglSelesai().format(FMT_TGL)
-                    + "  |  Status Sewa: " + hasilPenyewaan.getStsPenyewaan());
-            dpTglJatuhTempo.setValue(jatuhTempoTerpilih);
+            tglJatuhTempoTerpilih = jatuhTempoTerpilih;
+            txtTglJatuhTempo.setText(jatuhTempoTerpilih.format(FMT_TGL));
 
             // Ambil Harga_Kios buat preview Total Tagihan -- SESUAIKAN nama
             // method di CRUD_Kios kalau beda dari getById(idKios).
@@ -541,7 +541,7 @@ public class TagihanController implements Initializable {
             // karena hitungHariTerlambat() di sana butuh Tgl_Jatuh_Tempo.
             // Tgl_Bayar dianggap hari ini karena txtTglBayar selalu diisi
             // LocalDate.now() dan tidak bisa diedit untuk tagihan baru.
-            controllerBiaya.setInfoJatuhTempo(dpTglJatuhTempo.getValue(), LocalDate.now());
+            controllerBiaya.setInfoJatuhTempo(tglJatuhTempoTerpilih, LocalDate.now());
 
             Stage dialogBiaya = new Stage();
             dialogBiaya.setTitle("Tambah Biaya Tambahan");
@@ -631,6 +631,7 @@ public class TagihanController implements Initializable {
                 .ifPresent(t -> {
                     selectedTagihan = t;
                     txtTotalTagihan.setText(FMT_RUPIAH.format((long) t.getTotalTagihan()));
+                    txtTotalBiayaTambahan.setText(FMT_RUPIAH.format((long) t.getTotalBiayaTambahan()));
                     txtSudahDibayar.setText(FMT_RUPIAH.format((long) t.getTotalDibayar()));
                     txtStatus.setText(t.getStsTagihanPembayaran());
                 });
@@ -696,7 +697,7 @@ public class TagihanController implements Initializable {
                     penyewaanTerpilih.getIdPenyewaan(),
                     karyawanLogin.getIdKaryawan(),
                     LocalDate.now(),
-                    dpTglJatuhTempo.getValue(),
+                    tglJatuhTempoTerpilih,
                     0, 0, 0,
                     dibayarAwal,
                     cbMetodeBayar.getValue(),
@@ -852,12 +853,14 @@ public class TagihanController implements Initializable {
         txtNamaKaryawan.setText(t.getIdKaryawan());
         txtPenyewaanTerpilih.setText(t.getIdPenyewaan());
         cbMetodeBayar.setValue(t.getMetodeBayar());
-        dpTglJatuhTempo.setValue(t.getTglJatuhTempo());
+        tglJatuhTempoTerpilih = t.getTglJatuhTempo();
+        txtTglJatuhTempo.setText(t.getTglJatuhTempo() == null ? "" : t.getTglJatuhTempo().format(FMT_TGL));
         txtTglBayar.setText(t.getTglBayar() == null ? "" : t.getTglBayar().format(FMT_TGL));
         txtStatus.setText(t.getStsTagihanPembayaran());
         txtTotalTagihan.setText(FMT_RUPIAH.format((long) t.getTotalTagihan()));
+        txtTotalBiayaSewa.setText(FMT_RUPIAH.format((long) t.getTotalBiayaSewa()));
+        txtTotalBiayaTambahan.setText(FMT_RUPIAH.format((long) t.getTotalBiayaTambahan()));
         txtSudahDibayar.setText(FMT_RUPIAH.format((long) t.getTotalDibayar()));
-        lblInfoSewa.setText("Penyewaan: " + t.getIdPenyewaan());
         txtNominalBayar.clear();
 
         muatBiayaTambahanUntukTagihan(t.getIdTagihanPembayaran());

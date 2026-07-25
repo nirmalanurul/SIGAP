@@ -86,11 +86,13 @@ public class KiosController implements Initializable {
     private RadioMenuItem rmLuasTerbesar;
 
     @FXML
-    private RadioMenuItem rmStatusTersedia;
+    private RadioMenuItem rmStatusAktif;
     @FXML
-    private RadioMenuItem rmStatusTidakTersedia;
+    private RadioMenuItem rmStatusDisewakan;
     @FXML
-    private RadioMenuItem rmStatusTidakAktif;
+    private RadioMenuItem rmStatusMaintenance;
+    @FXML
+    private RadioMenuItem rmStatusNonaktif;
 
     @FXML
     private RadioMenuItem rmTampil12;
@@ -123,6 +125,7 @@ public class KiosController implements Initializable {
     private String urutanHarga = null;
     private String urutanLuas = null;
     private String filterStatus = null;
+    private String searchKeyword = "";
 
     // 6. KONSTANTA
     private static final NumberFormat FMT_RUPIAH =
@@ -150,7 +153,7 @@ public class KiosController implements Initializable {
         txtIdKios.setEditable(false);
         txtLuas.setEditable(false);
         txtStsKios.setEditable(false);
-        txtStsKios.setText("Tersedia");
+        txtStsKios.setText("Aktif");
 
         setupListeners();
         setupFilter();
@@ -178,9 +181,10 @@ public class KiosController implements Initializable {
         rmLuasTerbesar.setToggleGroup(grupLuas);
 
         ToggleGroup grupStatus = new ToggleGroup();
-        rmStatusTersedia.setToggleGroup(grupStatus);
-        rmStatusTidakTersedia.setToggleGroup(grupStatus);
-        rmStatusTidakAktif.setToggleGroup(grupStatus);
+        rmStatusAktif.setToggleGroup(grupStatus);
+        rmStatusDisewakan.setToggleGroup(grupStatus);
+        rmStatusMaintenance.setToggleGroup(grupStatus);
+        rmStatusNonaktif.setToggleGroup(grupStatus);
 
         ToggleGroup grupTampil = new ToggleGroup();
         rmTampil12.setToggleGroup(grupTampil);
@@ -368,7 +372,7 @@ public class KiosController implements Initializable {
         } catch (Exception ignored) {}
         refreshPreviewFoto();
 
-        boolean tidakAktif = "Tidak Aktif".equalsIgnoreCase(k.getStsKios());
+        boolean tidakAktif = "Nonaktif".equalsIgnoreCase(k.getStsKios());
         setFormState(true, tidakAktif);
     }
 
@@ -379,7 +383,7 @@ public class KiosController implements Initializable {
         txtLebar.clear();
         txtLuas.clear();
         txtDeskripsi.clear();
-        txtStsKios.setText("Tersedia");
+        txtStsKios.setText("Aktif");
         daftarFotoDipilih.clear();
         refreshPreviewFoto();
     }
@@ -586,7 +590,7 @@ public class KiosController implements Initializable {
                     Double.parseDouble(txtLebar.getText().trim()),
                     hitungLuasNilai(),
                     txtDeskripsi.getText().trim().isEmpty() ? null : txtDeskripsi.getText().trim(),
-                    "Tersedia"
+                    "Aktif"
             );
 
             CRUD_Kios.insert(k, daftarFotoDipilih);
@@ -655,7 +659,7 @@ public class KiosController implements Initializable {
         Alert konfirmasi = new Alert(Alert.AlertType.CONFIRMATION);
         konfirmasi.setTitle("Konfirmasi Nonaktifkan");
         konfirmasi.setHeaderText("Nonaktifkan Kios");
-        konfirmasi.setContentText("Kios [" + id + "] akan diubah statusnya menjadi Tidak Aktif.\nLanjutkan?");
+        konfirmasi.setContentText("Kios [" + id + "] akan diubah statusnya menjadi Nonaktif.\nLanjutkan?");
         if (txtIdKios.getScene() != null)
             konfirmasi.initOwner(txtIdKios.getScene().getWindow());
 
@@ -686,24 +690,8 @@ public class KiosController implements Initializable {
     // 17. EVENT HANDLER — PENCARIAN
     @FXML
     void onCari(ActionEvent event) {
-        String kw = txtCari.getText().trim();
-        if (kw.isEmpty()) { loadData(); return; }
-
-        String kwLower = kw.toLowerCase();
-        masterList = semuaData.stream()
-                .filter(k ->
-                        (k.getIdKios() != null && k.getIdKios().toLowerCase().contains(kwLower))
-                                || (k.getDeskripsi() != null && k.getDeskripsi().toLowerCase().contains(kwLower))
-                                || (k.getStsKios() != null && k.getStsKios().toLowerCase().contains(kwLower))
-                                || String.valueOf((long) k.getHargaKios()).contains(kwLower)
-                                || String.valueOf(k.getPanjangKios()).contains(kwLower)
-                                || String.valueOf(k.getLebarKios()).contains(kwLower)
-                                || String.valueOf(k.getLuasKios()).contains(kwLower)
-                )
-                .collect(java.util.stream.Collectors.toList());
-
-        currentPage = 1;
-        refreshGrid();
+        searchKeyword = txtCari.getText() == null ? "" : txtCari.getText().trim().toLowerCase();
+        terapkanFilter();
     }
 
     // 18. EVENT HANDLER — PAGINATION
@@ -746,38 +734,56 @@ public class KiosController implements Initializable {
 
     @FXML
     void onFilterStatus(ActionEvent event) {
-        filterStatus = rmStatusTersedia.isSelected() ? "Tersedia"
-                : rmStatusTidakTersedia.isSelected() ? "Tidak Tersedia"
-                : rmStatusTidakAktif.isSelected() ? "Tidak Aktif" : null;
+        filterStatus = rmStatusAktif.isSelected() ? "Aktif"
+                : rmStatusDisewakan.isSelected() ? "Disewakan"
+                : rmStatusMaintenance.isSelected() ? "Maintenance"
+                : rmStatusNonaktif.isSelected() ? "Nonaktif" : null;
         terapkanFilter();
     }
 
     private void terapkanFilter() {
-        List<Kios> hasil = new ArrayList<>(masterList);
+        String kw = searchKeyword == null ? "" : searchKeyword;
+
+        List<Kios> hasil = semuaData.stream()
+                .filter(k -> kw.isEmpty()
+                        || (k.getIdKios() != null && k.getIdKios().toLowerCase().contains(kw))
+                        || (k.getDeskripsi() != null && k.getDeskripsi().toLowerCase().contains(kw))
+                        || (k.getStsKios() != null && k.getStsKios().toLowerCase().contains(kw))
+                        || String.valueOf((long) k.getHargaKios()).contains(kw)
+                        || String.valueOf(k.getPanjangKios()).contains(kw)
+                        || String.valueOf(k.getLebarKios()).contains(kw)
+                        || String.valueOf(k.getLuasKios()).contains(kw)
+                )
+                .filter(k -> filterStatus == null
+                        || (k.getStsKios() != null && filterStatus.equalsIgnoreCase(k.getStsKios().trim()))
+                )
+                .collect(java.util.stream.Collectors.toList());
+
+        // --- Gabungkan urutan Harga & Luas jadi satu comparator chain ---
+        // (sebelumnya dua .sort() terpisah saling menimpa satu sama lain)
+        Comparator<Kios> comparatorGabungan = null;
 
         if (urutanHarga != null) {
             Comparator<Kios> byHarga = Comparator.comparingDouble(Kios::getHargaKios);
             if (urutanHarga.equals("desc")) byHarga = byHarga.reversed();
-            hasil.sort(byHarga);
+            comparatorGabungan = byHarga;
         }
 
         if (urutanLuas != null) {
             Comparator<Kios> byLuas = Comparator.comparingDouble(Kios::getLuasKios);
             if (urutanLuas.equals("desc")) byLuas = byLuas.reversed();
-            hasil.sort(byLuas);
+            comparatorGabungan = (comparatorGabungan == null)
+                    ? byLuas
+                    : comparatorGabungan.thenComparing(byLuas);
         }
 
-        if (filterStatus != null) {
-            hasil = hasil.stream()
-                    .filter(k -> filterStatus.equalsIgnoreCase(k.getStsKios()))
-                    .collect(java.util.stream.Collectors.toList());
+        if (comparatorGabungan != null) {
+            hasil.sort(comparatorGabungan);
         }
 
-        List<Kios> tampung = masterList;
         masterList = hasil;
         currentPage = 1;
         refreshGrid();
-        masterList = tampung;
     }
 
     @FXML
@@ -796,13 +802,16 @@ public class KiosController implements Initializable {
         urutanHarga = null;
         urutanLuas = null;
         filterStatus = null;
+        searchKeyword = "";
+        txtCari.clear();
         rmHargaTermurah.setSelected(false);
         rmHargaTermahal.setSelected(false);
         rmLuasTerkecil.setSelected(false);
         rmLuasTerbesar.setSelected(false);
-        rmStatusTersedia.setSelected(false);
-        rmStatusTidakTersedia.setSelected(false);
-        rmStatusTidakAktif.setSelected(false);
+        rmStatusAktif.setSelected(false);
+        rmStatusDisewakan.setSelected(false);
+        rmStatusMaintenance.setSelected(false);
+        rmStatusNonaktif.setSelected(false);
         loadData();
     }
 }

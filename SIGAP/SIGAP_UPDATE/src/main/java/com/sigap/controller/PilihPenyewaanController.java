@@ -1,7 +1,9 @@
 package com.sigap.controller;
 
+import com.sigap.ADT.Penyewa;
 import com.sigap.ADT.Penyewaan;
 import com.sigap.ADT.TagihanPembayaranSewa;
+import com.sigap.APP.CRUD_Penyewa;
 import com.sigap.APP.CRUD_Penyewaan;
 import com.sigap.APP.CRUD_TagihanPembayaranSewa;
 import com.sigap.util.PeriodeTagihanUtil;
@@ -52,6 +54,11 @@ public class PilihPenyewaanController implements Initializable {
     private final ObservableList<Penyewaan> masterList = FXCollections.observableArrayList();
     private Penyewaan penyewaanTerpilih = null;
 
+    /** Seluruh penyewaan yang lolos filter (sebelum kata kunci pencarian diterapkan). */
+    private List<Penyewaan> daftarLengkap = List.of();
+    /** Peta Id_Penyewa -> data Penyewa, dipakai untuk tampilkan & cari berdasarkan nama. */
+    private Map<String, Penyewa> petaPenyewa = Map.of();
+
     private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     @Override
@@ -63,7 +70,7 @@ public class PilihPenyewaanController implements Initializable {
     private void setupTable() {
         colId.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getIdPenyewaan()));
         colKios.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getIdKios()));
-        colPenyewa.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getIdPenyewa()));
+        colPenyewa.setCellValueFactory(d -> new SimpleStringProperty(labelPenyewa(d.getValue().getIdPenyewa())));
         colTglMulai.setCellValueFactory(d -> new SimpleStringProperty(
                 d.getValue().getTglMulai() == null ? "" : d.getValue().getTglMulai().format(FMT_TGL)));
         colTglSelesai.setCellValueFactory(d -> new SimpleStringProperty(
@@ -97,12 +104,35 @@ public class PilihPenyewaanController implements Initializable {
 
     private void loadData() {
         try {
+            muatPetaPenyewa();
             List<Penyewaan> semua = CRUD_Penyewaan.getAll();
-            masterList.setAll(filterMasihAdaSisaBulan(semua));
+            daftarLengkap = filterMasihAdaSisaBulan(semua);
+            masterList.setAll(daftarLengkap);
             tabelPenyewaan.setItems(masterList);
+            tabelPenyewaan.refresh();
         } catch (Exception e) {
             showAlert("Gagal memuat data penyewaan. Periksa koneksi ke database atau hubungi admin sistem.");
         }
+    }
+
+    /** Memuat data Nama_Penyewa dkk sekali di awal, dipakai untuk tampilan kolom & pencarian nama. */
+    private void muatPetaPenyewa() {
+        try {
+            petaPenyewa = CRUD_Penyewa.getAll().stream()
+                    .collect(Collectors.toMap(Penyewa::getIdPenyewa, p -> p, (a, b) -> a));
+        } catch (Exception e) {
+            petaPenyewa = Map.of();
+        }
+    }
+
+    /** Label kolom Penyewa: "ID - Nama" jika nama diketahui, jatuh ke ID saja jika tidak. */
+    private String labelPenyewa(String idPenyewa) {
+        if (idPenyewa == null) return "";
+        Penyewa p = petaPenyewa.get(idPenyewa);
+        if (p == null || p.getNamaPenyewa() == null || p.getNamaPenyewa().isBlank()) {
+            return idPenyewa;
+        }
+        return idPenyewa + " - " + p.getNamaPenyewa();
     }
 
     /**
@@ -155,13 +185,29 @@ public class PilihPenyewaanController implements Initializable {
     @FXML
     void onCari(ActionEvent event) {
         String kw = txtCari.getText().trim();
-        if (kw.isEmpty()) { loadData(); return; }
-        try {
-            List<Penyewaan> hasil = filterMasihAdaSisaBulan(CRUD_Penyewaan.search(kw));
-            tabelPenyewaan.setItems(FXCollections.observableArrayList(hasil));
-        } catch (Exception e) {
-            showAlert("Pencarian gagal. Error: " + e.getMessage());
+        if (kw.isEmpty()) {
+            masterList.setAll(daftarLengkap);
+            return;
         }
+        String kwLower = kw.toLowerCase();
+        List<Penyewaan> hasil = daftarLengkap.stream()
+                .filter(p -> cocokKeyword(p, kwLower))
+                .collect(Collectors.toList());
+        masterList.setAll(hasil);
+    }
+
+    /** Cocokkan kata kunci ke ID Penyewaan, Kios, ID Penyewa, Nama Penyewa, dan Status. */
+    private boolean cocokKeyword(Penyewaan p, String kwLower) {
+        if (mengandung(p.getIdPenyewaan(), kwLower)) return true;
+        if (mengandung(p.getIdKios(), kwLower)) return true;
+        if (mengandung(p.getIdPenyewa(), kwLower)) return true;
+        if (mengandung(p.getStsPenyewaan(), kwLower)) return true;
+        Penyewa penyewa = petaPenyewa.get(p.getIdPenyewa());
+        return penyewa != null && mengandung(penyewa.getNamaPenyewa(), kwLower);
+    }
+
+    private boolean mengandung(String value, String kwLower) {
+        return value != null && value.toLowerCase().contains(kwLower);
     }
 
     @FXML

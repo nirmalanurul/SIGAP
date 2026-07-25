@@ -32,7 +32,7 @@ public class CRUD_Penyewaan {
         try (Connection conn = new DBConnect().conn;
              CallableStatement cs = conn.prepareCall("{CALL spBatalkanPenyewaan(?)}")) {
             cs.setString(1, idPenyewaan);
-            cs.executeUpdate();
+            cs.execute();
         }
     }
 

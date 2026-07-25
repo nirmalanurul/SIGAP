@@ -10,6 +10,7 @@ import com.sigap.ADT.TagihanPembayaranSewa;
 import com.sigap.APP.CRUD_BiayaTambahan;
 import com.sigap.APP.CRUD_DetailTagihanBiaya;
 import com.sigap.APP.CRUD_Kios;
+import com.sigap.APP.CRUD_Penyewa;
 import com.sigap.APP.CRUD_TagihanPembayaranSewa;
 import com.sigap.util.Session;
 
@@ -505,7 +506,7 @@ public class TagihanController implements Initializable {
             if (jatuhTempoTerpilih == null) return; // dibatalkan di tahap 2, jangan ubah apa pun di form
 
             penyewaanTerpilih = hasilPenyewaan;
-            txtPenyewaanTerpilih.setText(hasilPenyewaan.getIdPenyewaan() + " - Kios " + hasilPenyewaan.getIdKios());
+            txtPenyewaanTerpilih.setText(labelPenyewaanTerpilih(hasilPenyewaan));
             tglJatuhTempoTerpilih = jatuhTempoTerpilih;
             txtTglJatuhTempo.setText(jatuhTempoTerpilih.format(FMT_TGL));
 
@@ -526,6 +527,21 @@ public class TagihanController implements Initializable {
             showAlert(Alert.AlertType.ERROR, "Gagal Membuka Dialog",
                     "Dialog pilih penyewaan gagal dibuka. Silakan coba lagi.");
         }
+    }
+
+    /** Label ringkas "Id_Penyewaan - Nama Penyewa - Kios Id_Kios" untuk txtPenyewaanTerpilih. */
+    private String labelPenyewaanTerpilih(Penyewaan p) {
+        String namaPenyewa = null;
+        try {
+            Penyewa penyewa = CRUD_Penyewa.getById(p.getIdPenyewa());
+            namaPenyewa = (penyewa != null) ? penyewa.getNamaPenyewa() : null;
+        } catch (Exception ex) {
+            // Nama gagal diambil (mis. koneksi DB) -> tetap tampilkan ID saja, jangan blokir alur.
+        }
+        String bagianPenyewa = (namaPenyewa == null || namaPenyewa.isBlank())
+                ? p.getIdPenyewa()
+                : p.getIdPenyewa() + " - " + namaPenyewa;
+        return p.getIdPenyewaan() + " (" + bagianPenyewa + ") - Kios " + p.getIdKios();
     }
 
     // 13b. EVENT HANDLER — PILIH BIAYA TAMBAHAN (buka dialog PilihBiayaTambahan)
@@ -779,7 +795,7 @@ public class TagihanController implements Initializable {
             showAlert(Alert.AlertType.WARNING, "Validasi Input",
                     "Tagihan pembayaran sewa tidak bisa dicicil. Nominal bayar harus persis Rp "
                             + FMT_RUPIAH.format((long) sisaTagihan) + " (sisa tagihan).\n"
-                            + "Klik tombol \"Otomatis\" untuk mengisi nominal secara otomatis.");
+                            + "Klik tombol \"Refresh\" untuk mengisi nominal secara otomatis.");
             return;
         }
 
@@ -808,7 +824,7 @@ public class TagihanController implements Initializable {
         }
     }
 
-    // 15b. EVENT HANDLER — OTOMATIS (isi nominal bayar = sisa tagihan yang dipilih)
+    // 15b. EVENT HANDLER —  (isi nominal bayar = sisa tagihan yang dipilih)
     @FXML
     void onIsiOtomatis(ActionEvent event) {
         if (selectedTagihan == null) {

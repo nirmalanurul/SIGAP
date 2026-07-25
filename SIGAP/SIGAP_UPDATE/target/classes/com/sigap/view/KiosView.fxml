@@ -160,9 +160,10 @@
                                         </Menu>
                                         <Menu style="-fx-text-fill: #333333;" text="Status">
                                             <items>
-                                                <RadioMenuItem fx:id="rmStatusTersedia" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Tersedia" />
-                                                <RadioMenuItem fx:id="rmStatusTidakTersedia" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Tidak Tersedia" />
-                                                <RadioMenuItem fx:id="rmStatusTidakAktif" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Tidak Aktif" />
+                                                <RadioMenuItem fx:id="rmStatusAktif" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Aktif" />
+                                                <RadioMenuItem fx:id="rmStatusDisewakan" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Disewakan" />
+                                                <RadioMenuItem fx:id="rmStatusMaintenance" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Maintenance" />
+                                                <RadioMenuItem fx:id="rmStatusNonaktif" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Nonaktif" />
                                             </items>
                                         </Menu>
                                         <MenuItem onAction="#onResetFilter" style="-fx-text-fill: #333333;" text="Reset Filter" />

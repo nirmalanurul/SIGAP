@@ -34,7 +34,7 @@
 
         <HBox spacing="8.0">
             <children>
-                <TextField fx:id="txtCari" promptText="Cari ID Penyewaan / Kios / Penyewa / Status"
+                <TextField fx:id="txtCari" promptText="Cari ID Penyewaan / Kios / Nama Penyewa / Status"
                            prefHeight="36" HBox.hgrow="ALWAYS"
                            style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 14; -fx-font-size: 13px;" />
                 <Button onAction="#onCari" prefHeight="36" prefWidth="90"
@@ -48,12 +48,12 @@
                    style="-fx-background-color: WHITE; -fx-background-radius: 8;"
                    VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="colId"         prefWidth="80"  text="ID" />
-                <TableColumn fx:id="colKios"       prefWidth="80"  text="Kios" />
-                <TableColumn fx:id="colPenyewa"    prefWidth="80"  text="Penyewa" />
-                <TableColumn fx:id="colTglMulai"   prefWidth="100" text="Tgl Mulai" />
-                <TableColumn fx:id="colTglSelesai" prefWidth="100" text="Tgl Selesai" />
-                <TableColumn fx:id="colStatus"     prefWidth="100" text="Status" />
+                <TableColumn fx:id="colId"         prefWidth="70"  text="ID" />
+                <TableColumn fx:id="colKios"       prefWidth="70"  text="Kios" />
+                <TableColumn fx:id="colPenyewa"    prefWidth="200" text="Penyewa" />
+                <TableColumn fx:id="colTglMulai"   prefWidth="95"  text="Tgl Mulai" />
+                <TableColumn fx:id="colTglSelesai" prefWidth="95"  text="Tgl Selesai" />
+                <TableColumn fx:id="colStatus"     prefWidth="90"  text="Status" />
             </columns>
             <placeholder>
                 <Label style="-fx-font-size: 13px; -fx-text-fill: #AAA;" text="Tidak ada penyewaan yang dapat ditagih." />

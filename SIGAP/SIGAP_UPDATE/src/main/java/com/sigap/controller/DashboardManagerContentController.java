@@ -10,7 +10,7 @@ import com.sigap.APP.CRUD_TagihanPembayaranSewa;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.chart.BarChart;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
@@ -25,6 +25,8 @@ import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import javafx.event.ActionEvent;
+import javafx.scene.control.ComboBox;
 
 /**
  * Controller untuk DashboardManagerContentView.fxml.
@@ -43,15 +45,18 @@ public class DashboardManagerContentController implements Initializable {
     @FXML private Label lblTagihanBelumLunas;
     @FXML private Label lblKiosTersewa;
 
-    @FXML private BarChart<String, Number> chartPendapatanBulanan;
+    @FXML private LineChart<String, Number> chartPendapatanBulanan;
     @FXML private CategoryAxis axisBulan;
     @FXML private NumberAxis axisPendapatan;
 
     @FXML private PieChart chartStatusTagihan;
 
-    @FXML private BarChart<String, Number> chartPenyewaanBulanan;
+    @FXML private LineChart<String, Number> chartPenyewaanBulanan;
     @FXML private CategoryAxis axisBulanPenyewaan;
     @FXML private NumberAxis axisJumlahPenyewaan;
+
+    @FXML private ComboBox<String> cbBulan;
+    @FXML private ComboBox<Integer> cbTahun;
 
     private static final NumberFormat FMT_RUPIAH = NumberFormat.getNumberInstance(new Locale("id", "ID"));
     private static final DateTimeFormatter FMT_BULAN =
@@ -72,6 +77,24 @@ public class DashboardManagerContentController implements Initializable {
     private List<TagihanPembayaranSewa> semuaTagihan = List.of();
     private List<Penyewaan> semuaPenyewaan = List.of();
     private List<Kios> semuaKios = List.of();
+
+    @FXML
+    private void onCariPeriode(ActionEvent event) {
+        // TODO: ambil bulan & tahun dari cbBulan/cbTahun, lalu filter ulang
+        // KPI dan chart berdasarkan periode yang dipilih.
+    }
+
+    @FXML
+    private void onResetPeriode(ActionEvent event) {
+        cbBulan.getSelectionModel().clearSelection();
+        cbTahun.getSelectionModel().clearSelection();
+
+        YearMonth bulanIni = YearMonth.now();
+        loadKpi(bulanIni);
+        loadChartPendapatanBulanan();
+        loadChartStatusTagihan(bulanIni);
+        loadChartPenyewaanBulanan();
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {

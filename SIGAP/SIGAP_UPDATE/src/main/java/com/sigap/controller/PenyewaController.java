@@ -18,11 +18,16 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -40,6 +45,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -93,6 +100,21 @@ public class PenyewaController implements Initializable {
     private TextField txtNama;
     @FXML
     private TextField txtNoTelp;
+    @FXML
+    private MenuButton btnFilter;
+    @FXML
+    private RadioMenuItem rmTglTerbaru;
+    @FXML
+    private RadioMenuItem rmTglTerlama;
+    @FXML
+    private RadioMenuItem rmStatusAktif;
+    @FXML
+    private RadioMenuItem rmStatusTidakAktif;
+
+    private List<Penyewa> semuaData = new ArrayList<>();
+    private String urutanTglDaftar = null;
+    private String filterStatus = null;
+    private String searchKeyword = "";
 
     private ObservableList<Penyewa> masterList = FXCollections.observableArrayList();
     private static final int PAGE_SIZE = 10;
@@ -111,11 +133,23 @@ public class PenyewaController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         setupTable();
         setupListeners();
+        setupFilter();
         setFormState(false, false);
         Platform.runLater(() -> {
             loadData();
             autoGenerateId();
         });
+    }
+
+    /** ToggleGroup untuk RadioMenuItem di menu FILTER, supaya cuma 1 pilihan aktif per kategori. */
+    private void setupFilter() {
+        ToggleGroup grupTgl = new ToggleGroup();
+        rmTglTerbaru.setToggleGroup(grupTgl);
+        rmTglTerlama.setToggleGroup(grupTgl);
+
+        ToggleGroup grupStatus = new ToggleGroup();
+        rmStatusAktif.setToggleGroup(grupStatus);
+        rmStatusTidakAktif.setToggleGroup(grupStatus);
     }
 
     private void setupListeners() {
@@ -232,15 +266,44 @@ public class PenyewaController implements Initializable {
 
     private void loadData() {
         try {
-            List<Penyewa> list = CRUD_Penyewa.getAll();
-            masterList.setAll(list);
-            currentPage = 1;
-            refreshTable();
+            semuaData = CRUD_Penyewa.getAll();
+            terapkanFilter();
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Error Koneksi",
                     "Gagal memuat data.\nDetail: " + e.getMessage());
         }
     }
+
+    /** Menggabungkan kata kunci pencarian + filter Status + urutan Tgl Daftar dalam satu proses. */
+    private void terapkanFilter() {
+        String kw = searchKeyword == null ? "" : searchKeyword.toLowerCase();
+
+        List<Penyewa> hasil = semuaData.stream()
+                .filter(p -> kw.isEmpty()
+                        || (p.getIdPenyewa() != null && p.getIdPenyewa().toLowerCase().contains(kw))
+                        || (p.getNamaPenyewa() != null && p.getNamaPenyewa().toLowerCase().contains(kw))
+                        || (p.getNik() != null && p.getNik().toLowerCase().contains(kw))
+                        || (p.getNoTelp() != null && p.getNoTelp().toLowerCase().contains(kw))
+                        || (p.getAlamat() != null && p.getAlamat().toLowerCase().contains(kw))
+                        || (p.getStsPenyewa() != null && p.getStsPenyewa().toLowerCase().contains(kw))
+                )
+                .filter(p -> filterStatus == null
+                        || (p.getStsPenyewa() != null && filterStatus.equalsIgnoreCase(p.getStsPenyewa().trim()))
+                )
+                .collect(java.util.stream.Collectors.toList());
+
+        if (urutanTglDaftar != null) {
+            Comparator<Penyewa> byTgl = Comparator.comparing(
+                    Penyewa::getTglDaftar, Comparator.nullsLast(Comparator.naturalOrder()));
+            if (urutanTglDaftar.equals("desc")) byTgl = byTgl.reversed();
+            hasil.sort(byTgl);
+        }
+
+        masterList.setAll(hasil);
+        currentPage = 1;
+        refreshTable();
+    }
+
     private void refreshTable() {
         int total = masterList.size();
         totalPage = (total == 0) ? 1 : (int) Math.ceil((double) total / PAGE_SIZE);
@@ -468,16 +531,36 @@ public class PenyewaController implements Initializable {
 
     @FXML
     void onCari(ActionEvent event) {
-        String kw = txtCari.getText().trim();
-        if (kw.isEmpty()) { loadData(); return; }
-        try {
-            List<Penyewa> hasil = CRUD_Penyewa.search(kw);
-            masterList.setAll(hasil);
-            currentPage = 1;
-            refreshTable();
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Cari", "Error: " + e.getMessage());
-        }
+        searchKeyword = txtCari.getText() == null ? "" : txtCari.getText().trim();
+        terapkanFilter();
+    }
+
+    /** Filter Status (Aktif / Tidak Aktif) dari submenu Status di MenuButton FILTER. */
+    @FXML
+    void onFilterStatus(ActionEvent event) {
+        filterStatus = rmStatusAktif.isSelected() ? "Aktif"
+                : rmStatusTidakAktif.isSelected() ? "Tidak Aktif" : null;
+        terapkanFilter();
+    }
+
+    /** Urutan Tanggal Daftar dari submenu di MenuButton FILTER. */
+    @FXML
+    void onFilterTglDaftar(ActionEvent event) {
+        urutanTglDaftar = rmTglTerbaru.isSelected() ? "desc"
+                : rmTglTerlama.isSelected() ? "asc" : null;
+        terapkanFilter();
+    }
+
+    /** Reset semua filter (Status, urutan Tgl Daftar) sekaligus lewat item "Reset Filter". */
+    @FXML
+    void onResetFilter(ActionEvent event) {
+        filterStatus = null;
+        urutanTglDaftar = null;
+        rmStatusAktif.setSelected(false);
+        rmStatusTidakAktif.setSelected(false);
+        rmTglTerbaru.setSelected(false);
+        rmTglTerlama.setSelected(false);
+        terapkanFilter();
     }
 
     @FXML

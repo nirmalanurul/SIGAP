@@ -93,8 +93,6 @@ public class PenyewaController implements Initializable {
     private TextField txtNama;
     @FXML
     private TextField txtNoTelp;
-    @FXML
-    private TextField txtStatus;
 
     private ObservableList<Penyewa> masterList = FXCollections.observableArrayList();
     private static final int PAGE_SIZE = 10;
@@ -111,9 +109,6 @@ public class PenyewaController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        txtStatus.setEditable(false);
-        txtStatus.setText("Aktif");
-
         setupTable();
         setupListeners();
         setFormState(false, false);
@@ -158,6 +153,19 @@ public class PenyewaController implements Initializable {
         colNama.setCellValueFactory(d   -> new SimpleStringProperty(d.getValue().getNamaPenyewa()));
         colNIK.setCellValueFactory(d    -> new SimpleStringProperty(d.getValue().getNik()));
         colNoTelp.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getNoTelp()));
+        colNoTelp.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item);
+                    // Mengatur rata kanan
+                    setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+                }
+            }
+        });
         colAlamat.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getAlamat()));
         colTgl.setCellValueFactory(d    -> new SimpleStringProperty(
                 d.getValue().getTglDaftar() == null ? "" :
@@ -233,7 +241,6 @@ public class PenyewaController implements Initializable {
                     "Gagal memuat data.\nDetail: " + e.getMessage());
         }
     }
-
     private void refreshTable() {
         int total = masterList.size();
         totalPage = (total == 0) ? 1 : (int) Math.ceil((double) total / PAGE_SIZE);
@@ -242,8 +249,7 @@ public class PenyewaController implements Initializable {
         int to = Math.min(from + PAGE_SIZE, total);
         tabelPenyewa.setItems(FXCollections.observableArrayList(masterList.subList(from, to)));
         lblTotal.setText("Total Data : " + total);
-        lblPage.setText(String.valueOf(currentPage));
-    }
+        lblPage.setText(String.valueOf(currentPage));}
 
     private void autoGenerateId() {
         try {
@@ -361,7 +367,6 @@ public class PenyewaController implements Initializable {
         txtNoTelp.clear();
         txtAlamat.clear();
         dpTglDaftar.setValue(LocalDate.now());
-        txtStatus.setText("Aktif");
         fotoKtpPath = null;
         lblFotoKtpNama.setText("Belum ada gambar dipilih");
     }
@@ -413,7 +418,8 @@ public class PenyewaController implements Initializable {
 
     private String sanitizeNamaFile(String nama) {
         return nama.trim()
-                .replaceAll("\\s+", "_")
+                .replaceAll("\\" +
+                        "s+", "_")
                 .replaceAll("[^A-Za-z0-9_]", "");
     }
 
@@ -558,7 +564,6 @@ public class PenyewaController implements Initializable {
         txtNoTelp.setText(p.getNoTelp());
         txtAlamat.setText(p.getAlamat());
         dpTglDaftar.setValue(p.getTglDaftar());
-        txtStatus.setText(p.getStsPenyewa() != null ? p.getStsPenyewa().trim() : "Aktif");
 
         fotoKtpPath = p.getFotoKtp();
         lblFotoKtpNama.setText(
@@ -585,6 +590,10 @@ public class PenyewaController implements Initializable {
     void onUbah(ActionEvent event) {
         if (!validasi(false)) return;
         try {
+            // Ambil status dari baris yang sedang dipilih agar tidak merubah status saat update
+            Penyewa pTabel = tabelPenyewa.getSelectionModel().getSelectedItem();
+            String statusLama = (pTabel != null && pTabel.getStsPenyewa() != null) ? pTabel.getStsPenyewa() : "Aktif";
+
             Penyewa p = new Penyewa(
                     txtIdPenyewa.getText().trim(),
                     txtNama.getText().trim(),
@@ -592,7 +601,7 @@ public class PenyewaController implements Initializable {
                     txtNoTelp.getText().trim(),
                     txtAlamat.getText().trim(),
                     dpTglDaftar.getValue(),
-                    txtStatus.getText()
+                    statusLama
             );
             p.setFotoKtp(fotoKtpPath);
             CRUD_Penyewa.update(p);

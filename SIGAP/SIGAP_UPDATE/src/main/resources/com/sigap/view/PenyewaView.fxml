@@ -124,6 +124,30 @@
                             <children>
                                 <TextField fx:id="txtCari" prefHeight="38" prefWidth="240" promptText="Cari ID / Nama / NIK / No Telp..." style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 14; -fx-font-size: 13px;" />
                                 <Button onAction="#onCari" prefHeight="38" prefWidth="94" style="-fx-background-color: #1A3A8F; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;" text="CARI" />
+                                <MenuButton fx:id="btnFilter" contentDisplay="GRAPHIC_ONLY" prefHeight="38" style="-fx-background-color: #1A3A8F; -fx-background-radius: 6; -fx-cursor: hand; -fx-mark-color: WHITE; -fx-padding: 6 6 6 14;">
+                                    <graphic>
+                                        <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                            <children>
+                                                <Label style="-fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700;" text="FILTER" />
+                                            </children>
+                                        </HBox>
+                                    </graphic>
+                                    <items>
+                                        <Menu style="-fx-text-fill: #333333;" text="Urutkan Tgl Daftar">
+                                            <items>
+                                                <RadioMenuItem fx:id="rmTglTerbaru" onAction="#onFilterTglDaftar" style="-fx-text-fill: #333333;" text="Terbaru - Terlama" />
+                                                <RadioMenuItem fx:id="rmTglTerlama" onAction="#onFilterTglDaftar" style="-fx-text-fill: #333333;" text="Terlama - Terbaru" />
+                                            </items>
+                                        </Menu>
+                                        <Menu style="-fx-text-fill: #333333;" text="Status">
+                                            <items>
+                                                <RadioMenuItem fx:id="rmStatusAktif" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Aktif" />
+                                                <RadioMenuItem fx:id="rmStatusTidakAktif" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Tidak Aktif" />
+                                            </items>
+                                        </Menu>
+                                        <MenuItem onAction="#onResetFilter" style="-fx-text-fill: #333333;" text="Reset Filter" />
+                                    </items>
+                                </MenuButton>
                             </children>
                         </HBox>
                     </children>

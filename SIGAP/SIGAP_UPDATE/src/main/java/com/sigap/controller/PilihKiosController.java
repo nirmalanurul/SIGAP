@@ -1,7 +1,9 @@
 package com.sigap.controller;
 
 import com.sigap.ADT.Kios;
+import com.sigap.ADT.Penyewaan;
 import com.sigap.APP.CRUD_Kios;
+import com.sigap.APP.CRUD_Penyewaan;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -20,9 +22,11 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class PilihKiosController implements Initializable {
@@ -45,6 +49,10 @@ public class PilihKiosController implements Initializable {
     private final ObservableList<Kios> masterList = FXCollections.observableArrayList();
     private Kios kiosTerpilih = null;
 
+    /** Rentang tanggal sewa yang diminta oleh form Penyewaan; dipakai untuk menyaring kios yang bentrok jadwal. */
+    private LocalDate tglMulaiFilter = null;
+    private LocalDate tglSelesaiFilter = null;
+
     private static final NumberFormat FMT_RUPIAH =
             NumberFormat.getNumberInstance(new Locale("id", "ID"));
 
@@ -52,6 +60,16 @@ public class PilihKiosController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         setupTable();
         Platform.runLater(this::loadData);
+    }
+
+    /**
+     * Dipanggil oleh parent controller (PenyewaanController) SEBELUM dialog.showAndWait(),
+     * supaya loadData() -- yang baru jalan lewat Platform.runLater setelah dialog tampil --
+     * sudah tahu rentang tanggal yang perlu difilter.
+     */
+    public void setRentangTanggal(LocalDate tglMulai, LocalDate tglSelesai) {
+        this.tglMulaiFilter = tglMulai;
+        this.tglSelesaiFilter = tglSelesai;
     }
 
     private void setupTable() {
@@ -79,14 +97,51 @@ public class PilihKiosController implements Initializable {
     private void loadData() {
         try {
             List<Kios> semua = CRUD_Kios.getAll();
-            List<Kios> tersediaSaja = semua.stream()
-                    .filter(k -> "Aktif".equalsIgnoreCase(k.getStsKios()))
-                    .collect(Collectors.toList());
-            masterList.setAll(tersediaSaja);
+            List<Kios> tersedia = terapkanFilterKetersediaan(semua);
+            masterList.setAll(tersedia);
             tabelKios.setItems(masterList);
         } catch (Exception e) {
             showAlert("Gagal memuat data kios. Periksa koneksi ke database atau hubungi admin sistem.");
         }
+    }
+
+    /**
+     * Hanya kios berstatus Aktif DAN tidak bentrok jadwal dengan penyewaan lain
+     * (yang belum Dibatalkan) pada rentang tglMulaiFilter..tglSelesaiFilter.
+     * Kalau rentang tanggal belum diset, hanya filter status Aktif seperti semula.
+     */
+    private List<Kios> terapkanFilterKetersediaan(List<Kios> semua) {
+        List<Kios> aktifSaja = semua.stream()
+                .filter(k -> "Aktif".equalsIgnoreCase(k.getStsKios()))
+                .collect(Collectors.toList());
+
+        if (tglMulaiFilter == null || tglSelesaiFilter == null) {
+            return aktifSaja;
+        }
+
+        Set<String> idKiosBentrok;
+        try {
+            List<Penyewaan> semuaPenyewaan = CRUD_Penyewaan.getAll();
+            idKiosBentrok = semuaPenyewaan.stream()
+                    .filter(p -> !"Dibatalkan".equalsIgnoreCase(p.getStsPenyewaan()))
+                    .filter(p -> bentrok(tglMulaiFilter, tglSelesaiFilter, p.getTglMulai(), p.getTglSelesai()))
+                    .map(Penyewaan::getIdKios)
+                    .collect(Collectors.toSet());
+        } catch (Exception e) {
+            // Kalau gagal ambil data penyewaan, jangan blokir semua kios -- tampilkan yang Aktif saja.
+            idKiosBentrok = Set.of();
+        }
+
+        final Set<String> bentrokFinal = idKiosBentrok;
+        return aktifSaja.stream()
+                .filter(k -> !bentrokFinal.contains(k.getIdKios()))
+                .collect(Collectors.toList());
+    }
+
+    /** Dua rentang tanggal [mulai1,selesai1] dan [mulai2,selesai2] tumpang tindih? */
+    private boolean bentrok(LocalDate mulai1, LocalDate selesai1, LocalDate mulai2, LocalDate selesai2) {
+        if (mulai1 == null || selesai1 == null || mulai2 == null || selesai2 == null) return false;
+        return !mulai1.isAfter(selesai2) && !mulai2.isAfter(selesai1);
     }
 
     private void showAlert(String msg) {
@@ -107,9 +162,7 @@ public class PilihKiosController implements Initializable {
         String kw = txtCari.getText().trim();
         if (kw.isEmpty()) { loadData(); return; }
         try {
-            List<Kios> hasil = CRUD_Kios.search(kw).stream()
-                    .filter(k -> "Aktif".equalsIgnoreCase(k.getStsKios()))
-                    .collect(Collectors.toList());
+            List<Kios> hasil = terapkanFilterKetersediaan(CRUD_Kios.search(kw));
             tabelKios.setItems(FXCollections.observableArrayList(hasil));
         } catch (Exception e) {
             showAlert("Pencarian gagal. Error: " + e.getMessage());

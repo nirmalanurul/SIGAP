@@ -11,6 +11,7 @@ import com.sigap.APP.CRUD_BiayaTambahan;
 import com.sigap.APP.CRUD_DetailTagihanBiaya;
 import com.sigap.APP.CRUD_Kios;
 import com.sigap.APP.CRUD_Penyewa;
+import com.sigap.APP.CRUD_Penyewaan;
 import com.sigap.APP.CRUD_TagihanPembayaranSewa;
 import com.sigap.util.Session;
 
@@ -43,8 +44,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class TagihanController implements Initializable {
 
@@ -134,6 +137,17 @@ public class TagihanController implements Initializable {
     private static final int PAGE_SIZE = 10;
     private int currentPage = 1;
     private int totalPage = 1;
+
+    // Seluruh data tagihan sebelum difilter kata kunci (dipakai sebagai sumber
+    // pencarian client-side di onCari, supaya tidak perlu bolak-balik ke DB).
+    private List<TagihanPembayaranSewa> daftarLengkap = List.of();
+    // Peta Id_Penyewaan -> Penyewaan, dan Id_Penyewa -> Penyewa. Dimuat sekali
+    // di loadData(), dipakai untuk menampilkan & mencari berdasarkan Nama
+    // Penyewa di kolom "Penyewaan" tabel tagihan (rantai: Tagihan -> Id_Penyewaan
+    // -> Penyewaan.Id_Penyewa -> Penyewa.Nama_Penyewa). Sama seperti pola yang
+    // dipakai di PilihPenyewaanController.
+    private Map<String, Penyewaan> petaPenyewaan = Map.of();
+    private Map<String, Penyewa> petaPenyewa = Map.of();
 
     // Data terpilih dari dialog picker
     private Penyewaan penyewaanTerpilih = null;
@@ -303,7 +317,7 @@ public class TagihanController implements Initializable {
     // 8. TABLE SETUP
     private void setupTable() {
         colId.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getIdTagihanPembayaran()));
-        colPenyewaan.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getIdPenyewaan()));
+        colPenyewaan.setCellValueFactory(d -> new SimpleStringProperty(labelPenyewaan(d.getValue().getIdPenyewaan())));
         colKaryawan.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getIdKaryawan()));
         colTglBayar.setCellValueFactory(d -> new SimpleStringProperty(
                 d.getValue().getTglBayar() == null ? "" : d.getValue().getTglBayar().format(FMT_TGL)));
@@ -338,6 +352,39 @@ public class TagihanController implements Initializable {
         });
     }
 
+    /** Label kolom Penyewaan: "Id_Penyewaan - Nama_Penyewa" jika nama diketahui, jatuh ke Id_Penyewaan saja jika tidak. */
+    private String labelPenyewaan(String idPenyewaan) {
+        if (idPenyewaan == null) return "";
+        Penyewaan penyewaan = petaPenyewaan.get(idPenyewaan);
+        if (penyewaan == null) return idPenyewaan;
+        Penyewa penyewa = petaPenyewa.get(penyewaan.getIdPenyewa());
+        if (penyewa == null || penyewa.getNamaPenyewa() == null || penyewa.getNamaPenyewa().isBlank()) {
+            return idPenyewaan;
+        }
+        return idPenyewaan + " - " + penyewa.getNamaPenyewa();
+    }
+
+    /**
+     * Memuat peta Penyewaan & Penyewa sekali di awal (dipanggil dari loadData()).
+     * Dipakai untuk menampilkan Nama Penyewa di kolom Penyewaan, dan untuk
+     * pencarian berdasarkan Nama Penyewa di onCari() -- tanpa perlu mengubah
+     * stored procedure spGetAllTagihan/spSearchTagihan di database.
+     */
+    private void muatPetaPenyewaan() {
+        try {
+            petaPenyewaan = CRUD_Penyewaan.getAll().stream()
+                    .collect(Collectors.toMap(Penyewaan::getIdPenyewaan, p -> p, (a, b) -> a));
+        } catch (Exception e) {
+            petaPenyewaan = Map.of();
+        }
+        try {
+            petaPenyewa = CRUD_Penyewa.getAll().stream()
+                    .collect(Collectors.toMap(Penyewa::getIdPenyewa, p -> p, (a, b) -> a));
+        } catch (Exception e) {
+            petaPenyewa = Map.of();
+        }
+    }
+
     private String styleBadgeStatus(String status) {
         String base = "-fx-font-weight:700;-fx-font-size:11px;-fx-padding:3 10;-fx-background-radius:10;";
         return switch (status == null ? "" : status) {
@@ -350,10 +397,12 @@ public class TagihanController implements Initializable {
     // 9. LOAD DATA & PAGINATION
     private void loadData() {
         try {
-            List<TagihanPembayaranSewa> list = CRUD_TagihanPembayaranSewa.getAll();
-            masterList.setAll(list);
+            muatPetaPenyewaan();
+            daftarLengkap = CRUD_TagihanPembayaranSewa.getAll();
+            masterList.setAll(daftarLengkap);
             currentPage = 1;
             refreshTable();
+            tabelTagihan.refresh();
         } catch (Exception e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Error Koneksi",
@@ -919,18 +968,46 @@ public class TagihanController implements Initializable {
     }
 
     // 18. EVENT HANDLER — PENCARIAN
+    // Pencarian dilakukan client-side atas daftarLengkap (data yang sudah dimuat
+    // penuh oleh loadData()), bukan lewat stored procedure spSearchTagihan lagi.
+    // Ini supaya kasir bisa cari tagihan berdasarkan Nama Penyewa juga, tanpa
+    // perlu mengubah stored procedure di database (nama penyewa didapat lewat
+    // rantai Id_Penyewaan -> Penyewaan.Id_Penyewa -> Penyewa.Nama_Penyewa).
     @FXML
     void onCari(ActionEvent event) {
-        String kw = txtCari.getText().trim();
-        if (kw.isEmpty()) { loadData(); return; }
-        try {
-            List<TagihanPembayaranSewa> hasil = CRUD_TagihanPembayaranSewa.search(kw);
-            masterList.setAll(hasil);
+        String kw = txtCari.getText() == null ? "" : txtCari.getText().trim();
+        if (kw.isEmpty()) {
+            masterList.setAll(daftarLengkap);
             currentPage = 1;
             refreshTable();
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Gagal Cari", "Error: " + e.getMessage());
+            return;
         }
+        String kwLower = kw.toLowerCase();
+        List<TagihanPembayaranSewa> hasil = daftarLengkap.stream()
+                .filter(t -> cocokKeyword(t, kwLower))
+                .collect(Collectors.toList());
+        masterList.setAll(hasil);
+        currentPage = 1;
+        refreshTable();
+    }
+
+    /** Cocokkan kata kunci ke ID Tagihan, ID Penyewaan, ID Karyawan, Status, dan Nama Penyewa. */
+    private boolean cocokKeyword(TagihanPembayaranSewa t, String kwLower) {
+        if (mengandung(t.getIdTagihanPembayaran(), kwLower)) return true;
+        if (mengandung(t.getIdPenyewaan(), kwLower)) return true;
+        if (mengandung(t.getIdKaryawan(), kwLower)) return true;
+        if (mengandung(t.getStsTagihanPembayaran(), kwLower)) return true;
+
+        Penyewaan penyewaan = petaPenyewaan.get(t.getIdPenyewaan());
+        if (penyewaan != null) {
+            Penyewa penyewa = petaPenyewa.get(penyewaan.getIdPenyewa());
+            if (penyewa != null && mengandung(penyewa.getNamaPenyewa(), kwLower)) return true;
+        }
+        return false;
+    }
+
+    private boolean mengandung(String value, String kwLower) {
+        return value != null && value.toLowerCase().contains(kwLower);
     }
 
     // 19. EVENT HANDLER — PAGINATION

@@ -211,7 +211,7 @@
                         </HBox>
                         <HBox spacing="8.0">
                             <children>
-                                <TextField fx:id="txtCari" prefHeight="38" prefWidth="260" promptText="Cari ID / Penyewaan / Status" style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 14; -fx-font-size: 13px;" />
+                                <TextField fx:id="txtCari" prefHeight="38" prefWidth="260" promptText="Cari ID / Penyewaan / Nama Penyewa / Status" style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 14; -fx-font-size: 13px;" />
                                 <Button onAction="#onCari" prefHeight="38" prefWidth="94" style="-fx-background-color: #1A3A8F; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;" text="CARI" />
                             </children>
                         </HBox>
@@ -233,9 +233,9 @@
 
                         <TableView fx:id="tabelTagihan" onMouseClicked="#onTableClick" prefHeight="360" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn fx:id="colId" prefWidth="90" text="ID" />
-                                <TableColumn fx:id="colPenyewaan" prefWidth="90" text="Penyewaan" />
-                                <TableColumn fx:id="colKaryawan" prefWidth="90" text="Karyawan" />
+                                <TableColumn fx:id="colId" prefWidth="80" text="ID" />
+                                <TableColumn fx:id="colPenyewaan" prefWidth="190" text="Penyewaan" />
+                                <TableColumn fx:id="colKaryawan" prefWidth="80" text="Karyawan" />
                                 <TableColumn fx:id="colTglBayar" prefWidth="100" text="Tgl Bayar" />
                                 <TableColumn fx:id="colTglTempo" prefWidth="100" text="Jatuh Tempo" />
                                 <TableColumn fx:id="colTotalTagihan" prefWidth="110" text="Total Tagihan" />

@@ -45,7 +45,6 @@ import java.util.ResourceBundle;
 public class DashboardManagerController implements Initializable {
 
     private static final String LOGIN_FXML = "/com/sigap/view/Login.fxml";
-    private static final String COMING_SOON_FXML = "/com/sigap/view/ComingSoonView.fxml";
     private static final String DASHBOARD_CONTENT_FXML = "/com/sigap/view/DashboardManagerContentView.fxml";
 
     // Path classpath ke file .jasper (SUDAH di-compile lewat Jaspersoft Studio),
@@ -84,7 +83,6 @@ public class DashboardManagerController implements Initializable {
             if (url == null) {
                 System.err.println("[DashboardManagerController] "
                         + DASHBOARD_CONTENT_FXML + " tidak ditemukan, fallback ke placeholder.");
-                showEmptyDashboard();
                 return;
             }
             Parent view = FXMLLoader.load(url);
@@ -92,27 +90,10 @@ public class DashboardManagerController implements Initializable {
         } catch (Exception e) {
             System.err.println("[DashboardManagerController] Gagal memuat dashboard: " + e.getMessage());
             e.printStackTrace();
-            showEmptyDashboard();
         }
     }
 
     /** Placeholder fallback kalau DashboardManagerContentView belum/gagal dimuat. */
-    private void showEmptyDashboard() {
-        try {
-            URL url = getClass().getResource(COMING_SOON_FXML);
-            FXMLLoader loader = new FXMLLoader(url);
-            Parent view = loader.load();
-
-            ComingSoonController controller = loader.getController();
-            controller.setJudul("Dashboard Manajer");
-
-            contentArea.getChildren().setAll(view);
-        } catch (Exception e) {
-            System.err.println("[DashboardManagerController] Gagal memuat placeholder: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
     @FXML
     public void onLogout(ActionEvent event) {
         try {

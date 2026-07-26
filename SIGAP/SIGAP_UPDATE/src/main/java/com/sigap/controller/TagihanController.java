@@ -195,6 +195,7 @@ public class TagihanController implements Initializable {
         setupTable();
         setupTabelBiayaTambahan();
         setupNominalBayarFormatter();
+        setupTotalDibayarAwalFormatter();
         setFormState(false);
 
         Platform.runLater(() -> {
@@ -274,6 +275,27 @@ public class TagihanController implements Initializable {
                 txtNominalBayar.setText(formatted);
                 txtNominalBayar.positionCaret(formatted.length());
                 sedangMemformatNominal = false;
+            }
+        });
+    }
+
+    // 7c. FORMAT OTOMATIS — Dibayar di Awal (DP) diketik manual otomatis dapat
+    // pemisah ribuan (mis. "50000" -> "50.000"), sama seperti txtNominalBayar.
+    // Flag terpisah supaya tidak bentrok dengan flag formatter nominal bayar.
+    private boolean sedangMemformatDpAwal = false;
+
+    private void setupTotalDibayarAwalFormatter() {
+        txtTotalDibayarAwal.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (sedangMemformatDpAwal) return;
+
+            String digitsOnly = newVal == null ? "" : newVal.replaceAll("[^0-9]", "");
+            String formatted = digitsOnly.isEmpty() ? "" : FMT_RUPIAH.format(Long.parseLong(digitsOnly));
+
+            if (!formatted.equals(newVal)) {
+                sedangMemformatDpAwal = true;
+                txtTotalDibayarAwal.setText(formatted);
+                txtTotalDibayarAwal.positionCaret(formatted.length());
+                sedangMemformatDpAwal = false;
             }
         });
     }
@@ -440,7 +462,7 @@ public class TagihanController implements Initializable {
             String dpAwalText = txtTotalDibayarAwal.getText() == null ? "" : txtTotalDibayarAwal.getText().trim();
             if (!dpAwalText.isEmpty()) {
                 try {
-                    double nilai = Double.parseDouble(dpAwalText);
+                    double nilai = parseNominal(dpAwalText);
                     if (nilai < 0) sb.append("• Nominal dibayar di awal tidak boleh negatif.\n");
                 } catch (NumberFormatException e) {
                     sb.append("• Nominal dibayar di awal harus berupa angka.\n");
@@ -705,7 +727,7 @@ public class TagihanController implements Initializable {
             double dibayarAwal = 0;
             if (!txtTotalDibayarAwal.isDisabled()) {
                 String dpAwalText = txtTotalDibayarAwal.getText() == null ? "" : txtTotalDibayarAwal.getText().trim();
-                dibayarAwal = dpAwalText.isEmpty() ? 0 : Double.parseDouble(dpAwalText);
+                dibayarAwal = dpAwalText.isEmpty() ? 0 : parseNominal(dpAwalText);
             }
 
             TagihanPembayaranSewa t = new TagihanPembayaranSewa(

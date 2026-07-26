@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+    DashboardManagerContentView.fxml
+    Dimuat ke dalam contentArea (StackPane) milik DashboardManagerView.fxml
+    lewat FXMLLoader saat btnDashboard diklik.
+-->
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sigap.controller.DashboardManagerContentController">
+    <content>
+        <VBox spacing="20.0" style="-fx-background-color: #F4F6FB;">
+            <padding>
+                <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+            </padding>
+            <children>
+
+                <!-- Judul Halaman -->
+                <VBox spacing="2.0">
+                    <children>
+                        <Label style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #1A3A8F;" text="Dashboard Manajer" />
+                        <Label fx:id="lblPeriode" style="-fx-font-size: 12px; -fx-text-fill: #888;" text="Ringkasan &amp; Laporan Bulanan — Juli 2026" />
+                    </children>
+                </VBox>
+
+                <!-- Filter Periode — cari laporan berdasarkan Bulan &amp; Tahun -->
+                <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: WHITE; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),8,0,0,2);">
+                    <padding>
+                        <Insets bottom="12.0" left="18.0" right="18.0" top="12.0" />
+                    </padding>
+                    <children>
+                        <Label style="-fx-font-size: 12px; -fx-font-weight: 700; -fx-text-fill: #1A3A8F;" text="Cari Periode:" />
+
+                        <ComboBox fx:id="cbBulan" prefWidth="150.0" promptText="Pilih Bulan" style="-fx-font-size: 12px;" />
+
+                        <ComboBox fx:id="cbTahun" prefWidth="110.0" promptText="Pilih Tahun" style="-fx-font-size: 12px;" />
+
+                        <Button fx:id="btnCariPeriode" onAction="#onCariPeriode" style="-fx-background-color: #1A3A8F; -fx-text-fill: WHITE; -fx-font-size: 12px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 8 16;" text="Cari" />
+
+                        <Button fx:id="btnResetPeriode" onAction="#onResetPeriode" style="-fx-background-color: #F0F2F8; -fx-text-fill: #555; -fx-font-size: 12px; -fx-font-weight: 600; -fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 8 16;" text="Reset" />
+                    </children>
+                </HBox>
+
+                <!-- KPI Cards -->
+                <GridPane hgap="16.0" vgap="16.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="25.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints />
+                    </rowConstraints>
+                    <children>
+
+                        <VBox spacing="6.0" style="-fx-background-color: WHITE; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),8,0,0,2);" GridPane.columnIndex="0">
+                            <padding>
+                                <Insets bottom="16.0" left="18.0" right="18.0" top="16.0" />
+                            </padding>
+                            <children>
+                                <Label style="-fx-font-size: 11px; -fx-text-fill: #888; -fx-font-weight: 600;" text="TOTAL PENDAPATAN BULAN INI" />
+                                <Label fx:id="lblTotalPendapatan" style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #1A3A8F;" text="Rp 0" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="6.0" style="-fx-background-color: WHITE; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),8,0,0,2);" GridPane.columnIndex="1">
+                            <padding>
+                                <Insets bottom="16.0" left="18.0" right="18.0" top="16.0" />
+                            </padding>
+                            <children>
+                                <Label style="-fx-font-size: 11px; -fx-text-fill: #888; -fx-font-weight: 600;" text="PENYEWAAN AKTIF" />
+                                <Label fx:id="lblPenyewaanAktif" style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #2ECC71;" text="0" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="6.0" style="-fx-background-color: WHITE; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),8,0,0,2);" GridPane.columnIndex="2">
+                            <padding>
+                                <Insets bottom="16.0" left="18.0" right="18.0" top="16.0" />
+                            </padding>
+                            <children>
+                                <Label style="-fx-font-size: 11px; -fx-text-fill: #888; -fx-font-weight: 600;" text="TAGIHAN BELUM LUNAS" />
+                                <Label fx:id="lblTagihanBelumLunas" style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #F5A623;" text="0" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="6.0" style="-fx-background-color: WHITE; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),8,0,0,2);" GridPane.columnIndex="3">
+                            <padding>
+                                <Insets bottom="16.0" left="18.0" right="18.0" top="16.0" />
+                            </padding>
+                            <children>
+                                <Label style="-fx-font-size: 11px; -fx-text-fill: #888; -fx-font-weight: 600;" text="KIOS TERSEWA" />
+                                <Label fx:id="lblKiosTersewa" style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #E74C3C;" text="0 / 0" />
+                            </children>
+                        </VBox>
+
+                    </children>
+                </GridPane>
+
+                <!-- Diagram Laporan Bulanan -->
+                <HBox spacing="16.0">
+                    <children>
+
+                        <!-- Diagram Garis: Pendapatan per Bulan -->
+                        <VBox spacing="10.0" style="-fx-background-color: WHITE; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),8,0,0,2);" HBox.hgrow="ALWAYS">
+                            <padding>
+                                <Insets bottom="16.0" left="18.0" right="18.0" top="16.0" />
+                            </padding>
+                            <children>
+                                <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #1A3A8F;" text="Pendapatan per Bulan (Rp)" />
+                                <LineChart fx:id="chartPendapatanBulanan" animated="false" createSymbols="true" legendVisible="false" prefHeight="280.0" style="-fx-background-color: transparent;">
+                                    <xAxis>
+                                        <CategoryAxis fx:id="axisBulan" label="Bulan" side="BOTTOM" />
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis fx:id="axisPendapatan" label="Pendapatan (Rp)" side="LEFT" />
+                                    </yAxis>
+                                </LineChart>
+                            </children>
+                        </VBox>
+
+                        <!-- Diagram Lingkaran: Status Tagihan Bulan Ini -->
+                        <VBox spacing="10.0" prefWidth="320.0" style="-fx-background-color: WHITE; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),8,0,0,2);">
+                            <padding>
+                                <Insets bottom="16.0" left="18.0" right="18.0" top="16.0" />
+                            </padding>
+                            <children>
+                                <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #1A3A8F;" text="Status Tagihan Bulan Ini" />
+                                <PieChart fx:id="chartStatusTagihan" animated="false" labelsVisible="true" legendVisible="true" prefHeight="280.0" style="-fx-background-color: transparent;" />
+                            </children>
+                        </VBox>
+
+                    </children>
+                </HBox>
+
+                <!-- Diagram Garis: Perbandingan Penyewaan vs Tagihan per Bulan -->
+                <VBox spacing="10.0" style="-fx-background-color: WHITE; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),8,0,0,2);">
+                    <padding>
+                        <Insets bottom="16.0" left="18.0" right="18.0" top="16.0" />
+                    </padding>
+                    <children>
+                        <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #1A3A8F;" text="Jumlah Penyewaan Baru per Bulan" />
+                        <LineChart fx:id="chartPenyewaanBulanan" animated="false" createSymbols="true" legendVisible="false" prefHeight="240.0" style="-fx-background-color: transparent;">
+                            <xAxis>
+                                <CategoryAxis fx:id="axisBulanPenyewaan" label="Bulan" side="BOTTOM" />
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis fx:id="axisJumlahPenyewaan" label="Jumlah" side="LEFT" />
+                            </yAxis>
+                        </LineChart>
+                    </children>
+                </VBox>
+
+            </children>
+        </VBox>
+    </content>
+</ScrollPane>

@@ -30,14 +30,19 @@
                     </padding>
                 </VBox>
 
-                <!-- Menu navigasi (kosong — belum ada modul untuk Manajer) -->
+                <!-- Menu navigasi — Laporan untuk role Manajer -->
                 <VBox spacing="6.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0">
                     <padding>
                         <Insets left="16.0" right="16.0" />
                     </padding>
                     <children>
                         <Label style="-fx-text-fill: #6080B0; -fx-font-size: 10px; -fx-font-weight: 700;" text="MENU MANAJER" />
-                        <Label style="-fx-text-fill: #6080B0; -fx-font-size: 11px; -fx-wrap-text: true;" text="Belum ada modul yang tersedia untuk role ini." wrapText="true" />
+
+                        <Button fx:id="btnDashboard" maxWidth="1.7976931348623157E308" onAction="#onDashboard" style="-fx-background-color: #152E75; -fx-text-fill: WHITE; -fx-font-size: 12px; -fx-font-weight: 600; -fx-background-radius: 6; -fx-cursor: hand; -fx-alignment: CENTER_LEFT; -fx-padding: 10 14;" text="Dashboard Manager" />
+
+                        <Button fx:id="btnLaporanPenyewaan" maxWidth="1.7976931348623157E308" onAction="#onLaporanPenyewaan" style="-fx-background-color: #152E75; -fx-text-fill: WHITE; -fx-font-size: 12px; -fx-font-weight: 600; -fx-background-radius: 6; -fx-cursor: hand; -fx-alignment: CENTER_LEFT; -fx-padding: 10 14;" text="Laporan Transaksi Penyewaan" />
+
+                        <Button fx:id="btnLaporanTagihan" maxWidth="1.7976931348623157E308" onAction="#onLaporanTagihan" style="-fx-background-color: #152E75; -fx-text-fill: WHITE; -fx-font-size: 12px; -fx-font-weight: 600; -fx-background-radius: 6; -fx-cursor: hand; -fx-alignment: CENTER_LEFT; -fx-padding: 10 14;" text="Laporan Tagihan Pembayaran Sewa" />
                     </children>
                 </VBox>
 

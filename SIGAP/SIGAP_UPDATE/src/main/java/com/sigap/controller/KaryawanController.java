@@ -122,6 +122,12 @@ public class KaryawanController implements Initializable {
     private PasswordField txtPassword;
     @FXML
     private TextField txtUsername;
+    @FXML
+    private PasswordField txtKonfirmasiPassword;
+    @FXML
+    private Label lblKonfirmasiPassword;
+    @FXML
+    private Label lblKonfirmasiPasswordRequired;
 
     private List<Karyawan> semuaData = new ArrayList<>();
     private final ObservableList<Karyawan> masterList = FXCollections.observableArrayList();
@@ -173,6 +179,14 @@ public class KaryawanController implements Initializable {
         txtPassword.setVisible(visible);
         txtPassword.setManaged(visible);
         txtPassword.clear();
+
+        lblKonfirmasiPassword.setVisible(visible);
+        lblKonfirmasiPassword.setManaged(visible);
+        lblKonfirmasiPasswordRequired.setVisible(visible);
+        lblKonfirmasiPasswordRequired.setManaged(visible);
+        txtKonfirmasiPassword.setVisible(visible);
+        txtKonfirmasiPassword.setManaged(visible);
+        txtKonfirmasiPassword.clear();
     }
 
     private void setupListeners() {
@@ -338,6 +352,8 @@ public class KaryawanController implements Initializable {
                     ambilNilai.apply(k) != null
                             && ambilNilai.apply(k).trim().equalsIgnoreCase(nilai)
                             && !k.getIdKaryawan().equalsIgnoreCase(currentId)
+                            && "Aktif".equalsIgnoreCase(
+                            k.getStsKaryawan() == null ? "" : k.getStsKaryawan().trim())
             );
         } catch (Exception e) {
             return false;
@@ -412,6 +428,13 @@ public class KaryawanController implements Initializable {
         return null;
     }
 
+    private String cekKonfirmasiPassword(String password, String konfirmasi, boolean isInsert) {
+        if (!isInsert) return null;
+        if (konfirmasi.isEmpty()) return "• Konfirmasi Password wajib diisi.\n";
+        if (!password.equals(konfirmasi)) return "• Konfirmasi Password tidak sama dengan Password.\n";
+        return null;
+    }
+
     private String cekFotoKtp(boolean isInsert) {
         if (isInsert && (fotoKtpPath == null || fotoKtpPath.isBlank())) return "• Foto KTP wajib diunggah.\n";
         return null;
@@ -428,6 +451,7 @@ public class KaryawanController implements Initializable {
                 cekEmail(txtEmail.getText().trim(), idSaatIni),
                 cekUsername(txtUsername.getText().trim(), idSaatIni),
                 cekPassword(txtPassword.getText().trim(), isInsert),
+                cekKonfirmasiPassword(txtPassword.getText().trim(), txtKonfirmasiPassword.getText().trim(), isInsert),
                 cekFotoKtp(isInsert)
         };
         for (String error : errors) {
@@ -449,6 +473,7 @@ public class KaryawanController implements Initializable {
         txtEmail.clear();
         txtUsername.clear();
         txtPassword.clear();
+        txtKonfirmasiPassword.clear();
         fotoKtpPath = null;
         lblFotoKtpNama.setText("Belum ada gambar dipilih");
     }

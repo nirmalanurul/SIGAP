@@ -49,15 +49,8 @@ public class KiosCardController {
         lblId.setText(k.getIdKios());
         lblHarga.setText("Rp " + FMT_RUPIAH.format(k.getHargaKios()));
         lblUkuran.setText(k.getPanjangKios() + "m x " + k.getLebarKios() + "m  ·  " + k.getLuasKios() + " m²");
-        lblStatus.setText(k.getStsKios());
 
-        String styleBadge = switch (k.getStsKios() == null ? "" : k.getStsKios()) {
-            case "Tersedia" -> "-fx-background-color:#E0F5E8;-fx-text-fill:#1E8A3C;-fx-font-weight:700;-fx-font-size:10px;-fx-padding:2 8;-fx-background-radius:8;"; // hijau
-            case "Tidak Tersedia" -> "-fx-background-color:#FFF3D6;-fx-text-fill:#B8860B;-fx-font-weight:700;-fx-font-size:10px;-fx-padding:2 8;-fx-background-radius:8;"; // kuning
-            case "Tidak Aktif" -> "-fx-background-color:#FFE8E8;-fx-text-fill:#C0392B;-fx-font-weight:700;-fx-font-size:10px;-fx-padding:2 8;-fx-background-radius:8;"; // merah
-            default -> "-fx-background-color:#EAEAEA;-fx-text-fill:#555555;-fx-font-weight:700;-fx-font-size:10px;-fx-padding:2 8;-fx-background-radius:8;";
-        };
-        lblStatus.setStyle(styleBadge);
+        setStatus(k.getStsKios());
 
         try {
             List<DetailGambarKios> foto = CRUD_Kios.getFoto(k.getIdKios());
@@ -71,5 +64,47 @@ public class KiosCardController {
         }
 
         rootCard.setOnMouseClicked(e -> onCardClicked.accept(k));
+    }
+
+    public void setStatus(String status) {
+        lblStatus.setText(status);
+
+        String bgColor;
+        String textColor;
+
+        if (status == null) {
+            bgColor = "#EEEEEE";
+            textColor = "#555555";
+        } else {
+            switch (status) {
+                case "Tersedia":
+                    bgColor = "#E0F5E8";
+                    textColor = "#1E8A3C"; // hijau
+                    break;
+                case "Disewakan":
+                    bgColor = "#FFF6DA";
+                    textColor = "#C99000"; // kuning
+                    break;
+                case "Nonaktif":
+                    bgColor = "#FDE2E2";
+                    textColor = "#C0392B"; // merah
+                    break;
+                case "Maintenance":
+                    bgColor = "#E3EEFD";
+                    textColor = "#1A5FCC"; // biru
+                    break;
+                default:
+                    bgColor = "#EEEEEE";
+                    textColor = "#555555";
+                    break;
+            }
+        }
+
+        lblStatus.setStyle(
+                "-fx-background-color: " + bgColor + "; " +
+                        "-fx-text-fill: " + textColor + "; " +
+                        "-fx-font-weight: 700; -fx-font-size: 10px; " +
+                        "-fx-padding: 2 8; -fx-background-radius: 8;"
+        );
     }
 }

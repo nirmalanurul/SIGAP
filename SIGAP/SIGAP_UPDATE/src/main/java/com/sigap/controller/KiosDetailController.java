@@ -47,12 +47,8 @@ public class KiosDetailController {
         lblHarga.setText("Rp " + FMT_RUPIAH.format(k.getHargaKios()));
         lblUkuran.setText(k.getPanjangKios() + "m x " + k.getLebarKios() + "m  (" + k.getLuasKios() + " m²)");
         lblDeskripsi.setText(k.getDeskripsi() == null ? "-" : k.getDeskripsi());
-        lblStatus.setText(k.getStsKios());
 
-        boolean aktif = "Aktif".equalsIgnoreCase(k.getStsKios());
-        lblStatus.setStyle(aktif
-                ? "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#1E8A3C;-fx-background-color:#E0F5E8;-fx-background-radius:8;-fx-padding:3 10;"
-                : "-fx-font-size:11px;-fx-font-weight:700;-fx-text-fill:#C0392B;-fx-background-color:#FFE8E8;-fx-background-radius:8;-fx-padding:3 10;");
+        setStatus(k.getStsKios());
 
         vboxGaleriFoto.getChildren().clear();
         try {
@@ -85,6 +81,48 @@ public class KiosDetailController {
     void onTutup(ActionEvent event) {
         Stage stage = (Stage) lblId.getScene().getWindow();
         stage.close();
+    }
+
+    private void setStatus(String status) {
+        lblStatus.setText(status);
+
+        String bgColor;
+        String textColor;
+
+        if (status == null) {
+            bgColor = "#EEEEEE";
+            textColor = "#555555";
+        } else {
+            switch (status) {
+                case "Tersedia":
+                    bgColor = "#E0F5E8";
+                    textColor = "#1E8A3C"; // hijau
+                    break;
+                case "Disewakan":
+                    bgColor = "#FFF6DA";
+                    textColor = "#C99000"; // kuning
+                    break;
+                case "Nonaktif":
+                    bgColor = "#FDE2E2";
+                    textColor = "#C0392B"; // merah
+                    break;
+                case "Maintenance":
+                    bgColor = "#E3EEFD";
+                    textColor = "#1A5FCC"; // biru
+                    break;
+                default:
+                    bgColor = "#EEEEEE";
+                    textColor = "#555555";
+                    break;
+            }
+        }
+
+        lblStatus.setStyle(
+                "-fx-background-color: " + bgColor + "; " +
+                        "-fx-text-fill: " + textColor + "; " +
+                        "-fx-font-weight: 700; -fx-font-size: 11px; " +
+                        "-fx-background-radius: 8; -fx-padding: 3 10;"
+        );
     }
 
     public boolean isPerluRefresh() {

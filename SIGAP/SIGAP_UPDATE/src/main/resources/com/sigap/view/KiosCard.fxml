@@ -24,8 +24,8 @@
 
         <HBox style="-fx-padding: 6 10 12 10;">
             <children>
-                <Label fx:id="lblStatus" text="Aktif"
-                       style="-fx-background-color: #E0F5E8; -fx-text-fill: #1E8A3C; -fx-font-weight: 700; -fx-font-size: 10px; -fx-padding: 2 8; -fx-background-radius: 8;" />
+                <Label fx:id="lblStatus" text="Tersedia"
+                       style="-fx-font-weight: 700; -fx-font-size: 10px; -fx-padding: 2 8; -fx-background-radius: 8;" />
             </children>
         </HBox>
     </children>

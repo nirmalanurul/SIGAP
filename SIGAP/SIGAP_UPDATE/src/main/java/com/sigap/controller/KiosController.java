@@ -153,7 +153,7 @@ public class KiosController implements Initializable {
         txtIdKios.setEditable(false);
         txtLuas.setEditable(false);
         txtStsKios.setEditable(false);
-        txtStsKios.setText("Aktif");
+        txtStsKios.setText("Tersedia");
 
         setupListeners();
         setupFilter();
@@ -383,7 +383,7 @@ public class KiosController implements Initializable {
         txtLebar.clear();
         txtLuas.clear();
         txtDeskripsi.clear();
-        txtStsKios.setText("Aktif");
+        txtStsKios.setText("Tersedia");
         daftarFotoDipilih.clear();
         refreshPreviewFoto();
     }

@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.effect.*?>
-<?import java.lang.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.shape.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.geometry.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.text.Text?>
 
-<StackPane prefHeight="800" prefWidth="1280" style="-fx-background-color: #EEF2FB;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sigap.controller.LoginController">
+<StackPane prefHeight="800" prefWidth="1280" style="-fx-background-color: #EEF2FB;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sigap.controller.LoginController">
     <children>
 
         <AnchorPane fx:id="rootPane" prefHeight="800" prefWidth="1280">
@@ -101,14 +108,14 @@
             <children>
 
                 <!-- Logo badge -->
-                <StackPane layoutX="174.0" layoutY="40.0" prefHeight="72.0" prefWidth="72.0">
-                    <children>
-                        <Circle fill="#1A3A8F" radius="36.0">
-                            <effect>
-                                <DropShadow blurType="GAUSSIAN" color="#1A3A8F55" offsetY="6.0" radius="16.0" />
-                            </effect>
-                        </Circle>
-                    </children>
+                <StackPane layoutX="37.0" layoutY="14.0" prefHeight="118.0" prefWidth="345.0">
+               <children>
+                  <ImageView fitHeight="88.0" fitWidth="84.0">
+                     <image>
+                         <Image url="@Logo/logoSigap.jpeg" />
+                     </image>
+                  </ImageView>
+               </children>
                 </StackPane>
 
                 <Label alignment="CENTER" layoutX="46.0" layoutY="122.0" prefWidth="328.0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1A3A8F;" text="Selamat Datang" />

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+
+<VBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.sigap.controller.PenyewaanDetailController"
+      style="-fx-background-color: WHITE;" prefWidth="460">
+    <padding>
+        <Insets top="24.0" right="24.0" bottom="20.0" left="24.0" />
+    </padding>
+    <children>
+
+        <HBox alignment="CENTER_LEFT" spacing="8.0">
+            <children>
+                <Rectangle arcHeight="4" arcWidth="4" fill="#1A3A8F" height="20" width="4" />
+                <Label fx:id="lblId" style="-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #1A2340;" text="PY001" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="lblStatus" style="-fx-font-size: 11px; -fx-font-weight: 700; -fx-text-fill: #B8860B; -fx-background-color: #FFF3D6; -fx-background-radius: 8; -fx-padding: 3 10;" text="Menunggu" />
+            </children>
+        </HBox>
+
+        <Label style="-fx-font-size: 12px; -fx-text-fill: #888; -fx-padding: 4 0 16 0;" text="Detail Transaksi Penyewaan" />
+
+        <VBox spacing="14.0">
+            <children>
+
+                <VBox spacing="2.0">
+                    <children>
+                        <Label style="-fx-font-size: 11px; -fx-font-weight: 700; -fx-text-fill: #999;" text="KIOS" />
+                        <Label fx:id="lblKios" style="-fx-font-size: 14px; -fx-text-fill: #1A2340; -fx-font-weight: 600;" wrapText="true" text="-" />
+                    </children>
+                </VBox>
+
+                <VBox spacing="2.0">
+                    <children>
+                        <Label style="-fx-font-size: 11px; -fx-font-weight: 700; -fx-text-fill: #999;" text="PENYEWA" />
+                        <Label fx:id="lblPenyewa" style="-fx-font-size: 14px; -fx-text-fill: #1A2340; -fx-font-weight: 600;" wrapText="true" text="-" />
+                    </children>
+                </VBox>
+
+                <VBox spacing="2.0">
+                    <children>
+                        <Label style="-fx-font-size: 11px; -fx-font-weight: 700; -fx-text-fill: #999;" text="KARYAWAN" />
+                        <Label fx:id="lblKaryawan" style="-fx-font-size: 14px; -fx-text-fill: #1A2340; -fx-font-weight: 600;" wrapText="true" text="-" />
+                    </children>
+                </VBox>
+
+                <HBox spacing="24.0">
+                    <children>
+                        <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label style="-fx-font-size: 11px; -fx-font-weight: 700; -fx-text-fill: #999;" text="TANGGAL MULAI" />
+                                <Label fx:id="lblTglMulai" style="-fx-font-size: 14px; -fx-text-fill: #1A2340;" text="-" />
+                            </children>
+                        </VBox>
+                        <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label style="-fx-font-size: 11px; -fx-font-weight: 700; -fx-text-fill: #999;" text="TANGGAL SELESAI" />
+                                <Label fx:id="lblTglSelesai" style="-fx-font-size: 14px; -fx-text-fill: #1A2340;" text="-" />
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+
+                <VBox spacing="2.0">
+                    <children>
+                        <Label style="-fx-font-size: 11px; -fx-font-weight: 700; -fx-text-fill: #999;" text="TANGGAL TRANSAKSI" />
+                        <Label fx:id="lblTglTransaksi" style="-fx-font-size: 14px; -fx-text-fill: #1A2340;" text="-" />
+                    </children>
+                </VBox>
+
+            </children>
+        </VBox>
+
+        <HBox alignment="CENTER_RIGHT" style="-fx-padding: 20 0 0 0;">
+            <children>
+                <Button onAction="#onTutup" prefHeight="36" prefWidth="100"
+                        style="-fx-background-color: #A0A8B8; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;"
+                        text="TUTUP" />
+            </children>
+        </HBox>
+
+    </children>
+</VBox>

@@ -173,6 +173,10 @@ public class DashboardManagerController implements Initializable {
                 info.setHeaderText(null);
                 info.setContentText("PDF berhasil dibuat, tapi tidak bisa dibuka otomatis di komputer ini.\n"
                         + "Buka manual dari lokasi berikut:\n" + outputFile.getAbsolutePath());
+                if (contentArea.getScene() != null) {
+                    info.initOwner(contentArea.getScene().getWindow());
+                    info.initModality(javafx.stage.Modality.WINDOW_MODAL);
+                }
                 info.showAndWait();
             }
 
@@ -188,6 +192,12 @@ public class DashboardManagerController implements Initializable {
         alert.setTitle("Laporan Gagal Dibuka");
         alert.setHeaderText(null);
         alert.setContentText(pesan);
+        // Tempelkan ke window aplikasi supaya dialog tidak muncul sebagai window
+        // lepas/independen, melainkan modal & selalu di atas app.
+        if (contentArea.getScene() != null) {
+            alert.initOwner(contentArea.getScene().getWindow());
+            alert.initModality(javafx.stage.Modality.WINDOW_MODAL);
+        }
         alert.showAndWait();
     }
 

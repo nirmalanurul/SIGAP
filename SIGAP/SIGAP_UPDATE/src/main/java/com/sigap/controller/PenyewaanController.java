@@ -51,7 +51,6 @@ import java.util.stream.Collectors;
 
 public class PenyewaanController implements Initializable {
 
-    // 1. FXML FIELDS — FORM INPUT
     @FXML
     private TextField txtIdPenyewaan;
     @FXML
@@ -77,7 +76,6 @@ public class PenyewaanController implements Initializable {
     @FXML
     private Button btnBatalkan;
 
-    // 2. FXML FIELDS — PENCARIAN, FILTER & TABLE
     @FXML
     private TextField txtCari;
     @FXML
@@ -113,13 +111,11 @@ public class PenyewaanController implements Initializable {
     @FXML
     private TableColumn<Penyewaan, String> colStatus;
 
-    // 3. FXML FIELDS — PAGINATION
     @FXML
     private Label lblPage;
     @FXML
     private Label lblTotal;
 
-    // 4. CONSTANTS
     private static final int PAGE_SIZE = 10;
     private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("id", "ID"));
     private static final String STYLE_READONLY =
@@ -131,7 +127,6 @@ public class PenyewaanController implements Initializable {
                     "-fx-border-radius:6;-fx-background-radius:6;-fx-padding:6 12;" +
                     "-fx-font-size:13px;";
 
-    // 5. STATE
     private List<Penyewaan> rawList = new ArrayList<>();
     private final ObservableList<Penyewaan> masterList = FXCollections.observableArrayList();
 
@@ -150,11 +145,8 @@ public class PenyewaanController implements Initializable {
     private Kios kiosTerpilih = null;
     private Penyewaan selectedPenyewaan = null;
 
-
-    // 6. INITIALIZE
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Set Read-Only Fields
         txtIdPenyewaan.setEditable(false);
         txtNamaKaryawan.setEditable(false);
         txtPenyewaTerpilih.setEditable(false);
@@ -163,13 +155,11 @@ public class PenyewaanController implements Initializable {
         txtStatus.setEditable(false);
         txtStatus.setStyle(STYLE_READONLY);
 
-        // UI Setups
         setupTable();
         setupDatePickers();
         setupFilterStatus();
         setFormState(false);
 
-        // Load Data
         Platform.runLater(() -> {
             loadData();
             autoGenerateId();
@@ -179,8 +169,6 @@ public class PenyewaanController implements Initializable {
         });
     }
 
-
-    // 7. SETUP UI & LISTENERS
     private void setupDatePickers() {
         dpTglMulai.setDayCellFactory(picker -> new DateCell() {
             @Override
@@ -248,8 +236,6 @@ public class PenyewaanController implements Initializable {
         btnPilihKios.setDisable(sedangTerkunci || !tanggalLengkap);
     }
 
-
-    // 8. TABLE SETUP & FORMATTING
     private void setupTable() {
         colId.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getIdPenyewaan()));
         colKios.setCellValueFactory(d -> new SimpleStringProperty(labelKios(d.getValue().getIdKios())));
@@ -308,12 +294,10 @@ public class PenyewaanController implements Initializable {
             case "Berlangsung" -> "-fx-background-color:#E0F5E8;-fx-text-fill:#1E8A3C;" + base;
             case "Selesai"     -> "-fx-background-color:#EAEAEA;-fx-text-fill:#555555;" + base;
             case "Dibatalkan"  -> "-fx-background-color:#FFE8E8;-fx-text-fill:#C0392B;" + base;
-            default            -> "-fx-background-color:#FFF3D6;-fx-text-fill:#B8860B;" + base; // Menunggu
+            default            -> "-fx-background-color:#FFF3D6;-fx-text-fill:#B8860B;" + base;
         };
     }
 
-
-    // 9. DATA LOADING & MAPPING
     private void loadData() {
         try {
             CRUD_Penyewaan.refreshStatus();
@@ -363,8 +347,6 @@ public class PenyewaanController implements Initializable {
         lblPage.setText(String.valueOf(currentPage));
     }
 
-
-    // 10. FORM STATE & VALIDASI
     private void setFormState(boolean adaBarisTerpilih) {
         btnSimpan.setDisable(adaBarisTerpilih);
         dpTglMulai.setDisable(adaBarisTerpilih);
@@ -413,8 +395,6 @@ public class PenyewaanController implements Initializable {
         return true;
     }
 
-
-    // 11. EVENT HANDLER — FORM & ACTION
     @FXML
     void onPilihPenyewa(ActionEvent event) {
         if (dpTglMulai.getValue() == null || dpTglSelesai.getValue() == null) {
@@ -591,8 +571,6 @@ public class PenyewaanController implements Initializable {
         setFormState(true);
     }
 
-
-    // 12. EVENT HANDLER — FILTER & PENCARIAN
     private void populateFilterMenus() {
         menuPenyewa.getItems().clear();
         ToggleGroup grupPenyewa = new ToggleGroup();
@@ -684,8 +662,6 @@ public class PenyewaanController implements Initializable {
         return value != null && value.toLowerCase().contains(kwLower);
     }
 
-
-    // 13. EVENT HANDLER — PAGINATION
     @FXML
     void onFirstPage(ActionEvent event) {
         currentPage = 1;
@@ -708,8 +684,6 @@ public class PenyewaanController implements Initializable {
         if (currentPage > 1) { currentPage--; refreshTable(); }
     }
 
-
-    // 14. UTILITAS
     private String labelPenyewa(String idPenyewa) {
         if (idPenyewa == null) return "";
         Penyewa p = petaPenyewa.get(idPenyewa);

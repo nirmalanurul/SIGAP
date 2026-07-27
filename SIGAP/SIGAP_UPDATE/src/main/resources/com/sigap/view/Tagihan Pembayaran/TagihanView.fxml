@@ -66,7 +66,6 @@
                             </rowConstraints>
                             <children>
 
-                                <!-- Kolom kiri -->
 
                                 <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
                                     <children>
@@ -117,10 +116,7 @@
                                     </children>
                                 </HBox>
 
-                                <!-- Total Dibayar: sudah dibayar (readonly, baris kecil) + input nominal bayar + tombol
-                                     Otomatis (ikon refresh, isi nominal = sisa tagihan) + tombol BAYAR. Logika sama
-                                     persis dengan panel Tambah Pembayaran sebelumnya, cuma dipindah ke sel grid ini. -->
-                                <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                  <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
                                     <children>
                                         <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;" text="Total Dibayar (Rp)" />
                                         <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
@@ -163,10 +159,6 @@
                     </children>
                 </VBox>
 
-                <!-- Panel Biaya Tambahan — daftar Detail_Tagihan_Biaya yang disiapkan untuk
-                     tagihan ini. Tombol pemilihan biaya kini ada di grid utama (baris Total
-                     Biaya Tambahan). Tabel & tombol tetap dikunci lewat setFormState() saat baris
-                     tagihan existing dipilih (btnPilihBiayaTambahan.setDisable). -->
                 <VBox spacing="12.0" style="-fx-background-color: WHITE; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.07),10,0,0,2);">
                     <padding>
                         <Insets bottom="16.0" left="20.0" right="20.0" top="16.0" />
@@ -206,9 +198,7 @@
                     <children>
                         <HBox spacing="8.0" HBox.hgrow="ALWAYS">
                             <children>
-                                <!-- Tidak ada tombol UBAH: data inti tagihan bersifat final setelah disimpan.
-                                     Aksi lanjutan yang sah hanya BAYAR (menambah Total_Dibayar) atau
-                                     BATALKAN (selagi belum ada pembayaran sama sekali). -->
+
                                 <Button fx:id="btnSimpan" onAction="#onSimpan" prefHeight="38" prefWidth="120" style="-fx-background-color: #1A3A8F; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;" text="SIMPAN" />
                                 <Button onAction="#onBersih" prefHeight="38" prefWidth="110" style="-fx-background-color: #A0A8B8; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;" text="BATAL" />
                             </children>

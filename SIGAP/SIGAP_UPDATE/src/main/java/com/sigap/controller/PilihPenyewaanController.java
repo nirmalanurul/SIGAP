@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 
 public class PilihPenyewaanController implements Initializable {
 
-    // 1. FXML FIELDS
     @FXML
     private TextField txtCari;
     @FXML
@@ -53,11 +52,9 @@ public class PilihPenyewaanController implements Initializable {
     private TableColumn<Penyewaan, String> colStatus;
 
 
-    // 2. CONSTANTS
     private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
 
-    // 3. STATE
     private final ObservableList<Penyewaan> masterList = FXCollections.observableArrayList();
     private Penyewaan penyewaanTerpilih = null;
 
@@ -67,7 +64,6 @@ public class PilihPenyewaanController implements Initializable {
     private Map<String, Penyewa> petaPenyewa = Map.of();
 
 
-    // 4. INITIALIZE
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupTable();
@@ -75,7 +71,6 @@ public class PilihPenyewaanController implements Initializable {
     }
 
 
-    // 5. TABLE SETUP
     private void setupTable() {
         colId.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getIdPenyewaan()));
         colKios.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getIdKios()));
@@ -113,7 +108,6 @@ public class PilihPenyewaanController implements Initializable {
     }
 
 
-    // 6. DATA LOADING & FILTERING
     private void loadData() {
         try {
             muatPetaPenyewa();
@@ -163,7 +157,6 @@ public class PilihPenyewaanController implements Initializable {
     }
 
 
-    // 7. EVENT HANDLERS
     @FXML
     void onCari(ActionEvent event) {
         String kw = txtCari.getText().trim();
@@ -195,7 +188,6 @@ public class PilihPenyewaanController implements Initializable {
     }
 
 
-    // 8. UTILITAS
     private String labelPenyewa(String idPenyewa) {
         if (idPenyewa == null) return "";
         Penyewa p = petaPenyewa.get(idPenyewa);

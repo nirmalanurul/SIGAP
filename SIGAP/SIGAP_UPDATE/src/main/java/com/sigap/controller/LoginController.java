@@ -29,7 +29,7 @@ public class LoginController implements Initializable {
     @FXML private Label errorLabel;
     @FXML private Button loginButton;
     @FXML private Button exitButton;
-    // Tambahkan komponen baru ini
+
     @FXML private TextField passwordTextField;
     @FXML private Button togglePasswordButton;
 

@@ -14,10 +14,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class MaintenanceScheduler {
 
-    // Jarak antar pengecekan. Kios yang masa Maintenance-nya sudah
-    // lewat akan menunggu maksimal sekian lama sebelum otomatis
-    // kembali Aktif. Ubah TimeUnit.HOURS -> TimeUnit.MINUTES kalau
-    // butuh lebih presisi.
     private static final long INTERVAL = 1;
     private static final TimeUnit INTERVAL_UNIT = TimeUnit.HOURS;
 
@@ -29,7 +25,6 @@ public class MaintenanceScheduler {
             });
 
     public static void start() {
-        // langsung cek sekali saat start, lalu berulang sesuai INTERVAL
         executor.scheduleAtFixedRate(MaintenanceScheduler::checkAndRevert, 0, INTERVAL, INTERVAL_UNIT);
     }
 
@@ -37,7 +32,6 @@ public class MaintenanceScheduler {
         try {
             CRUD_Kios.selesaikanMaintenanceOverdue();
         } catch (SQLException e) {
-            // TODO: ganti dengan logger project (mis. SLF4J) kalau sudah ada
             e.printStackTrace();
         }
     }

@@ -27,19 +27,14 @@ import java.util.stream.Collectors;
 
 public class PilihBulanTagihanController implements Initializable {
 
-    // 1. FXML FIELDS
     @FXML private Label lblInfoPenyewaan;
     @FXML private TableView<SlotBulan> tabelBulan;
     @FXML private TableColumn<SlotBulan, String> colBulanKe;
     @FXML private TableColumn<SlotBulan, String> colJatuhTempo;
 
-
-    // 2. CONSTANTS
     private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static final DateTimeFormatter FMT_BULAN = DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("id", "ID"));
 
-
-    // 3. INNER CLASS
     public static class SlotBulan {
         final int bulanKe;
         final LocalDate jatuhTempo;
@@ -50,13 +45,9 @@ public class PilihBulanTagihanController implements Initializable {
         }
     }
 
-
-    // 4. STATE
     private Penyewaan penyewaan;
     private LocalDate jatuhTempoTerpilih = null;
 
-
-    // 5. INITIALIZE & SETUP
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupTable();
@@ -70,8 +61,6 @@ public class PilihBulanTagihanController implements Initializable {
                         + "  (jatuh tempo " + d.getValue().jatuhTempo.format(FMT_TGL) + ")"));
     }
 
-
-    // 6. DATA LOADING & SETTERS
     public void setPenyewaan(Penyewaan p) {
         this.penyewaan = p;
         lblInfoPenyewaan.setText("Penyewaan " + p.getIdPenyewaan() + "  |  Kios " + p.getIdKios()
@@ -103,8 +92,6 @@ public class PilihBulanTagihanController implements Initializable {
         tabelBulan.setItems(slotBelumDitagih);
     }
 
-
-    // 7. EVENT HANDLERS
     @FXML
     void onRowClicked(MouseEvent event) {
         if (event.getClickCount() < 1) return;
@@ -121,8 +108,6 @@ public class PilihBulanTagihanController implements Initializable {
         tutupDialog();
     }
 
-
-    // 8. UTILITAS & HELPERS
     private static String capitalize(String s) {
         if (s == null || s.isEmpty()) return s;
         return Character.toUpperCase(s.charAt(0)) + s.substring(1);

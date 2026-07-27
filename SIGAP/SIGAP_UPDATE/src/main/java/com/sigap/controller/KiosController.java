@@ -61,7 +61,6 @@ public class KiosController implements Initializable {
     @FXML
     private Button btnUbah;
 
-    // 2. FXML FIELDS — FOTO
     @FXML
     private Button btnPilihFotoKios;
     @FXML
@@ -103,7 +102,6 @@ public class KiosController implements Initializable {
     @FXML
     private Label lblTotal;
 
-    // 5. STATE
     private List<Kios> semuaData = new ArrayList<>();
     private List<Kios> masterList = new ArrayList<>();
     private final List<String> daftarFotoDipilih = new ArrayList<>();
@@ -394,7 +392,6 @@ public class KiosController implements Initializable {
         txtDeskripsi.setStyle(isTidakAktif ? STYLE_READONLY : STYLE_NORMAL);
     }
 
-    // 13. UPLOAD & PREVIEW FOTO
     @FXML
     void onPilihFotoKios(ActionEvent event) {
         FileChooser chooser = new FileChooser();
@@ -702,7 +699,6 @@ public class KiosController implements Initializable {
         if (currentPage > 1) { currentPage--; refreshGrid(); }
     }
 
-    // 19. EVENT HANDLER — FILTER
     @FXML
     void onFilterHarga(ActionEvent event) {
         urutanHarga = rmHargaTermurah.isSelected() ? "asc"

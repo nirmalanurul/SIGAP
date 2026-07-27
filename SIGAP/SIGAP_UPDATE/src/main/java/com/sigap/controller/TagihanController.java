@@ -55,6 +55,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class TagihanController implements Initializable {
+
     @FXML
     private TextField txtIdTagihan;
     @FXML
@@ -81,7 +82,6 @@ public class TagihanController implements Initializable {
     @FXML
     private Button btnSimpan;
 
-
     @FXML
     private Button btnPilihBiayaTambahan;
     @FXML
@@ -97,7 +97,6 @@ public class TagihanController implements Initializable {
     @FXML
     private TextField txtTotalBiayaTambahan;
 
-    // 2. FXML FIELDS — PANEL TAMBAH PEMBAYARAN (kini menyatu di sel grid "Total Dibayar")
     @FXML
     private TextField txtSudahDibayar;
     @FXML
@@ -107,7 +106,6 @@ public class TagihanController implements Initializable {
     @FXML
     private Button btnBayar;
 
-    // 3. FXML FIELDS — PENCARIAN, FILTER & TABLE
     @FXML
     private TextField txtCari;
     @FXML
@@ -141,48 +139,35 @@ public class TagihanController implements Initializable {
     @FXML
     private TableColumn<TagihanPembayaranSewa, String> colStatus;
 
-    // 4. FXML FIELDS — PAGINATION
     @FXML
     private Label lblPage;
     @FXML
     private Label lblTotal;
 
-    // 5. STATE
     private final ObservableList<TagihanPembayaranSewa> masterList = FXCollections.observableArrayList();
     private static final int PAGE_SIZE = 10;
     private int currentPage = 1;
     private int totalPage = 1;
 
-
     private List<TagihanPembayaranSewa> daftarLengkap = List.of();
-
     private Map<String, Penyewaan> petaPenyewaan = Map.of();
     private Map<String, Penyewa> petaPenyewa = Map.of();
-
 
     private String filterIdPenyewaan = null;
     private String filterStatus = null;
 
-
     private Penyewaan penyewaanTerpilih = null;
-
     private double hargaSewaTerpilih = 0;
-
 
     private LocalDate tglJatuhTempoTerpilih = null;
 
-
     private TagihanPembayaranSewa selectedTagihan = null;
 
-
     private final ObservableList<DetailTagihanBiaya> daftarBiayaTambahan = FXCollections.observableArrayList();
-
     private List<BiayaTambahan> masterBiayaTambahan = List.of();
 
-    // Format tanggal tampilan: "28 Juli 2026" (nama bulan, bukan angka) — konsisten dengan PenyewaanController
     private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("id", "ID"));
     private static final NumberFormat FMT_RUPIAH = NumberFormat.getNumberInstance(new Locale("id", "ID"));
-
 
     private static final String KATA_KUNCI_KETERLAMBATAN = "keterlambatan";
     private static final String STYLE_READONLY =
@@ -190,7 +175,6 @@ public class TagihanController implements Initializable {
                     "-fx-border-radius:6;-fx-background-radius:6;-fx-padding:6 12;" +
                     "-fx-font-size:13px;-fx-text-fill:#888;";
 
-    // 6. INITIALIZE
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         txtIdTagihan.setEditable(false);
@@ -229,7 +213,6 @@ public class TagihanController implements Initializable {
         });
     }
 
-    // 8b. TABEL MINI — BIAYA TAMBAHAN (Detail_Tagihan_Biaya untuk tagihan ini)
     private void setupTabelBiayaTambahan() {
         colJenisBiayaTambahan.setCellValueFactory(d -> new SimpleStringProperty(
                 cariJenisBiaya(d.getValue().getIdBiayaTambahan())));
@@ -263,7 +246,6 @@ public class TagihanController implements Initializable {
         txtTotalBiayaTambahan.setText(FMT_RUPIAH.format((long) total));
     }
 
-
     private void refreshPreviewTotalTagihan() {
         double totalBiayaTambahan = daftarBiayaTambahan.stream().mapToDouble(DetailTagihanBiaya::getSubTotal).sum();
         double preview = hargaSewaTerpilih + totalBiayaTambahan;
@@ -289,7 +271,6 @@ public class TagihanController implements Initializable {
         });
     }
 
-
     private boolean sedangMemformatDpAwal = false;
 
     private void setupTotalDibayarAwalFormatter() {
@@ -308,7 +289,6 @@ public class TagihanController implements Initializable {
         });
     }
 
-    // 8. TABLE SETUP
     private void setupTable() {
         colId.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getIdTagihanPembayaran()));
         colPenyewaan.setCellValueFactory(d -> new SimpleStringProperty(labelPenyewaan(d.getValue().getIdPenyewaan())));
@@ -346,7 +326,6 @@ public class TagihanController implements Initializable {
         });
     }
 
-
     private String labelPenyewaan(String idPenyewaan) {
         if (idPenyewaan == null) return "";
         Penyewaan penyewaan = petaPenyewaan.get(idPenyewaan);
@@ -357,7 +336,6 @@ public class TagihanController implements Initializable {
         }
         return idPenyewaan + " - " + penyewa.getNamaPenyewa();
     }
-
 
     private void muatPetaPenyewaan() {
         try {
@@ -380,11 +358,10 @@ public class TagihanController implements Initializable {
             case "Lunas"      -> "-fx-background-color:#E0F5E8;-fx-text-fill:#1E8A3C;" + base;
             case "Terlambat"  -> "-fx-background-color:#FFE8E8;-fx-text-fill:#C0392B;" + base;
             case "Dibatalkan" -> "-fx-background-color:#EAEAEA;-fx-text-fill:#555555;" + base;
-            default           -> "-fx-background-color:#FFF3D6;-fx-text-fill:#B8860B;" + base; // Belum Lunas
+            default           -> "-fx-background-color:#FFF3D6;-fx-text-fill:#B8860B;" + base;
         };
     }
 
-    // 8c. FILTER — MenuButton FILTER (submenu Penyewaan dinamis + submenu Status statis)
     private void setupFilterStatus() {
         ToggleGroup grupStatus = new ToggleGroup();
         rmStatusBelumLunas.setToggleGroup(grupStatus);
@@ -410,7 +387,6 @@ public class TagihanController implements Initializable {
         });
     }
 
-    // 9. LOAD DATA & PAGINATION
     private void loadData() {
         try {
             muatPetaPenyewaan();
@@ -452,7 +428,6 @@ public class TagihanController implements Initializable {
         }
     }
 
-    // 10. FORM STATE
     private void setFormState(boolean adaBarisTerpilih) {
         btnSimpan.setDisable(adaBarisTerpilih);
         btnPilihPenyewaan.setDisable(adaBarisTerpilih);
@@ -460,6 +435,7 @@ public class TagihanController implements Initializable {
                 || (selectedTagihan != null && "Belum Lunas".equalsIgnoreCase(selectedTagihan.getStsTagihanPembayaran()));
         btnPilihBiayaTambahan.setDisable(!bolehUbahBiayaTambahan);
         cbMetodeBayar.setDisable(adaBarisTerpilih);
+
         boolean bolehDp = !adaBarisTerpilih
                 && penyewaanTerpilih != null
                 && "Menunggu".equalsIgnoreCase(penyewaanTerpilih.getStsPenyewaan());
@@ -500,7 +476,6 @@ public class TagihanController implements Initializable {
         refreshTabelBiayaTambahan();
     }
 
-    // 11. VALIDASI
     private boolean validasi() {
         StringBuilder sb = new StringBuilder();
 
@@ -527,7 +502,6 @@ public class TagihanController implements Initializable {
         return true;
     }
 
-    // 12. UTILITAS
     private void showAlert(Alert.AlertType type, String title, String msg) {
         Runnable show = () -> {
             Alert alert = new Alert(type);
@@ -542,7 +516,6 @@ public class TagihanController implements Initializable {
         else Platform.runLater(show);
     }
 
-    // 13. EVENT HANDLER — PILIH PENYEWAAN (2 tahap: pilih Penyewaan, lalu pilih bulan tagihan)
     @FXML
     void onPilihPenyewaan(ActionEvent event) {
         try {
@@ -559,7 +532,6 @@ public class TagihanController implements Initializable {
 
             Penyewaan hasilPenyewaan = controllerPenyewaan.getPenyewaanTerpilih();
             if (hasilPenyewaan == null) return;
-
 
             FXMLLoader loaderBulan = new FXMLLoader(getClass().getResource("/com/sigap/view/Tagihan Pembayaran/PilihBulanTagihan.fxml"));
             Parent rootBulan = loaderBulan.load();
@@ -597,21 +569,18 @@ public class TagihanController implements Initializable {
         }
     }
 
-
     private String labelPenyewaanTerpilih(Penyewaan p) {
         String namaPenyewa = null;
         try {
             Penyewa penyewa = CRUD_Penyewa.getById(p.getIdPenyewa());
             namaPenyewa = (penyewa != null) ? penyewa.getNamaPenyewa() : null;
         } catch (Exception ex) {
-
         }
         String bagianPenyewa = (namaPenyewa == null || namaPenyewa.isBlank())
                 ? p.getIdPenyewa()
                 : p.getIdPenyewa() + " - " + namaPenyewa;
         return p.getIdPenyewaan() + " (" + bagianPenyewa + ") - Kios " + p.getIdKios();
     }
-
 
     @FXML
     void onPilihBiayaTambahan(ActionEvent event) {
@@ -620,7 +589,6 @@ public class TagihanController implements Initializable {
             Parent rootBiaya = loaderBiaya.load();
             PilihBiayaTambahanController controllerBiaya = loaderBiaya.getController();
             controllerBiaya.setDaftarAwal(daftarBiayaTambahan, masterBiayaTambahan);
-
             controllerBiaya.setInfoJatuhTempo(tglJatuhTempoTerpilih, LocalDate.now());
 
             Stage dialogBiaya = new Stage();
@@ -630,18 +598,15 @@ public class TagihanController implements Initializable {
             dialogBiaya.setScene(new Scene(rootBiaya));
             dialogBiaya.showAndWait();
 
-
             if (!controllerBiaya.isSelesaiDiklik()) return;
 
             List<DetailTagihanBiaya> hasilDialog = controllerBiaya.getDaftarBiayaTerpilih();
 
             if (selectedTagihan == null) {
-
                 daftarBiayaTambahan.setAll(hasilDialog);
                 refreshTabelBiayaTambahan();
                 refreshPreviewTotalTagihan();
             } else {
-
                 simpanPerubahanBiayaTambahanTersimpan(selectedTagihan.getIdTagihanPembayaran(), hasilDialog);
             }
         } catch (Exception e) {
@@ -669,6 +634,7 @@ public class TagihanController implements Initializable {
                 .toList();
 
         if (ditambahkan.isEmpty() && dihapus.isEmpty()) return;
+
         boolean semuaSukses = true;
         for (DetailTagihanBiaya d : ditambahkan) {
             try {
@@ -687,7 +653,6 @@ public class TagihanController implements Initializable {
                 semuaSukses = false;
             }
         }
-
 
         muatBiayaTambahanUntukTagihan(idTagihan);
         loadData();
@@ -710,34 +675,6 @@ public class TagihanController implements Initializable {
         }
     }
 
-//    @FXML
-//    void onPilihPenyewa(ActionEvent event) {
-//        try {
-//            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sigap/view/Penyewaan/PilihPenyewa.fxml"));
-//            Parent root = loader.load();
-//
-//            PilihPenyewaController controller = loader.getController();
-//
-//            Stage dialog = new Stage();
-//            dialog.setTitle("Pilih Penyewa");
-//            dialog.initModality(Modality.APPLICATION_MODAL);
-//            if (txtPenyewaTerpilih.getScene() != null) dialog.initOwner(txtPenyewaTerpilih.getScene().getWindow());
-//            dialog.setScene(new Scene(root));
-//            dialog.showAndWait();
-//
-//            Penyewa hasil = controller.getPenyewaTerpilih();
-//            if (hasil != null) {
-//                penyewaTerpilih = hasil;
-//                txtPenyewaTerpilih.setText(hasil.getIdPenyewa() + " - " + hasil.getNamaPenyewa());
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            showAlert(Alert.AlertType.ERROR, "Gagal Membuka Dialog",
-//                    "Dialog pilih penyewa gagal dibuka. Silakan coba lagi.");
-//        }
-//    }
-
-    // 14. EVENT HANDLER — SIMPAN (INSERT)
     @FXML
     void onSimpan(ActionEvent event) {
         if (!validasi()) return;
@@ -797,6 +734,7 @@ public class TagihanController implements Initializable {
             );
 
             CRUD_TagihanPembayaranSewa.insert(t);
+
             if (!daftarBiayaTambahan.isEmpty()) {
                 boolean semuaBiayaSukses = true;
                 for (DetailTagihanBiaya d : daftarBiayaTambahan) {
@@ -826,7 +764,6 @@ public class TagihanController implements Initializable {
         }
     }
 
-    // 15. EVENT HANDLER — BAYAR (menambah Total_Dibayar untuk tagihan yang dipilih)
     @FXML
     void onBayar(ActionEvent event) {
         if (selectedTagihan == null) {
@@ -887,7 +824,6 @@ public class TagihanController implements Initializable {
         }
     }
 
-    // 15b. EVENT HANDLER —  (isi nominal bayar = sisa tagihan yang dipilih)
     @FXML
     void onIsiOtomatis(ActionEvent event) {
         if (selectedTagihan == null) {
@@ -897,7 +833,6 @@ public class TagihanController implements Initializable {
         double sisaTagihan = selectedTagihan.getTotalTagihan() - selectedTagihan.getTotalDibayar();
         txtNominalBayar.setText(FMT_RUPIAH.format((long) sisaTagihan));
     }
-
 
     private double parseNominal(String text) throws NumberFormatException {
         String digitsOnly = text.replaceAll("[^0-9]", "");
@@ -914,7 +849,6 @@ public class TagihanController implements Initializable {
         isiKaryawanLogin();
     }
 
-    // 17. EVENT HANDLER — KLIK BARIS TABEL (tampilkan detail, siapkan aksi Bayar/Batalkan)
     @FXML
     void onTableClick(MouseEvent event) {
         TagihanPembayaranSewa t = tabelTagihan.getSelectionModel().getSelectedItem();
@@ -951,11 +885,10 @@ public class TagihanController implements Initializable {
         refreshTabelBiayaTambahan();
     }
 
-    // 18. EVENT HANDLER — PENCARIAN & FILTER
+    @FXML
     void onCari(ActionEvent event) {
         terapkanFilterDanCari();
     }
-
 
     @FXML
     void onFilterStatus(ActionEvent event) {
@@ -965,7 +898,6 @@ public class TagihanController implements Initializable {
                 : rmStatusDibatalkan.isSelected() ? "Dibatalkan" : null;
         terapkanFilterDanCari();
     }
-
 
     @FXML
     void onResetFilter(ActionEvent event) {
@@ -978,7 +910,6 @@ public class TagihanController implements Initializable {
         populateFilterMenus();
         terapkanFilterDanCari();
     }
-
 
     private void terapkanFilterDanCari() {
         String kw = txtCari.getText() == null ? "" : txtCari.getText().trim().toLowerCase();
@@ -993,7 +924,6 @@ public class TagihanController implements Initializable {
         currentPage = 1;
         refreshTable();
     }
-
 
     private boolean cocokKeyword(TagihanPembayaranSewa t, String kwLower) {
         if (mengandung(t.getIdTagihanPembayaran(), kwLower)) return true;
@@ -1013,7 +943,6 @@ public class TagihanController implements Initializable {
         return value != null && value.toLowerCase().contains(kwLower);
     }
 
-    // 19. EVENT HANDLER — PAGINATION
     @FXML
     void onFirstPage(ActionEvent event) {
         currentPage = 1;

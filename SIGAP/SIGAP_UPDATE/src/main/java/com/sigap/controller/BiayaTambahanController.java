@@ -203,11 +203,6 @@ public class BiayaTambahanController implements Initializable {
         }
     }
 
-    /**
-     * Cek apakah data "Keterlambatan Bayar Sewa" berstatus Aktif sudah ada.
-     * Kalau sudah ada, radio Keterlambatan dikunci (tidak bisa input baru)
-     * sampai data lama dihapus (dinonaktifkan) terlebih dahulu.
-     */
     private void cekStatusKeterlambatan() {
         keterlambatanTerpakai = masterList.stream()
                 .anyMatch(d -> KETERLAMBATAN.equalsIgnoreCase(d.getJenisBiayaTambahan())

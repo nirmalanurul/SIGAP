@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 
 public class PilihKiosController implements Initializable {
 
-    // 1. FXML FIELDS
     @FXML
     private TextField txtCari;
     @FXML
@@ -47,30 +46,21 @@ public class PilihKiosController implements Initializable {
     @FXML
     private TableColumn<Kios, String> colDeskripsi;
 
-
-    // 2. CONSTANTS
     private static final NumberFormat FMT_RUPIAH =
             NumberFormat.getNumberInstance(new Locale("id", "ID"));
 
-
-    // 3. STATE
     private final ObservableList<Kios> masterList = FXCollections.observableArrayList();
     private Kios kiosTerpilih = null;
 
-    /** Rentang tanggal sewa yang diminta oleh form Penyewaan; dipakai untuk menyaring kios yang bentrok jadwal. */
     private LocalDate tglMulaiFilter = null;
     private LocalDate tglSelesaiFilter = null;
 
-
-    // 4. INITIALIZE
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupTable();
         Platform.runLater(this::loadData);
     }
 
-
-    // 5. TABLE SETUP
     private void setupTable() {
         colId.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getIdKios()));
 
@@ -97,13 +87,6 @@ public class PilihKiosController implements Initializable {
         });
     }
 
-
-    // 6. DATA LOADING & FILTERING
-    /**
-     * Dipanggil oleh parent controller (PenyewaanController) SEBELUM dialog.showAndWait(),
-     * supaya loadData() -- yang baru jalan lewat Platform.runLater setelah dialog tampil --
-     * sudah tahu rentang tanggal yang perlu difilter.
-     */
     public void setRentangTanggal(LocalDate tglMulai, LocalDate tglSelesai) {
         this.tglMulaiFilter = tglMulai;
         this.tglSelesaiFilter = tglSelesai;
@@ -143,7 +126,6 @@ public class PilihKiosController implements Initializable {
                     .map(Penyewaan::getIdKios)
                     .collect(Collectors.toSet());
         } catch (Exception e) {
-            // Kalau gagal ambil data penyewaan, jangan blokir semua kios -- tampilkan yang Tersedia saja.
             idKiosBentrok = Set.of();
         }
 
@@ -160,7 +142,6 @@ public class PilihKiosController implements Initializable {
     }
 
 
-    // 7. EVENT HANDLERS
     @FXML
     void onCari(ActionEvent event) {
         String kw = txtCari.getText().trim();
@@ -189,8 +170,6 @@ public class PilihKiosController implements Initializable {
         tutupDialog();
     }
 
-
-    // 8. UTILITAS
     private void showAlert(String msg) {
         Runnable show = () -> {
             Alert alert = new Alert(Alert.AlertType.ERROR);

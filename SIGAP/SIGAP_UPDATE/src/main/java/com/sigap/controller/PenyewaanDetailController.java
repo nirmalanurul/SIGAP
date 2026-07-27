@@ -8,7 +8,6 @@ import javafx.stage.Stage;
 
 public class PenyewaanDetailController {
 
-    // 1. FXML FIELDS
     @FXML
     private Label lblId;
     @FXML
@@ -26,8 +25,6 @@ public class PenyewaanDetailController {
     @FXML
     private Label lblTglTransaksi;
 
-
-    // 2. SETUP DATA
     public void setData(String idPenyewaan, String statusPenyewaan,
                         String labelKios, String labelPenyewa, String labelKaryawan,
                         String tglMulaiText, String tglSelesaiText, String tglTransaksiText) {
@@ -45,20 +42,16 @@ public class PenyewaanDetailController {
         lblTglTransaksi.setText(tglTransaksiText);
     }
 
-
-    // 3. UTILITAS FORMATTING
     private String styleBadgeStatus(String status) {
         String base = "-fx-font-size:11px;-fx-font-weight:700;-fx-background-radius:8;-fx-padding:3 10;";
         return switch (status == null ? "" : status) {
             case "Berlangsung" -> "-fx-text-fill:#1E8A3C;-fx-background-color:#E0F5E8;" + base;
             case "Selesai"     -> "-fx-text-fill:#555555;-fx-background-color:#EAEAEA;" + base;
             case "Dibatalkan"  -> "-fx-text-fill:#C0392B;-fx-background-color:#FFE8E8;" + base;
-            default            -> "-fx-text-fill:#B8860B;-fx-background-color:#FFF3D6;" + base; // Menunggu
+            default            -> "-fx-text-fill:#B8860B;-fx-background-color:#FFF3D6;" + base;
         };
     }
 
-
-    // 4. EVENT HANDLER
     @FXML
     void onTutup(ActionEvent event) {
         Stage stage = (Stage) lblId.getScene().getWindow();

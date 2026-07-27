@@ -38,22 +38,17 @@ import java.util.ResourceBundle;
 
 public class DashboardManagerController implements Initializable {
 
-    // 1. FXML FIELDS
     @FXML private StackPane contentArea;
     @FXML private Label lblTanggal;
     @FXML private Label lblJam;
     @FXML private Label lblUserName;
     @FXML private Label lblUserRole;
 
-
-    // 2. CONSTANTS
     private static final String LOGIN_FXML = "/com/sigap/view/Login.fxml";
     private static final String DASHBOARD_CONTENT_FXML = "/com/sigap/view/DashboardManagerContentView.fxml";
     private static final String REPORT_PENYEWAAN_JASPER = "/report/LaporanTransaksiPenyewaan.jasper";
     private static final String REPORT_TAGIHAN_JASPER = "/report/LaporanTagihanPembayaranSewa.jasper";
 
-
-    // 3. INITIALIZE & SETUP
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupClock();
@@ -83,8 +78,6 @@ public class DashboardManagerController implements Initializable {
         clock.play();
     }
 
-
-    // 4. EVENT HANDLERS — NAVIGATION & LOGOUT
     @FXML
     private void onDashboard(ActionEvent event) {
         try {
@@ -125,7 +118,6 @@ public class DashboardManagerController implements Initializable {
     }
 
 
-    // 5. EVENT HANDLERS — REPORT GENERATION
     @FXML
     private void onLaporanPenyewaan(ActionEvent event) {
         cetakLaporan(REPORT_PENYEWAAN_JASPER, "LaporanTransaksiPenyewaan");
@@ -136,10 +128,6 @@ public class DashboardManagerController implements Initializable {
         cetakLaporan(REPORT_TAGIHAN_JASPER, "LaporanTagihanPembayaranSewa");
     }
 
-    /**
-     * Load laporan dari file .jasper (sudah di-compile sebelumnya via Jaspersoft Studio),
-     * fill dari database, export ke PDF, lalu buka otomatis lewat aplikasi PDF default OS.
-     */
     private void cetakLaporan(String resourcePath, String namaFile) {
         try (Connection conn = new DBConnect().conn;
              InputStream jasperStream = getClass().getResourceAsStream(resourcePath)) {
@@ -188,8 +176,6 @@ public class DashboardManagerController implements Initializable {
         }
     }
 
-
-    // 6. UTILITAS
     private void tampilkanError(String pesan) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Laporan Gagal Dibuka");

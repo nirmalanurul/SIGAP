@@ -33,7 +33,6 @@ import java.util.ResourceBundle;
 
 public class PilihBiayaTambahanController implements Initializable {
 
-    // 1. FXML FIELDS
     @FXML private TableView<BiayaTambahan> tabelTersedia;
     @FXML private TableColumn<BiayaTambahan, String> colIdTersedia;
     @FXML private TableColumn<BiayaTambahan, String> colJenisTersedia;
@@ -55,14 +54,10 @@ public class PilihBiayaTambahanController implements Initializable {
     @FXML private Button btnSelesai;
     @FXML private Button btnBatal;
 
-
-    // 2. CONSTANTS
     private static final NumberFormat FMT_RUPIAH = NumberFormat.getNumberInstance(new Locale("id", "ID"));
 
     private static final String KATA_KUNCI_KETERLAMBATAN = "keterlambatan";
 
-
-    // 3. INNER CLASS
     public static class BarisBiayaTerpilih {
         final BiayaTambahan biaya;
         int jumlahHari;
@@ -79,8 +74,6 @@ public class PilihBiayaTambahanController implements Initializable {
         }
     }
 
-
-    // 4. STATE
     private final ObservableList<BiayaTambahan> masterTersedia = FXCollections.observableArrayList();
     private final ObservableList<BarisBiayaTerpilih> daftarDipilih = FXCollections.observableArrayList();
 
@@ -89,8 +82,6 @@ public class PilihBiayaTambahanController implements Initializable {
     private LocalDate tglJatuhTempo;
     private LocalDate tglBayar;
 
-
-    // 5. INITIALIZE & SETUP
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupTabelTersedia();
@@ -132,8 +123,6 @@ public class PilihBiayaTambahanController implements Initializable {
         tabelDipilih.setItems(daftarDipilih);
     }
 
-
-    // 6. DATA LOADING & SETTERS
     private void muatBiayaTersedia() {
         try {
             List<BiayaTambahan> semua = CRUD_BiayaTambahan.getAll();
@@ -165,8 +154,6 @@ public class PilihBiayaTambahanController implements Initializable {
         hitungUlangTotal();
     }
 
-
-    // 7. EVENT HANDLERS
     @FXML
     void onRowTersediaClicked(MouseEvent event) {
         biayaTerpilihSementara = tabelTersedia.getSelectionModel().getSelectedItem();
@@ -232,8 +219,6 @@ public class PilihBiayaTambahanController implements Initializable {
         tutupDialog();
     }
 
-
-    // 8. UTILITAS & HELPERS
     private Callback<TableColumn<BarisBiayaTerpilih, Void>, TableCell<BarisBiayaTerpilih, Void>> hapusCellFactory() {
         return col -> new TableCell<>() {
             private final Button btn = new Button("Hapus");

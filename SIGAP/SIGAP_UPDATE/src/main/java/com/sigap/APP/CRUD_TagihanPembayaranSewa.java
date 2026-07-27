@@ -33,7 +33,6 @@ public class CRUD_TagihanPembayaranSewa {
             cs.executeUpdate();
         }
     }
-    // hanya lewat bayar(idTagihan, nominal, metode).
 
     public static void refreshStatus() throws SQLException {
         try (Connection conn = new DBConnect().conn;

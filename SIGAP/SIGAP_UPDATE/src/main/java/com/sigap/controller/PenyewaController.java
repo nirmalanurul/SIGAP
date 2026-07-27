@@ -121,7 +121,6 @@ public class PenyewaController implements Initializable {
     private int currentPage = 1;
     private int totalPage = 1;
 
-    // Formatter tanggal dengan nama bulan berbahasa Indonesia, contoh: 14 Juli 2026
     private static final DateTimeFormatter FORMAT_TGL =
             DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("id", "ID"));
 
@@ -195,7 +194,6 @@ public class PenyewaController implements Initializable {
                     setText(null);
                 } else {
                     setText(item);
-                    // Mengatur rata kanan
                     setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
                 }
             }
@@ -230,7 +228,6 @@ public class PenyewaController implements Initializable {
             }
         });
 
-        // Kolom Foto KTP: tombol "Lihat Gambar" di setiap baris
         colFoto.setCellValueFactory(d -> new SimpleObjectProperty<>(d.getValue()));
         colFoto.setCellFactory(col -> new TableCell<>() {
             private static final String STYLE_NORMAL =

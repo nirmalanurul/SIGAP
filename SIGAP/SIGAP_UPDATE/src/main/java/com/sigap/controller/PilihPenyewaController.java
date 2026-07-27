@@ -84,7 +84,6 @@ public class PilihPenyewaController implements Initializable {
 
     private void loadData() {
         try {
-            // Hanya penyewa berstatus Aktif yang boleh dipilih untuk transaksi baru
             List<Penyewa> semua = CRUD_Penyewa.getAll();
             List<Penyewa> aktifSaja = semua.stream()
                     .filter(p -> "Aktif".equalsIgnoreCase(p.getStsPenyewa()))

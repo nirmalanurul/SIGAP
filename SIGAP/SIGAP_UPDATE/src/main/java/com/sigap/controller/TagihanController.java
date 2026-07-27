@@ -179,7 +179,8 @@ public class TagihanController implements Initializable {
 
     private List<BiayaTambahan> masterBiayaTambahan = List.of();
 
-    private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    // Format tanggal tampilan: "28 Juli 2026" (nama bulan, bukan angka) — konsisten dengan PenyewaanController
+    private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("id", "ID"));
     private static final NumberFormat FMT_RUPIAH = NumberFormat.getNumberInstance(new Locale("id", "ID"));
 
 

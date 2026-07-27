@@ -106,17 +106,17 @@ public class PilihKiosController implements Initializable {
     }
 
     /**
-     * Hanya kios berstatus Aktif DAN tidak bentrok jadwal dengan penyewaan lain
+     * Hanya kios berstatus Tersedia DAN tidak bentrok jadwal dengan penyewaan lain
      * (yang belum Dibatalkan) pada rentang tglMulaiFilter..tglSelesaiFilter.
-     * Kalau rentang tanggal belum diset, hanya filter status Aktif seperti semula.
+     * Kalau rentang tanggal belum diset, hanya filter status Tersedia seperti semula.
      */
     private List<Kios> terapkanFilterKetersediaan(List<Kios> semua) {
-        List<Kios> aktifSaja = semua.stream()
-                .filter(k -> "Aktif".equalsIgnoreCase(k.getStsKios()))
+        List<Kios> tersediaSaja = semua.stream()
+                .filter(k -> "Tersedia".equalsIgnoreCase(k.getStsKios()))
                 .collect(Collectors.toList());
 
         if (tglMulaiFilter == null || tglSelesaiFilter == null) {
-            return aktifSaja;
+            return tersediaSaja;
         }
 
         Set<String> idKiosBentrok;
@@ -128,12 +128,12 @@ public class PilihKiosController implements Initializable {
                     .map(Penyewaan::getIdKios)
                     .collect(Collectors.toSet());
         } catch (Exception e) {
-            // Kalau gagal ambil data penyewaan, jangan blokir semua kios -- tampilkan yang Aktif saja.
+            // Kalau gagal ambil data penyewaan, jangan blokir semua kios -- tampilkan yang Tersedia saja.
             idKiosBentrok = Set.of();
         }
 
         final Set<String> bentrokFinal = idKiosBentrok;
-        return aktifSaja.stream()
+        return tersediaSaja.stream()
                 .filter(k -> !bentrokFinal.contains(k.getIdKios()))
                 .collect(Collectors.toList());
     }

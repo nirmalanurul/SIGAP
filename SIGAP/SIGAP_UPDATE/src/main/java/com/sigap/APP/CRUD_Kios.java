@@ -69,7 +69,7 @@ public class CRUD_Kios {
 
     public static void delete(String idKios) throws SQLException {
         try (Connection conn = new DBConnect().conn;
-             CallableStatement cs = conn.prepareCall("{CALL spNonaktifkanKios(?)}")) {
+             CallableStatement cs = conn.prepareCall("{CALL spDeleteKios(?)}")) {
             cs.setString(1, idKios);
             cs.executeUpdate();
         }

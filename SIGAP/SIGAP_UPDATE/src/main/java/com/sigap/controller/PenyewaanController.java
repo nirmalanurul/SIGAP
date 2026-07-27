@@ -635,9 +635,6 @@ public class PenyewaanController implements Initializable {
             LocalDate tglMulai = dpTglMulai.getValue();
             LocalDate tglSelesai = dpTglSelesai.getValue();
 
-            // Status awal dihitung di sisi Java hanya untuk ditampilkan sebelum simpan;
-            // nilai final yang benar-benar tersimpan tetap dihitung ulang oleh spInsertPenyewaan
-            // di database (sumber kebenaran ada di server, bukan di klien).
             String statusAwal;
             if (tglMulai.isAfter(hariIni)) {
                 statusAwal = "Menunggu";
@@ -698,10 +695,13 @@ public class PenyewaanController implements Initializable {
                 showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Transaksi berhasil dibatalkan.");
                 loadData();
                 onBersih(null);
-            } catch (Exception e) {
+            } catch (Exception e) {                          // ⬅️ blok ini yang diganti
                 e.printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Gagal Membatalkan",
-                        "Transaksi gagal dibatalkan. Silakan coba lagi atau hubungi admin sistem.");
+                String pesanSql = e.getMessage();
+                String pesanTampil = (pesanSql != null && !pesanSql.isBlank())
+                        ? pesanSql
+                        : "Transaksi gagal dibatalkan. Silakan coba lagi atau hubungi admin sistem.";
+                showAlert(Alert.AlertType.ERROR, "Gagal Membatalkan", pesanTampil);
             }
         }
     }
@@ -741,7 +741,6 @@ public class PenyewaanController implements Initializable {
         terapkanFilterDanCari();
     }
 
-    /** Filter Status dipilih lewat submenu Status di MenuButton FILTER (radio, hanya 1 aktif). */
     @FXML
     void onFilterStatus(ActionEvent event) {
         filterStatus = rmStatusMenunggu.isSelected() ? "Menunggu"

@@ -36,28 +36,24 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-
-/**
- * Dashboard untuk role Manajer.
- * Modul yang menjadi hak akses Manajer saat ini: Laporan Transaksi Penyewaan
- * dan Laporan Tagihan Pembayaran Sewa (lihat DashboardManagerView.fxml).
- */
 public class DashboardManagerController implements Initializable {
 
+    // 1. FXML FIELDS
+    @FXML private StackPane contentArea;
+    @FXML private Label lblTanggal;
+    @FXML private Label lblJam;
+    @FXML private Label lblUserName;
+    @FXML private Label lblUserRole;
+
+
+    // 2. CONSTANTS
     private static final String LOGIN_FXML = "/com/sigap/view/Login.fxml";
     private static final String DASHBOARD_CONTENT_FXML = "/com/sigap/view/DashboardManagerContentView.fxml";
-
-    // Path classpath ke file .jasper (SUDAH di-compile lewat Jaspersoft Studio),
-    // bukan .jrxml — supaya tidak perlu compile-runtime yang rawan gagal di komputer lain
     private static final String REPORT_PENYEWAAN_JASPER = "/report/LaporanTransaksiPenyewaan.jasper";
-    private static final String REPORT_TAGIHAN_JASPER   = "/report/LaporanTagihanPembayaranSewa.jasper";
+    private static final String REPORT_TAGIHAN_JASPER = "/report/LaporanTagihanPembayaranSewa.jasper";
 
-    @FXML private StackPane contentArea;
-    @FXML private Label     lblTanggal;
-    @FXML private Label     lblJam;
-    @FXML private Label     lblUserName;
-    @FXML private Label     lblUserRole;
 
+    // 3. INITIALIZE & SETUP
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupClock();
@@ -73,6 +69,22 @@ public class DashboardManagerController implements Initializable {
         }
     }
 
+    private void setupClock() {
+        DateTimeFormatter fmtTgl = DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("id", "ID"));
+        DateTimeFormatter fmtJam = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+        Timeline clock = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
+            LocalDateTime now = LocalDateTime.now();
+            lblTanggal.setText(now.format(fmtTgl));
+            lblJam.setText(now.format(fmtJam));
+        }));
+
+        clock.setCycleCount(Animation.INDEFINITE);
+        clock.play();
+    }
+
+
+    // 4. EVENT HANDLERS — NAVIGATION & LOGOUT
     @FXML
     private void onDashboard(ActionEvent event) {
         try {
@@ -113,7 +125,7 @@ public class DashboardManagerController implements Initializable {
     }
 
 
-
+    // 5. EVENT HANDLERS — REPORT GENERATION
     @FXML
     private void onLaporanPenyewaan(ActionEvent event) {
         cetakLaporan(REPORT_PENYEWAAN_JASPER, "LaporanTransaksiPenyewaan");
@@ -127,9 +139,6 @@ public class DashboardManagerController implements Initializable {
     /**
      * Load laporan dari file .jasper (sudah di-compile sebelumnya via Jaspersoft Studio),
      * fill dari database, export ke PDF, lalu buka otomatis lewat aplikasi PDF default OS.
-     *
-     * @param resourcePath
-     * @param namaFile
      */
     private void cetakLaporan(String resourcePath, String namaFile) {
         try (Connection conn = new DBConnect().conn;
@@ -143,9 +152,7 @@ public class DashboardManagerController implements Initializable {
             }
 
             JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
-
             Map<String, Object> params = new HashMap<>();
-
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, conn);
 
             File outputFile = new File(System.getProperty("java.io.tmpdir"), namaFile + ".pdf");
@@ -181,6 +188,8 @@ public class DashboardManagerController implements Initializable {
         }
     }
 
+
+    // 6. UTILITAS
     private void tampilkanError(String pesan) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Laporan Gagal Dibuka");
@@ -191,17 +200,5 @@ public class DashboardManagerController implements Initializable {
             alert.initModality(javafx.stage.Modality.WINDOW_MODAL);
         }
         alert.showAndWait();
-    }
-
-    private void setupClock() {
-        DateTimeFormatter fmtTgl = DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("id", "ID"));
-        DateTimeFormatter fmtJam = DateTimeFormatter.ofPattern("HH:mm:ss");
-        Timeline clock = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
-            LocalDateTime now = LocalDateTime.now();
-            lblTanggal.setText(now.format(fmtTgl));
-            lblJam.setText(now.format(fmtJam));
-        }));
-        clock.setCycleCount(Animation.INDEFINITE);
-        clock.play();
     }
 }

@@ -10,11 +10,6 @@ import java.util.List;
 
 public class CRUD_TagihanPembayaranSewa {
 
-    // Transaksi tagihan TIDAK memiliki method update() biasa.
-    // Setelah insert, data inti (Id_Penyewaan, Id_Karyawan, Tgl_Bayar, Tgl_Jatuh_Tempo,
-    // Total_Biaya_Sewa, Total_Biaya_Tambahan, Total_Tagihan) bersifat final
-    // (lihat trg_PreventUpdateTagihan di database). Perubahan lanjutan yang sah
-    // hanya lewat bayar(idTagihan, nominal, metode) atau batalkan(idTagihan).
 
     public static void insert(TagihanPembayaranSewa t) throws SQLException {
         try (Connection conn = new DBConnect().conn;

@@ -96,19 +96,19 @@ public class KiosDetailController {
             switch (status) {
                 case "Tersedia":
                     bgColor = "#E0F5E8";
-                    textColor = "#1E8A3C"; // hijau
+                    textColor = "#1E8A3C";
                     break;
                 case "Disewakan":
                     bgColor = "#FFF6DA";
-                    textColor = "#C99000"; // kuning
+                    textColor = "#C99000";
                     break;
                 case "Nonaktif":
                     bgColor = "#FDE2E2";
-                    textColor = "#C0392B"; // merah
+                    textColor = "#C0392B";
                     break;
                 case "Maintenance":
                     bgColor = "#E3EEFD";
-                    textColor = "#1A5FCC"; // biru
+                    textColor = "#1A5FCC";
                     break;
                 default:
                     bgColor = "#EEEEEE";

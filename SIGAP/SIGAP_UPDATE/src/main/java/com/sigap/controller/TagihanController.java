@@ -55,8 +55,6 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class TagihanController implements Initializable {
-
-    // 1. FXML FIELDS — FORM INPUT
     @FXML
     private TextField txtIdTagihan;
     @FXML
@@ -83,7 +81,7 @@ public class TagihanController implements Initializable {
     @FXML
     private Button btnSimpan;
 
-    // 2b. FXML FIELDS — PANEL BIAYA TAMBAHAN (Biaya_Tambahan / Detail_Tagihan_Biaya)
+
     @FXML
     private Button btnPilihBiayaTambahan;
     @FXML
@@ -155,51 +153,36 @@ public class TagihanController implements Initializable {
     private int currentPage = 1;
     private int totalPage = 1;
 
-    // Seluruh data tagihan sebelum difilter kata kunci (dipakai sebagai sumber
-    // pencarian client-side di onCari, supaya tidak perlu bolak-balik ke DB).
+
     private List<TagihanPembayaranSewa> daftarLengkap = List.of();
-    // Peta Id_Penyewaan -> Penyewaan, dan Id_Penyewa -> Penyewa. Dimuat sekali
-    // di loadData(), dipakai untuk menampilkan & mencari berdasarkan Nama
-    // Penyewa di kolom "Penyewaan" tabel tagihan (rantai: Tagihan -> Id_Penyewaan
-    // -> Penyewaan.Id_Penyewa -> Penyewa.Nama_Penyewa). Sama seperti pola yang
-    // dipakai di PilihPenyewaanController.
+
     private Map<String, Penyewaan> petaPenyewaan = Map.of();
     private Map<String, Penyewa> petaPenyewa = Map.of();
 
-    // Kriteria filter aktif dari MenuButton FILTER (null = tidak difilter pada kolom itu)
+
     private String filterIdPenyewaan = null;
     private String filterStatus = null;
 
-    // Data terpilih dari dialog picker
+
     private Penyewaan penyewaanTerpilih = null;
-    // Harga_Kios dari Kios milik penyewaanTerpilih -- diambil sekali pas
-    // Penyewaan dipilih, dipakai HANYA untuk preview Total Tagihan di klien
-    // (Rp 0 kalau belum ada penyewaan terpilih). Nilai final tetap dihitung
-    // ulang di server oleh spInsertTagihanPembayaran; ini bukan sumber
-    // kebenaran, cuma biar kasir bisa lihat estimasi sebelum klik Simpan.
+
     private double hargaSewaTerpilih = 0;
 
-    // Nilai LocalDate jatuh tempo yang sedang aktif di form (dari Pilih Penyewaan
-    // -> Pilih Bulan Tagihan, atau dari baris tagihan tersimpan yang diklik).
-    // txtTglJatuhTempo hanya menampilkan teksnya (readonly); ini sumber kebenarannya
-    // di sisi klien -- dulu disimpan langsung oleh dpTglJatuhTempo.getValue().
+
     private LocalDate tglJatuhTempoTerpilih = null;
 
-    // Baris yang sedang dipilih di tabel (untuk aksi Bayar/Batalkan)
+
     private TagihanPembayaranSewa selectedTagihan = null;
 
-    // Daftar Detail_Tagihan_Biaya yang sedang disiapkan untuk tagihan baru
-    // (atau daftar existing kalau sedang melihat tagihan yang sudah tersimpan).
+
     private final ObservableList<DetailTagihanBiaya> daftarBiayaTambahan = FXCollections.observableArrayList();
-    // Master data Biaya_Tambahan, dimuat sekali untuk keperluan lookup nama Jenis
-    // di tabel mini pada form ini (Detail_Tagihan_Biaya sendiri cuma simpan Id).
+
     private List<BiayaTambahan> masterBiayaTambahan = List.of();
 
     private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static final NumberFormat FMT_RUPIAH = NumberFormat.getNumberInstance(new Locale("id", "ID"));
 
-    // Sama seperti KATA_KUNCI_KETERLAMBATAN di PilihBiayaTambahanController --
-// SATU-SATUNYA jenis biaya yang wajib ditambahkan kalau pembayaran telat.
+
     private static final String KATA_KUNCI_KETERLAMBATAN = "keterlambatan";
     private static final String STYLE_READONLY =
             "-fx-background-color:#F0F0F0;-fx-border-color:#D0D8E8;" +
@@ -222,8 +205,6 @@ public class TagihanController implements Initializable {
         txtTotalBiayaTambahan.setEditable(false);
         txtTotalBiayaTambahan.setStyle(STYLE_READONLY);
         txtSudahDibayar.setEditable(false);
-        // Tgl. Jatuh Tempo sekarang selalu otomatis dari slot bulan yang dipilih
-        // lewat dialog Pilih Penyewaan -> Pilih Bulan Tagihan, tidak diketik manual lagi.
         txtTglJatuhTempo.setEditable(false);
         txtTglJatuhTempo.setStyle(STYLE_READONLY);
 
@@ -260,7 +241,6 @@ public class TagihanController implements Initializable {
 
     private void muatMasterBiayaTambahan() {
         try {
-            // SESUAIKAN: nama method di CRUD_BiayaTambahan kalau berbeda.
             masterBiayaTambahan = CRUD_BiayaTambahan.getAll();
         } catch (Exception e) {
             masterBiayaTambahan = List.of();
@@ -282,13 +262,7 @@ public class TagihanController implements Initializable {
         txtTotalBiayaTambahan.setText(FMT_RUPIAH.format((long) total));
     }
 
-    /**
-     * Preview Total Tagihan = Harga_Kios (hargaSewaTerpilih) + jumlah Sub_total
-     * semua biaya tambahan yang sudah ditambahkan. HANYA dipakai untuk tampilan
-     * di form tagihan BARU (belum Simpan) -- untuk tagihan yang sudah tersimpan
-     * (onTableClick), txtTotalTagihan tetap diisi dari t.getTotalTagihan() yang
-     * merupakan nilai final dari server, bukan hasil method ini.
-     */
+
     private void refreshPreviewTotalTagihan() {
         double totalBiayaTambahan = daftarBiayaTambahan.stream().mapToDouble(DetailTagihanBiaya::getSubTotal).sum();
         double preview = hargaSewaTerpilih + totalBiayaTambahan;
@@ -296,10 +270,6 @@ public class TagihanController implements Initializable {
         txtTotalBiayaSewa.setText(FMT_RUPIAH.format((long) hargaSewaTerpilih));
     }
 
-    // 7b. FORMAT OTOMATIS — nominal bayar diketik manual otomatis dapat pemisah
-    // ribuan (mis. "50000" -> "50.000") supaya sama enaknya dibaca dengan hasil
-    // tombol Otomatis. Pakai flag sedangMemformat supaya setText() di dalam
-    // listener tidak memicu listener ini lagi (infinite loop).
     private boolean sedangMemformatNominal = false;
 
     private void setupNominalBayarFormatter() {
@@ -318,9 +288,7 @@ public class TagihanController implements Initializable {
         });
     }
 
-    // 7c. FORMAT OTOMATIS — Dibayar di Awal (DP) diketik manual otomatis dapat
-    // pemisah ribuan (mis. "50000" -> "50.000"), sama seperti txtNominalBayar.
-    // Flag terpisah supaya tidak bentrok dengan flag formatter nominal bayar.
+
     private boolean sedangMemformatDpAwal = false;
 
     private void setupTotalDibayarAwalFormatter() {
@@ -377,7 +345,7 @@ public class TagihanController implements Initializable {
         });
     }
 
-    /** Label kolom Penyewaan: "Id_Penyewaan - Nama_Penyewa" jika nama diketahui, jatuh ke Id_Penyewaan saja jika tidak. */
+
     private String labelPenyewaan(String idPenyewaan) {
         if (idPenyewaan == null) return "";
         Penyewaan penyewaan = petaPenyewaan.get(idPenyewaan);
@@ -389,12 +357,7 @@ public class TagihanController implements Initializable {
         return idPenyewaan + " - " + penyewa.getNamaPenyewa();
     }
 
-    /**
-     * Memuat peta Penyewaan & Penyewa sekali di awal (dipanggil dari loadData()).
-     * Dipakai untuk menampilkan Nama Penyewa di kolom Penyewaan, dan untuk
-     * pencarian berdasarkan Nama Penyewa di onCari() -- tanpa perlu mengubah
-     * stored procedure spGetAllTagihan/spSearchTagihan di database.
-     */
+
     private void muatPetaPenyewaan() {
         try {
             petaPenyewaan = CRUD_Penyewaan.getAll().stream()
@@ -421,7 +384,6 @@ public class TagihanController implements Initializable {
     }
 
     // 8c. FILTER — MenuButton FILTER (submenu Penyewaan dinamis + submenu Status statis)
-    /** ToggleGroup untuk RadioMenuItem status di menu FILTER, supaya cuma 1 status aktif dalam satu waktu. */
     private void setupFilterStatus() {
         ToggleGroup grupStatus = new ToggleGroup();
         rmStatusBelumLunas.setToggleGroup(grupStatus);
@@ -430,11 +392,6 @@ public class TagihanController implements Initializable {
         rmStatusDibatalkan.setToggleGroup(grupStatus);
     }
 
-    /**
-     * Mengisi submenu Penyewaan di menu FILTER secara dinamis (item-nya tergantung
-     * petaPenyewaan), dipanggil ulang tiap kali data selesai dimuat lewat loadData().
-     * Label tiap item pakai labelPenyewaan() supaya konsisten dengan kolom Penyewaan di tabel.
-     */
     private void populateFilterMenus() {
         menuPenyewaan.getItems().clear();
         ToggleGroup grupPenyewaan = new ToggleGroup();
@@ -495,27 +452,13 @@ public class TagihanController implements Initializable {
     }
 
     // 10. FORM STATE
-    // Form Tagihan hanya punya 2 mode: siap-input-baru, atau terkunci (baris terpilih ditampilkan read-only).
-    // Tidak ada mode "edit" karena tidak ada operasi UPDATE bebas untuk data inti tagihan.
     private void setFormState(boolean adaBarisTerpilih) {
         btnSimpan.setDisable(adaBarisTerpilih);
         btnPilihPenyewaan.setDisable(adaBarisTerpilih);
-        // Biaya tambahan boleh disusun bebas untuk tagihan BARU (belum Simpan).
-        // Untuk tagihan yang SUDAH tersimpan, tetap boleh ditambah/dikurangi
-        // SELAMA statusnya masih "Belum Lunas" -- begitu Lunas/Terlambat/
-        // Dibatalkan, dikunci total (lihat onPilihBiayaTambahan() untuk alur
-        // insert/delete langsung ke DB pada mode tagihan tersimpan).
         boolean bolehUbahBiayaTambahan = !adaBarisTerpilih
                 || (selectedTagihan != null && "Belum Lunas".equalsIgnoreCase(selectedTagihan.getStsTagihanPembayaran()));
         btnPilihBiayaTambahan.setDisable(!bolehUbahBiayaTambahan);
         cbMetodeBayar.setDisable(adaBarisTerpilih);
-        // Tgl. Jatuh Tempo tidak lagi diketik manual — nilainya selalu datang dari
-        // slot bulan yang dipilih di dialog Pilih Penyewaan -> Pilih Bulan Tagihan.
-        // txtTglJatuhTempo sudah readonly permanen (editable=false), tidak perlu disable lagi.
-
-        // Dibayar di Awal (DP) hanya boleh diisi kalau penyewaan yang dipilih
-        // berstatus "Menunggu". Probis tidak mengizinkan cicilan/DP untuk
-        // penyewaan yang sudah Berlangsung/Selesai/Dibatalkan.
         boolean bolehDp = !adaBarisTerpilih
                 && penyewaanTerpilih != null
                 && "Menunggu".equalsIgnoreCase(penyewaanTerpilih.getStsPenyewaan());
@@ -602,7 +545,6 @@ public class TagihanController implements Initializable {
     @FXML
     void onPilihPenyewaan(ActionEvent event) {
         try {
-            // Tahap 1: pilih Penyewaan (yang masih punya sisa bulan belum ditagih).
             FXMLLoader loaderPenyewaan = new FXMLLoader(getClass().getResource("/com/sigap/view/Tagihan Pembayaran/PilihPenyewaan.fxml"));
             Parent rootPenyewaan = loaderPenyewaan.load();
             PilihPenyewaanController controllerPenyewaan = loaderPenyewaan.getController();
@@ -615,9 +557,9 @@ public class TagihanController implements Initializable {
             dialogPenyewaan.showAndWait();
 
             Penyewaan hasilPenyewaan = controllerPenyewaan.getPenyewaanTerpilih();
-            if (hasilPenyewaan == null) return; // dibatalkan di tahap 1
+            if (hasilPenyewaan == null) return;
 
-            // Tahap 2: dari penyewaan itu, pilih 1 slot bulan (virtual) yang belum ditagih.
+
             FXMLLoader loaderBulan = new FXMLLoader(getClass().getResource("/com/sigap/view/Tagihan Pembayaran/PilihBulanTagihan.fxml"));
             Parent rootBulan = loaderBulan.load();
             PilihBulanTagihanController controllerBulan = loaderBulan.getController();
@@ -631,15 +573,13 @@ public class TagihanController implements Initializable {
             dialogBulan.showAndWait();
 
             LocalDate jatuhTempoTerpilih = controllerBulan.getJatuhTempoTerpilih();
-            if (jatuhTempoTerpilih == null) return; // dibatalkan di tahap 2, jangan ubah apa pun di form
+            if (jatuhTempoTerpilih == null) return;
 
             penyewaanTerpilih = hasilPenyewaan;
             txtPenyewaanTerpilih.setText(labelPenyewaanTerpilih(hasilPenyewaan));
             tglJatuhTempoTerpilih = jatuhTempoTerpilih;
             txtTglJatuhTempo.setText(jatuhTempoTerpilih.format(FMT_TGL));
 
-            // Ambil Harga_Kios buat preview Total Tagihan -- SESUAIKAN nama
-            // method di CRUD_Kios kalau beda dari getById(idKios).
             try {
                 Kios kios = CRUD_Kios.getById(hasilPenyewaan.getIdKios());
                 hargaSewaTerpilih = (kios != null) ? kios.getHargaKios() : 0;
@@ -648,7 +588,6 @@ public class TagihanController implements Initializable {
             }
             refreshPreviewTotalTagihan();
 
-            // Refresh status field DP: hanya terbuka jika status penyewaan "Menunggu".
             setFormState(false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -657,14 +596,14 @@ public class TagihanController implements Initializable {
         }
     }
 
-    /** Label ringkas "Id_Penyewaan - Nama Penyewa - Kios Id_Kios" untuk txtPenyewaanTerpilih. */
+
     private String labelPenyewaanTerpilih(Penyewaan p) {
         String namaPenyewa = null;
         try {
             Penyewa penyewa = CRUD_Penyewa.getById(p.getIdPenyewa());
             namaPenyewa = (penyewa != null) ? penyewa.getNamaPenyewa() : null;
         } catch (Exception ex) {
-            // Nama gagal diambil (mis. koneksi DB) -> tetap tampilkan ID saja, jangan blokir alur.
+
         }
         String bagianPenyewa = (namaPenyewa == null || namaPenyewa.isBlank())
                 ? p.getIdPenyewa()
@@ -672,7 +611,7 @@ public class TagihanController implements Initializable {
         return p.getIdPenyewaan() + " (" + bagianPenyewa + ") - Kios " + p.getIdKios();
     }
 
-    // 13b. EVENT HANDLER — PILIH BIAYA TAMBAHAN (buka dialog PilihBiayaTambahan)
+
     @FXML
     void onPilihBiayaTambahan(ActionEvent event) {
         try {
@@ -680,11 +619,7 @@ public class TagihanController implements Initializable {
             Parent rootBiaya = loaderBiaya.load();
             PilihBiayaTambahanController controllerBiaya = loaderBiaya.getController();
             controllerBiaya.setDaftarAwal(daftarBiayaTambahan, masterBiayaTambahan);
-            // WAJIB: tanpa ini, Jumlah_Hari untuk jenis "Keterlambatan Bayar Sewa"
-            // di dalam dialog tidak akan pernah terhitung otomatis (tetap 0),
-            // karena hitungHariTerlambat() di sana butuh Tgl_Jatuh_Tempo.
-            // Tgl_Bayar dianggap hari ini karena txtTglBayar selalu diisi
-            // LocalDate.now() dan tidak bisa diedit untuk tagihan baru.
+
             controllerBiaya.setInfoJatuhTempo(tglJatuhTempoTerpilih, LocalDate.now());
 
             Stage dialogBiaya = new Stage();
@@ -694,23 +629,18 @@ public class TagihanController implements Initializable {
             dialogBiaya.setScene(new Scene(rootBiaya));
             dialogBiaya.showAndWait();
 
-            // isSelesaiDiklik() dipakai supaya "Selesai tanpa pilih apa-apa" (list kosong)
-            // tidak salah dianggap sama dengan "Batal" (list juga kosong).
+
             if (!controllerBiaya.isSelesaiDiklik()) return;
 
             List<DetailTagihanBiaya> hasilDialog = controllerBiaya.getDaftarBiayaTerpilih();
 
             if (selectedTagihan == null) {
-                // Tagihan BARU (belum Simpan): tetap staging seperti biasa di
-                // klien, baru benar-benar di-insert ke DB pas onSimpan().
+
                 daftarBiayaTambahan.setAll(hasilDialog);
                 refreshTabelBiayaTambahan();
                 refreshPreviewTotalTagihan();
             } else {
-                // Tagihan SUDAH TERSIMPAN (status Belum Lunas -- tombol ini
-                // cuma aktif di kondisi itu, lihat setFormState()): tidak ada
-                // "staging" lagi, langsung sinkronkan ke DB (insert baris baru,
-                // delete baris yang dihapus kasir di dialog).
+
                 simpanPerubahanBiayaTambahanTersimpan(selectedTagihan.getIdTagihanPembayaran(), hasilDialog);
             }
         } catch (Exception e) {
@@ -720,13 +650,6 @@ public class TagihanController implements Initializable {
         }
     }
 
-    /**
-     * Sinkronkan perubahan biaya tambahan dari dialog ke DB untuk tagihan yang
-     * SUDAH TERSIMPAN (status Belum Lunas). Dibandingkan terhadap data terbaru
-     * dari DB (bukan daftarBiayaTambahan di klien) supaya perbandingan lama-vs-
-     * baru akurat. Baris baru di-insert, baris yang dihapus kasir di dialog
-     * di-delete (lihat catatan di CRUD_DetailTagihanBiaya soal delete manual).
-     */
     private void simpanPerubahanBiayaTambahanTersimpan(String idTagihan, List<DetailTagihanBiaya> hasilDialog) {
         List<DetailTagihanBiaya> lamaDariDb;
         try {
@@ -744,15 +667,14 @@ public class TagihanController implements Initializable {
                 .filter(lama -> hasilDialog.stream().noneMatch(b -> b.getIdBiayaTambahan().equals(lama.getIdBiayaTambahan())))
                 .toList();
 
-        if (ditambahkan.isEmpty() && dihapus.isEmpty()) return; // gak ada perubahan
-
+        if (ditambahkan.isEmpty() && dihapus.isEmpty()) return;
         boolean semuaSukses = true;
         for (DetailTagihanBiaya d : ditambahkan) {
             try {
                 CRUD_DetailTagihanBiaya.insert(new DetailTagihanBiaya(
                         idTagihan, d.getIdBiayaTambahan(), d.getJumlahHari(), d.getSubTotal()));
             } catch (Exception e) {
-                e.printStackTrace(); // SEMENTARA: biar error SQL asli kelihatan di console
+                e.printStackTrace();
                 semuaSukses = false;
             }
         }
@@ -760,13 +682,12 @@ public class TagihanController implements Initializable {
             try {
                 CRUD_DetailTagihanBiaya.delete(idTagihan, d.getIdBiayaTambahan());
             } catch (Exception e) {
-                e.printStackTrace(); // SEMENTARA: biar error SQL asli kelihatan di console
+                e.printStackTrace();
                 semuaSukses = false;
             }
         }
 
-        // Refresh semua tampilan dari sumber kebenaran (DB): panel biaya
-        // tambahan, tabel daftar tagihan, dan field Total_Tagihan tagihan ini.
+
         muatBiayaTambahanUntukTagihan(idTagihan);
         loadData();
         masterList.stream()
@@ -816,8 +737,6 @@ public class TagihanController implements Initializable {
 //    }
 
     // 14. EVENT HANDLER — SIMPAN (INSERT)
-    // Total_Biaya_Sewa dan Total_Tagihan TIDAK dihitung di sini — nilai final dihitung ulang
-    // oleh spInsertTagihanPembayaran di database (sumber kebenaran ada di server, bukan di klien).
     @FXML
     void onSimpan(ActionEvent event) {
         if (!validasi()) return;
@@ -829,7 +748,6 @@ public class TagihanController implements Initializable {
             return;
         }
 
-        // Wajib ada biaya keterlambatan kalau pembayaran melewati jatuh tempo
         if (LocalDate.now().isAfter(tglJatuhTempoTerpilih)) {
             boolean sudahAdaBiayaKeterlambatan;
             try {
@@ -878,14 +796,6 @@ public class TagihanController implements Initializable {
             );
 
             CRUD_TagihanPembayaranSewa.insert(t);
-
-            // Simpan Detail_Tagihan_Biaya SETELAH Id_Tagihan_Pembayaran tersimpan --
-            // FK Detail_Tagihan_Biaya.Id_Tagihan_Pembayaran butuh baris induknya ada dulu.
-            // SESUAIKAN: kalau spInsertDetailTagihanBiaya kamu juga bertugas
-            // mengisi ulang Total_Biaya_Tambahan & Total_Tagihan di
-            // Tagihan_Pembayaran_Sewa, tidak perlu langkah tambahan apa pun di
-            // sini. Kalau totalnya masih perlu di-refresh terpisah, tambahkan
-            // pemanggilannya di sini juga.
             if (!daftarBiayaTambahan.isEmpty()) {
                 boolean semuaBiayaSukses = true;
                 for (DetailTagihanBiaya d : daftarBiayaTambahan) {
@@ -942,11 +852,6 @@ public class TagihanController implements Initializable {
             return;
         }
 
-        // Tidak ada cicilan untuk tagihan pembayaran sewa: sekali Bayar, harus
-        // langsung melunasi sisa tagihan. Nominal WAJIB persis sama dengan sisa
-        // (Total_Tagihan - Total_Dibayar) -- tidak boleh kurang (baru sebagian)
-        // ataupun lebih (kelebihan bayar). Pakai toleransi kecil untuk floating
-        // point, karena Rupiah pada dasarnya bilangan bulat.
         double sisaTagihan = selectedTagihan.getTotalTagihan() - selectedTagihan.getTotalDibayar();
         if (Math.abs(nominal - sisaTagihan) > 0.5) {
             showAlert(Alert.AlertType.WARNING, "Validasi Input",
@@ -992,12 +897,7 @@ public class TagihanController implements Initializable {
         txtNominalBayar.setText(FMT_RUPIAH.format((long) sisaTagihan));
     }
 
-    /**
-     * Parsing nominal yang toleran terhadap pemisah ribuan (mis. "50.000" dari
-     * tombol Otomatis) maupun angka polos yang diketik manual (mis. "50000").
-     * Rupiah tidak punya desimal, jadi semua karakter selain digit dibuang
-     * dulu sebelum di-parse.
-     */
+
     private double parseNominal(String text) throws NumberFormatException {
         String digitsOnly = text.replaceAll("[^0-9]", "");
         if (digitsOnly.isEmpty()) throw new NumberFormatException("Nominal kosong");
@@ -1040,11 +940,8 @@ public class TagihanController implements Initializable {
         setFormState(true);
     }
 
-    /** Tampilkan Detail_Tagihan_Biaya yang sudah tersimpan untuk tagihan yang sedang dilihat. */
     private void muatBiayaTambahanUntukTagihan(String idTagihanPembayaran) {
         try {
-            // SESUAIKAN: nama method di CRUD_DetailTagihanBiaya kalau berbeda
-            // (mis. getByIdTagihan / findByTagihan).
             List<DetailTagihanBiaya> existing = CRUD_DetailTagihanBiaya.getByIdTagihanPembayaran(idTagihanPembayaran);
             daftarBiayaTambahan.setAll(existing);
         } catch (Exception e) {
@@ -1054,17 +951,11 @@ public class TagihanController implements Initializable {
     }
 
     // 18. EVENT HANDLER — PENCARIAN & FILTER
-    // Pencarian & filter dilakukan client-side atas daftarLengkap (data yang sudah
-    // dimuat penuh oleh loadData()), bukan lewat stored procedure spSearchTagihan lagi.
-    // Ini supaya kasir bisa cari tagihan berdasarkan Nama Penyewa juga, tanpa
-    // perlu mengubah stored procedure di database (nama penyewa didapat lewat
-    // rantai Id_Penyewaan -> Penyewaan.Id_Penyewa -> Penyewa.Nama_Penyewa).
-    @FXML
     void onCari(ActionEvent event) {
         terapkanFilterDanCari();
     }
 
-    /** Filter Status dipilih lewat submenu Status di MenuButton FILTER (radio, hanya 1 aktif). */
+
     @FXML
     void onFilterStatus(ActionEvent event) {
         filterStatus = rmStatusBelumLunas.isSelected() ? "Belum Lunas"
@@ -1074,7 +965,7 @@ public class TagihanController implements Initializable {
         terapkanFilterDanCari();
     }
 
-    /** Reset semua filter (Penyewaan, Status) sekaligus, dipicu item "Reset Filter" di MenuButton. */
+
     @FXML
     void onResetFilter(ActionEvent event) {
         filterIdPenyewaan = null;
@@ -1087,7 +978,7 @@ public class TagihanController implements Initializable {
         terapkanFilterDanCari();
     }
 
-    /** Menerapkan kata kunci pencarian + kriteria filter (Penyewaan, Status) ke daftarLengkap, lalu refresh tabel. */
+
     private void terapkanFilterDanCari() {
         String kw = txtCari.getText() == null ? "" : txtCari.getText().trim().toLowerCase();
 
@@ -1102,7 +993,7 @@ public class TagihanController implements Initializable {
         refreshTable();
     }
 
-    /** Cocokkan kata kunci ke ID Tagihan, ID Penyewaan, ID Karyawan, Status, dan Nama Penyewa. */
+
     private boolean cocokKeyword(TagihanPembayaranSewa t, String kwLower) {
         if (mengandung(t.getIdTagihanPembayaran(), kwLower)) return true;
         if (mengandung(t.getIdPenyewaan(), kwLower)) return true;

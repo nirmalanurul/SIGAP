@@ -10,10 +10,6 @@ import java.util.List;
 
 public class CRUD_Penyewaan {
 
-    // Transaksi penyewaan TIDAK memiliki method update().
-    // Setelah insert, data inti transaksi bersifat final (lihat trg_PreventUpdatePenyewaan
-    // di database). Satu-satunya perubahan lanjutan yang sah adalah batalkan(idPenyewaan),
-    // yang hanya berhasil jika status saat ini masih 'Menunggu'.
 
     public static void insert(Penyewaan p) throws SQLException {
         try (Connection conn = new DBConnect().conn;

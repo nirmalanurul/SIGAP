@@ -673,7 +673,6 @@ public class PenyewaController implements Initializable {
     void onUbah(ActionEvent event) {
         if (!validasi(false)) return;
         try {
-            // Ambil status dari baris yang sedang dipilih agar tidak merubah status saat update
             Penyewa pTabel = tabelPenyewa.getSelectionModel().getSelectedItem();
             String statusLama = (pTabel != null && pTabel.getStsPenyewa() != null) ? pTabel.getStsPenyewa() : "Aktif";
 

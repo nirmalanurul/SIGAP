@@ -1,5 +1,4 @@
 package com.sigap.controller;
-/// ///
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;

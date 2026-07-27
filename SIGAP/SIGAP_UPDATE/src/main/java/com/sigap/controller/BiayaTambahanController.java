@@ -110,8 +110,6 @@ public class BiayaTambahanController implements Initializable {
     private static final String TIDAK_AKTIF = "Tidak Aktif";
     private static final NumberFormat RIBUAN_FORMAT = NumberFormat.getInstance(new Locale("in", "ID"));
 
-    // Flag: apakah data "Keterlambatan Bayar Sewa" yang berstatus Aktif sudah ada di DB.
-    // Kalau true -> radio Keterlambatan dikunci, hanya boleh Ubah/Hapus data yang sudah ada.
     private boolean keterlambatanTerpakai = false;
 
     private final ObservableList<BiayaTambahan> masterList = FXCollections.observableArrayList();
@@ -281,7 +279,7 @@ public class BiayaTambahanController implements Initializable {
                 if (!newVal.isEmpty()) txtNominal.setText("");
                 return;
             }
-            // buang angka nol di depan (kecuali angka itu sendiri "0")
+
             digits = digits.replaceFirst("^0+(?=\\d)", "");
 
             String formatted = formatRibuan(digits);

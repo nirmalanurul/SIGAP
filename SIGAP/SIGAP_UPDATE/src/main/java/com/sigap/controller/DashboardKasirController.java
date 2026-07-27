@@ -23,10 +23,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-/**
- * Dashboard untuk role Kasir.
- * Hak akses: Penyewa, Penyewaan, Tagihan Pembayaran Sewa.
- */
 public class DashboardKasirController implements Initializable {
 
     private static final String LOGIN_FXML = "/com/sigap/view/Login.fxml";
@@ -56,7 +52,6 @@ public class DashboardKasirController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         setupClock();
         setupUserInfo();
-        // Default tampilkan Penyewa saat pertama buka
         onMenuPenyewa();
     }
 
@@ -106,11 +101,6 @@ public class DashboardKasirController implements Initializable {
         }
     }
 
-    /**
-     * Memuat FXML ke contentArea. Jika judulPlaceholder tidak null dan
-     * controller hasil load adalah ComingSoonController, judul akan
-     * disetel otomatis.
-     */
     private void loadView(String fxmlPath, String judulPlaceholder) {
         try {
             URL url = getClass().getResource(fxmlPath);
@@ -121,12 +111,6 @@ public class DashboardKasirController implements Initializable {
             FXMLLoader loader = new FXMLLoader(url);
             Parent view = loader.load();
 
-            if (judulPlaceholder != null) {
-                Object controller = loader.getController();
-                if (controller instanceof ComingSoonController) {
-                    ((ComingSoonController) controller).setJudul(judulPlaceholder);
-                }
-            }
 
             contentArea.getChildren().setAll(view);
         } catch (Exception e) {

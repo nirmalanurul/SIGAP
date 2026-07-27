@@ -23,10 +23,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-/**
- * Dashboard untuk role Admin.
- * Hak akses: Karyawan, Kios, Biaya Tambahan.
- */
 public class DashboardAdminController implements Initializable {
 
     private static final String LOGIN_FXML = "/com/sigap/view/Login.fxml";

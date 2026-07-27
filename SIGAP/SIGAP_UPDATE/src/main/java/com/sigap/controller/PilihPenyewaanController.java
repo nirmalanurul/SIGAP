@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 
 public class PilihPenyewaanController implements Initializable {
 
+    // 1. FXML FIELDS
     @FXML
     private TextField txtCari;
     @FXML
@@ -51,26 +52,35 @@ public class PilihPenyewaanController implements Initializable {
     @FXML
     private TableColumn<Penyewaan, String> colStatus;
 
+
+    // 2. CONSTANTS
+    private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+
+    // 3. STATE
     private final ObservableList<Penyewaan> masterList = FXCollections.observableArrayList();
     private Penyewaan penyewaanTerpilih = null;
 
-    /** Seluruh penyewaan yang lolos filter (sebelum kata kunci pencarian diterapkan). */
+
     private List<Penyewaan> daftarLengkap = List.of();
-    /** Peta Id_Penyewa -> data Penyewa, dipakai untuk tampilkan & cari berdasarkan nama. */
+
     private Map<String, Penyewa> petaPenyewa = Map.of();
 
-    private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
+    // 4. INITIALIZE
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupTable();
         Platform.runLater(this::loadData);
     }
 
+
+    // 5. TABLE SETUP
     private void setupTable() {
         colId.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getIdPenyewaan()));
         colKios.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getIdKios()));
         colPenyewa.setCellValueFactory(d -> new SimpleStringProperty(labelPenyewa(d.getValue().getIdPenyewa())));
+
         colTglMulai.setCellValueFactory(d -> new SimpleStringProperty(
                 d.getValue().getTglMulai() == null ? "" : d.getValue().getTglMulai().format(FMT_TGL)));
         colTglSelesai.setCellValueFactory(d -> new SimpleStringProperty(
@@ -102,11 +112,14 @@ public class PilihPenyewaanController implements Initializable {
         });
     }
 
+
+    // 6. DATA LOADING & FILTERING
     private void loadData() {
         try {
             muatPetaPenyewa();
             List<Penyewaan> semua = CRUD_Penyewaan.getAll();
             daftarLengkap = filterMasihAdaSisaBulan(semua);
+
             masterList.setAll(daftarLengkap);
             tabelPenyewaan.setItems(masterList);
             tabelPenyewaan.refresh();
@@ -115,7 +128,7 @@ public class PilihPenyewaanController implements Initializable {
         }
     }
 
-    /** Memuat data Nama_Penyewa dkk sekali di awal, dipakai untuk tampilan kolom & pencarian nama. */
+
     private void muatPetaPenyewa() {
         try {
             petaPenyewa = CRUD_Penyewa.getAll().stream()
@@ -125,26 +138,6 @@ public class PilihPenyewaanController implements Initializable {
         }
     }
 
-    /** Label kolom Penyewa: "ID - Nama" jika nama diketahui, jatuh ke ID saja jika tidak. */
-    private String labelPenyewa(String idPenyewa) {
-        if (idPenyewa == null) return "";
-        Penyewa p = petaPenyewa.get(idPenyewa);
-        if (p == null || p.getNamaPenyewa() == null || p.getNamaPenyewa().isBlank()) {
-            return idPenyewa;
-        }
-        return idPenyewa + " - " + p.getNamaPenyewa();
-    }
-
-    /**
-     * Hanya menampilkan penyewaan yang:
-     *  1) statusnya belum 'Dibatalkan', dan
-     *  2) masih punya minimal satu slot bulan (dari Tgl_Mulai s/d Tgl_Selesai)
-     *     yang belum punya tagihan aktif (selain yang sudah 'Dibatalkan').
-     * Satu penyewaan sekarang bisa punya banyak tagihan aktif sekaligus (satu per
-     * bulan kontrak) — bukan lagi "belum pernah ditagih sama sekali" seperti
-     * sebelumnya, tapi "masih ada sisa bulan yang belum ditagih". Bulan mana saja
-     * yang tersedia baru ditentukan di dialog Pilih Bulan Tagihan (tahap 2).
-     */
     private List<Penyewaan> filterMasihAdaSisaBulan(List<Penyewaan> semua) {
         Map<String, List<TagihanPembayaranSewa>> tagihanPerPenyewaan;
         try {
@@ -169,19 +162,8 @@ public class PilihPenyewaanController implements Initializable {
                 .collect(Collectors.toList());
     }
 
-    private void showAlert(String msg) {
-        Runnable show = () -> {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText(null);
-            alert.setContentText(msg);
-            if (tabelPenyewaan.getScene() != null) alert.initOwner(tabelPenyewaan.getScene().getWindow());
-            alert.showAndWait();
-        };
-        if (Platform.isFxApplicationThread()) show.run();
-        else Platform.runLater(show);
-    }
 
+    // 7. EVENT HANDLERS
     @FXML
     void onCari(ActionEvent event) {
         String kw = txtCari.getText().trim();
@@ -196,25 +178,12 @@ public class PilihPenyewaanController implements Initializable {
         masterList.setAll(hasil);
     }
 
-    /** Cocokkan kata kunci ke ID Penyewaan, Kios, ID Penyewa, Nama Penyewa, dan Status. */
-    private boolean cocokKeyword(Penyewaan p, String kwLower) {
-        if (mengandung(p.getIdPenyewaan(), kwLower)) return true;
-        if (mengandung(p.getIdKios(), kwLower)) return true;
-        if (mengandung(p.getIdPenyewa(), kwLower)) return true;
-        if (mengandung(p.getStsPenyewaan(), kwLower)) return true;
-        Penyewa penyewa = petaPenyewa.get(p.getIdPenyewa());
-        return penyewa != null && mengandung(penyewa.getNamaPenyewa(), kwLower);
-    }
-
-    private boolean mengandung(String value, String kwLower) {
-        return value != null && value.toLowerCase().contains(kwLower);
-    }
-
     @FXML
     void onRowClicked(MouseEvent event) {
         if (event.getClickCount() < 1) return;
         Penyewaan dipilih = tabelPenyewaan.getSelectionModel().getSelectedItem();
         if (dipilih == null) return;
+
         penyewaanTerpilih = dipilih;
         tutupDialog();
     }
@@ -225,15 +194,49 @@ public class PilihPenyewaanController implements Initializable {
         tutupDialog();
     }
 
+
+    // 8. UTILITAS
+    private String labelPenyewa(String idPenyewa) {
+        if (idPenyewa == null) return "";
+        Penyewa p = petaPenyewa.get(idPenyewa);
+        if (p == null || p.getNamaPenyewa() == null || p.getNamaPenyewa().isBlank()) {
+            return idPenyewa;
+        }
+        return idPenyewa + " - " + p.getNamaPenyewa();
+    }
+
+    private boolean cocokKeyword(Penyewaan p, String kwLower) {
+        if (mengandung(p.getIdPenyewaan(), kwLower)) return true;
+        if (mengandung(p.getIdKios(), kwLower)) return true;
+        if (mengandung(p.getIdPenyewa(), kwLower)) return true;
+        if (mengandung(p.getStsPenyewaan(), kwLower)) return true;
+
+        Penyewa penyewa = petaPenyewa.get(p.getIdPenyewa());
+        return penyewa != null && mengandung(penyewa.getNamaPenyewa(), kwLower);
+    }
+
+    private boolean mengandung(String value, String kwLower) {
+        return value != null && value.toLowerCase().contains(kwLower);
+    }
+
+    private void showAlert(String msg) {
+        Runnable show = () -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText(msg);
+            if (tabelPenyewaan.getScene() != null) alert.initOwner(tabelPenyewaan.getScene().getWindow());
+            alert.showAndWait();
+        };
+        if (Platform.isFxApplicationThread()) show.run();
+        else Platform.runLater(show);
+    }
+
     private void tutupDialog() {
         Stage stage = (Stage) tabelPenyewaan.getScene().getWindow();
         stage.close();
     }
 
-    /**
-     * Dipanggil oleh parent controller setelah dialog.showAndWait() selesai.
-     * Mengembalikan null jika dialog dibatalkan / ditutup tanpa memilih.
-     */
     public Penyewaan getPenyewaanTerpilih() {
         return penyewaanTerpilih;
     }

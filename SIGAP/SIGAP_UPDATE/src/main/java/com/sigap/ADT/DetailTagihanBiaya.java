@@ -2,19 +2,6 @@ package com.sigap.ADT;
 
 import java.util.Objects;
 
-/**
- * Merepresentasikan satu baris tabel Detail_Tagihan_Biaya (PDM).
- * Composite PK: (Id_Tagihan_Pembayaran, Id_Biaya_Tambahan).
- *
- *   PK,FK1  Id_Tagihan_Pembayaran   VARCHAR(8)  NOT NULL
- *   PK,FK2  Id_Biaya_Tambahan       VARCHAR(8)  NOT NULL
- *           Jumlah_Hari             INT         NOT NULL
- *           Sub_total               INT         NOT NULL
- *
- * Tidak ada Id sendiri (surrogate key) karena baris ini murni tabel
- * junction/detail antara Tagihan_Pembayaran_Sewa dan Biaya_Tambahan --
- * identitasnya adalah gabungan kedua FK di atas.
- */
 public class DetailTagihanBiaya {
 
     private String idTagihanPembayaran;

@@ -25,30 +25,21 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-/**
- * Dialog tahap ke-2 dari alur "Pilih Penyewaan": menampilkan slot bulan
- * tagihan (virtual, belum ada di DB) untuk satu Penyewaan yang sudah dipilih
- * di tahap 1, hanya bulan yang BELUM punya tagihan aktif. Kasir memilih satu
- * bulan, dan tanggal jatuh tempo bulan itu dikembalikan ke TagihanController.
- */
 public class PilihBulanTagihanController implements Initializable {
 
-    @FXML
-    private Label lblInfoPenyewaan;
-    @FXML
-    private TableView<SlotBulan> tabelBulan;
-    @FXML
-    private TableColumn<SlotBulan, String> colBulanKe;
-    @FXML
-    private TableColumn<SlotBulan, String> colJatuhTempo;
+    // 1. FXML FIELDS
+    @FXML private Label lblInfoPenyewaan;
+    @FXML private TableView<SlotBulan> tabelBulan;
+    @FXML private TableColumn<SlotBulan, String> colBulanKe;
+    @FXML private TableColumn<SlotBulan, String> colJatuhTempo;
 
+
+    // 2. CONSTANTS
     private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static final DateTimeFormatter FMT_BULAN = DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("id", "ID"));
 
-    private Penyewaan penyewaan;
-    private LocalDate jatuhTempoTerpilih = null;
 
-    /** Baris tabel: satu slot bulan tagihan yang masih tersedia (virtual). */
+    // 3. INNER CLASS
     public static class SlotBulan {
         final int bulanKe;
         final LocalDate jatuhTempo;
@@ -59,15 +50,28 @@ public class PilihBulanTagihanController implements Initializable {
         }
     }
 
+
+    // 4. STATE
+    private Penyewaan penyewaan;
+    private LocalDate jatuhTempoTerpilih = null;
+
+
+    // 5. INITIALIZE & SETUP
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        setupTable();
+    }
+
+    private void setupTable() {
         colBulanKe.setCellValueFactory(d -> new SimpleStringProperty("Bulan ke-" + d.getValue().bulanKe));
+
         colJatuhTempo.setCellValueFactory(d -> new SimpleStringProperty(
                 capitalize(d.getValue().jatuhTempo.format(FMT_BULAN))
                         + "  (jatuh tempo " + d.getValue().jatuhTempo.format(FMT_TGL) + ")"));
     }
 
-    /** Dipanggil oleh TagihanController sebelum dialog ditampilkan (showAndWait). */
+
+    // 6. DATA LOADING & SETTERS
     public void setPenyewaan(Penyewaan p) {
         this.penyewaan = p;
         lblInfoPenyewaan.setText("Penyewaan " + p.getIdPenyewaan() + "  |  Kios " + p.getIdKios()
@@ -99,16 +103,14 @@ public class PilihBulanTagihanController implements Initializable {
         tabelBulan.setItems(slotBelumDitagih);
     }
 
-    private static String capitalize(String s) {
-        if (s == null || s.isEmpty()) return s;
-        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
-    }
 
+    // 7. EVENT HANDLERS
     @FXML
     void onRowClicked(MouseEvent event) {
         if (event.getClickCount() < 1) return;
         SlotBulan dipilih = tabelBulan.getSelectionModel().getSelectedItem();
         if (dipilih == null) return;
+
         jatuhTempoTerpilih = dipilih.jatuhTempo;
         tutupDialog();
     }
@@ -119,12 +121,18 @@ public class PilihBulanTagihanController implements Initializable {
         tutupDialog();
     }
 
+
+    // 8. UTILITAS & HELPERS
+    private static String capitalize(String s) {
+        if (s == null || s.isEmpty()) return s;
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
+
     private void tutupDialog() {
         Stage stage = (Stage) tabelBulan.getScene().getWindow();
         stage.close();
     }
 
-    /** Null jika dialog dibatalkan / ditutup tanpa memilih bulan. */
     public LocalDate getJatuhTempoTerpilih() {
         return jatuhTempoTerpilih;
     }

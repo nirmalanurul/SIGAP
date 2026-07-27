@@ -41,30 +41,24 @@ public class LoginController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         loginButton.setOnAction(this::onLogin);
         hideError();
-
-        // Enter di field password juga trigger login (defaultButton sudah handle ini,
-        // tapi jaga-jaga kalau fokus di username lalu tekan Enter)
         usernameField.setOnAction(this::onLogin);
         passwordField.setOnAction(this::onLogin);
-        passwordTextField.setOnAction(this::onLogin);// Tambahkan ini agar enter di textfield juga bisa login
+        passwordTextField.setOnAction(this::onLogin);
         exitButton.setOnAction(event -> {
-            javafx.application.Platform.exit(); // Menutup engine JavaFX dengan bersih
-            System.exit(0);                    // Memastikan proses JVM berhenti total
+            javafx.application.Platform.exit();
+            System.exit(0);
         });
-        // Logika Klik Tombol Mata
         togglePasswordButton.setOnAction(event -> {
             if (passwordField.isVisible()) {
-                // Salin teks dari passwordField ke textField biasa, lalu balik visibilitas
                 passwordTextField.setText(passwordField.getText());
                 passwordTextField.setVisible(true);
                 passwordField.setVisible(false);
-                togglePasswordButton.setText("⌣"); // Ubah ikon mata tutup
+                togglePasswordButton.setText("⌣");
             } else {
-                // Salin balik ke passwordField
                 passwordField.setText(passwordTextField.getText());
                 passwordField.setVisible(true);
                 passwordTextField.setVisible(false);
-                togglePasswordButton.setText("\uD83D\uDC41"); // Ubah ikon mata buka
+                togglePasswordButton.setText("\uD83D\uDC41");
             }
         });
     }
@@ -119,11 +113,6 @@ public class LoginController implements Initializable {
         return k;
     }
 
-    /**
-     * Mengarahkan user ke dashboard sesuai jabatanKaryawan yang login:
-     * "Admin" -> DashboardAdminView, "Kasir" -> DashboardKasirView,
-     * selain itu (mis. "Manajer") -> DashboardManagerView (placeholder kosong).
-     */
     private void goToDashboard(Karyawan matched) {
         String jabatan = matched.getJabatanKaryawan() == null ? "" : matched.getJabatanKaryawan().trim();
 

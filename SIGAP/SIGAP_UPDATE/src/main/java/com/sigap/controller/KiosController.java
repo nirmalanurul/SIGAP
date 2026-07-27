@@ -39,8 +39,6 @@ import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ToggleGroup;
 
 public class KiosController implements Initializable {
-
-    // 1. FXML FIELDS — FORM INPUT
     @FXML
     private TextField txtIdKios;
     @FXML
@@ -70,8 +68,6 @@ public class KiosController implements Initializable {
     private Label lblJumlahFoto;
     @FXML
     private FlowPane hboxPreviewFoto;
-
-    // 3. FXML FIELDS — PENCARIAN & CARD GRID
     @FXML
     private TextField txtCari;
     @FXML
@@ -102,8 +98,6 @@ public class KiosController implements Initializable {
     private RadioMenuItem rmTampil24;
     @FXML
     private RadioMenuItem rmTampil30;
-
-    // 4. FXML FIELDS — PAGINATION
     @FXML
     private Label lblPage;
     @FXML
@@ -127,7 +121,6 @@ public class KiosController implements Initializable {
     private String filterStatus = null;
     private String searchKeyword = "";
 
-    // 6. KONSTANTA
     private static final NumberFormat FMT_RUPIAH =
             NumberFormat.getNumberInstance(new Locale("id", "ID"));
 
@@ -147,7 +140,6 @@ public class KiosController implements Initializable {
     private static final int JUMLAH_KOLOM = 6;
     private static final double CARD_HGAP = 20.0;
 
-    // 7. INITIALIZE
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         txtIdKios.setEditable(false);
@@ -194,7 +186,6 @@ public class KiosController implements Initializable {
         rmTampil12.setSelected(true);
     }
 
-    // 8. LISTENER INPUT FORM (Panjang, Lebar, Harga)
     private void setupListeners() {
         txtPanjang.textProperty().addListener((obs, oldVal, newVal) -> {
             String filtered = newVal.replaceAll("[^0-9.]", "");
@@ -241,7 +232,6 @@ public class KiosController implements Initializable {
         });
     }
 
-    // 9. KALKULASI (Harga, Luas)
     private String rawHarga() {
         return txtHarga.getText().replaceAll("[^0-9]", "");
     }
@@ -263,7 +253,7 @@ public class KiosController implements Initializable {
         return Math.round(p * l * 100.0) / 100.0;
     }
 
-    // 10. LOAD DATA & CARD GRID
+
     private void loadData() {
         try {
             semuaData = CRUD_Kios.getAll();
@@ -279,7 +269,7 @@ public class KiosController implements Initializable {
 
     private void refreshGrid() {
         int total = masterList.size();
-        totalPage = (total == 0) ? 1 : (int) Math.ceil((double) total / pageSize);   // GANTI PAGE_SIZE → pageSize
+        totalPage = (total == 0) ? 1 : (int) Math.ceil((double) total / pageSize);
         if (currentPage > totalPage) currentPage = totalPage;
 
         int from = (currentPage - 1) * pageSize;
@@ -316,7 +306,6 @@ public class KiosController implements Initializable {
         return (lebarTersedia - totalGap) / JUMLAH_KOLOM;
     }
 
-    // 11. CARD & DIALOG DETAIL
     private VBox buatCardKios(Kios k) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sigap/view/KiosCard.fxml"));
         VBox card = loader.load();
@@ -355,7 +344,7 @@ public class KiosController implements Initializable {
         }
     }
 
-    // 12. FORM: ISI DATA & RESET
+
     private void isiFormDariKios(Kios k) {
         txtIdKios.setText(k.getIdKios());
         txtHarga.setText(FMT_RUPIAH.format((long) k.getHargaKios()));
@@ -470,7 +459,6 @@ public class KiosController implements Initializable {
         }
     }
 
-    // 14. VALIDASI
     private boolean validasi() {
         StringBuilder sb = new StringBuilder();
 
@@ -545,7 +533,6 @@ public class KiosController implements Initializable {
         return dataUtamaSama && !fotoBerubah;
     }
 
-    // 15. UTILITAS (Alert, ID Generator)
     private void showAlert(Alert.AlertType type, String title, String msg) {
         Runnable show = () -> {
             Alert alert = new Alert(type);
@@ -572,7 +559,6 @@ public class KiosController implements Initializable {
         }
     }
 
-    // 16. EVENT HANDLER — FORM (Simpan, Ubah, Hapus, Bersih)
     @FXML
     void onSimpan(ActionEvent event) {
         if (!validasi()) return;
@@ -687,14 +673,13 @@ public class KiosController implements Initializable {
         txtHarga.requestFocus();
     }
 
-    // 17. EVENT HANDLER — PENCARIAN
+
     @FXML
     void onCari(ActionEvent event) {
         searchKeyword = txtCari.getText() == null ? "" : txtCari.getText().trim().toLowerCase();
         terapkanFilter();
     }
 
-    // 18. EVENT HANDLER — PAGINATION
     @FXML
     void onFirstPage(ActionEvent event) {
         currentPage = 1;
@@ -759,8 +744,7 @@ public class KiosController implements Initializable {
                 )
                 .collect(java.util.stream.Collectors.toList());
 
-        // --- Gabungkan urutan Harga & Luas jadi satu comparator chain ---
-        // (sebelumnya dua .sort() terpisah saling menimpa satu sama lain)
+
         Comparator<Kios> comparatorGabungan = null;
 
         if (urutanHarga != null) {

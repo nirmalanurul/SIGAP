@@ -9,19 +9,6 @@ import java.util.List;
 
 public class CRUD_DetailTagihanBiaya {
 
-    // Sama seperti Tagihan_Pembayaran_Sewa, baris Detail_Tagihan_Biaya TIDAK
-    // punya update biasa: Jumlah_Hari & Sub_total final begitu diinsert.
-    // Sub_total sengaja TIDAK dikirim dari klien -- dihitung server-side di
-    // spInsertDetailTagihanBiaya (Biaya_Tambahan.Nominal x Jumlah_Hari), lalu
-    // SP yang sama juga bertanggung jawab menambah Total_Biaya_Tambahan &
-    // Total_Tagihan di baris induk Tagihan_Pembayaran_Sewa terkait (di luar
-    // trg_PreventUpdateTagihan, karena perubahan itu bagian dari transaksi
-    // insert biaya, bukan update bebas dari klien).
-    //
-    // CATATAN: Nama-nama stored procedure di bawah ini masih usulan --
-    // PDM cuma mendefinisikan tabelnya, jadi SP-nya perlu dibuat kalau belum
-    // ada. Sesuaikan nama & urutan parameter kalau SP kamu sudah pakai nama
-    // lain.
 
     public static void insert(DetailTagihanBiaya d) throws SQLException {
         try (Connection conn = new DBConnect().conn;
@@ -33,11 +20,6 @@ public class CRUD_DetailTagihanBiaya {
         }
     }
 
-    /**
-     * Hanya untuk skenario pembersihan/rollback manual (mis. sebagian baris
-     * biaya gagal tersimpan saat proses simpan tagihan baru). Bukan bagian
-     * dari alur "edit" biasa karena Detail_Tagihan_Biaya bersifat final.
-     */
     public static void delete(String idTagihanPembayaran, String idBiayaTambahan) throws SQLException {
         try (Connection conn = new DBConnect().conn;
              CallableStatement cs = conn.prepareCall("{CALL spHapusDetailTagihanBiaya(?,?)}")) {
@@ -59,7 +41,6 @@ public class CRUD_DetailTagihanBiaya {
         return list;
     }
 
-    /** Semua baris biaya tambahan milik satu tagihan (dipakai TagihanController saat menampilkan detail). */
     public static List<DetailTagihanBiaya> getByIdTagihanPembayaran(String idTagihanPembayaran) throws SQLException {
         List<DetailTagihanBiaya> list = new ArrayList<>();
         try (Connection conn = new DBConnect().conn;
@@ -74,7 +55,6 @@ public class CRUD_DetailTagihanBiaya {
         return list;
     }
 
-    /** Semua tagihan yang pernah memakai satu jenis Biaya_Tambahan tertentu (berguna untuk laporan). */
     public static List<DetailTagihanBiaya> getByIdBiayaTambahan(String idBiayaTambahan) throws SQLException {
         List<DetailTagihanBiaya> list = new ArrayList<>();
         try (Connection conn = new DBConnect().conn;

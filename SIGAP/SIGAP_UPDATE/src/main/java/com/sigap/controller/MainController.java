@@ -44,7 +44,6 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupClock();
-        // Default tampilkan Penyewaan saat pertama buka (kasir langsung siap transaksi)
         onMenuPenyewaan();
     }
 

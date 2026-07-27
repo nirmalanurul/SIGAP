@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 public class PilihKiosController implements Initializable {
 
+    // 1. FXML FIELDS
     @FXML
     private TextField txtCari;
     @FXML
@@ -46,6 +47,13 @@ public class PilihKiosController implements Initializable {
     @FXML
     private TableColumn<Kios, String> colDeskripsi;
 
+
+    // 2. CONSTANTS
+    private static final NumberFormat FMT_RUPIAH =
+            NumberFormat.getNumberInstance(new Locale("id", "ID"));
+
+
+    // 3. STATE
     private final ObservableList<Kios> masterList = FXCollections.observableArrayList();
     private Kios kiosTerpilih = null;
 
@@ -53,33 +61,28 @@ public class PilihKiosController implements Initializable {
     private LocalDate tglMulaiFilter = null;
     private LocalDate tglSelesaiFilter = null;
 
-    private static final NumberFormat FMT_RUPIAH =
-            NumberFormat.getNumberInstance(new Locale("id", "ID"));
 
+    // 4. INITIALIZE
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupTable();
         Platform.runLater(this::loadData);
     }
 
-    /**
-     * Dipanggil oleh parent controller (PenyewaanController) SEBELUM dialog.showAndWait(),
-     * supaya loadData() -- yang baru jalan lewat Platform.runLater setelah dialog tampil --
-     * sudah tahu rentang tanggal yang perlu difilter.
-     */
-    public void setRentangTanggal(LocalDate tglMulai, LocalDate tglSelesai) {
-        this.tglMulaiFilter = tglMulai;
-        this.tglSelesaiFilter = tglSelesai;
-    }
 
+    // 5. TABLE SETUP
     private void setupTable() {
         colId.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getIdKios()));
+
         colHarga.setCellValueFactory(d -> new SimpleStringProperty(
                 "Rp " + FMT_RUPIAH.format((long) d.getValue().getHargaKios())));
+
         colUkuran.setCellValueFactory(d -> new SimpleStringProperty(
                 d.getValue().getPanjangKios() + " x " + d.getValue().getLebarKios()));
+
         colLuas.setCellValueFactory(d -> new SimpleStringProperty(
                 String.valueOf(d.getValue().getLuasKios())));
+
         colDeskripsi.setCellValueFactory(d -> new SimpleStringProperty(
                 d.getValue().getDeskripsi() == null ? "" : d.getValue().getDeskripsi()));
 
@@ -92,6 +95,18 @@ public class PilihKiosController implements Initializable {
                 setStyle("-fx-text-fill:#1A3A8F;-fx-font-weight:600;");
             }
         });
+    }
+
+
+    // 6. DATA LOADING & FILTERING
+    /**
+     * Dipanggil oleh parent controller (PenyewaanController) SEBELUM dialog.showAndWait(),
+     * supaya loadData() -- yang baru jalan lewat Platform.runLater setelah dialog tampil --
+     * sudah tahu rentang tanggal yang perlu difilter.
+     */
+    public void setRentangTanggal(LocalDate tglMulai, LocalDate tglSelesai) {
+        this.tglMulaiFilter = tglMulai;
+        this.tglSelesaiFilter = tglSelesai;
     }
 
     private void loadData() {
@@ -144,19 +159,8 @@ public class PilihKiosController implements Initializable {
         return !mulai1.isAfter(selesai2) && !mulai2.isAfter(selesai1);
     }
 
-    private void showAlert(String msg) {
-        Runnable show = () -> {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText(null);
-            alert.setContentText(msg);
-            if (tabelKios.getScene() != null) alert.initOwner(tabelKios.getScene().getWindow());
-            alert.showAndWait();
-        };
-        if (Platform.isFxApplicationThread()) show.run();
-        else Platform.runLater(show);
-    }
 
+    // 7. EVENT HANDLERS
     @FXML
     void onCari(ActionEvent event) {
         String kw = txtCari.getText().trim();
@@ -174,6 +178,7 @@ public class PilihKiosController implements Initializable {
         if (event.getClickCount() < 1) return;
         Kios dipilih = tabelKios.getSelectionModel().getSelectedItem();
         if (dipilih == null) return;
+
         kiosTerpilih = dipilih;
         tutupDialog();
     }
@@ -184,15 +189,26 @@ public class PilihKiosController implements Initializable {
         tutupDialog();
     }
 
+
+    // 8. UTILITAS
+    private void showAlert(String msg) {
+        Runnable show = () -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText(msg);
+            if (tabelKios.getScene() != null) alert.initOwner(tabelKios.getScene().getWindow());
+            alert.showAndWait();
+        };
+        if (Platform.isFxApplicationThread()) show.run();
+        else Platform.runLater(show);
+    }
+
     private void tutupDialog() {
         Stage stage = (Stage) tabelKios.getScene().getWindow();
         stage.close();
     }
 
-    /**
-     * Dipanggil oleh parent controller setelah dialog.showAndWait() selesai.
-     * Mengembalikan null jika dialog dibatalkan / ditutup tanpa memilih.
-     */
     public Kios getKiosTerpilih() {
         return kiosTerpilih;
     }

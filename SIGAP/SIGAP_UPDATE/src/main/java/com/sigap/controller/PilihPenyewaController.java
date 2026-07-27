@@ -143,10 +143,7 @@ public class PilihPenyewaController implements Initializable {
         stage.close();
     }
 
-    /**
-     * Dipanggil oleh parent controller setelah dialog.showAndWait() selesai.
-     * Mengembalikan null jika dialog dibatalkan / ditutup tanpa memilih.
-     */
+
     public Penyewa getPenyewaTerpilih() {
         return penyewaTerpilih;
     }

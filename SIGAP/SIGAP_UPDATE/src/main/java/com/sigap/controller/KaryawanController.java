@@ -610,7 +610,7 @@ public class KaryawanController implements Initializable {
         terapkanFilter();
     }
 
-    // FILTER: Nama (A-Z / Z-A), Jabatan (Admin/Kasir/Manajer), Status (Aktif/Tidak Aktif)
+
     @FXML
     void onFilterNama(ActionEvent event) {
         urutanNama = rmNamaAZ.isSelected() ? "asc"

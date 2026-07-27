@@ -8,14 +8,16 @@ import com.sigap.APP.CRUD_Penyewaan;
 import com.sigap.APP.CRUD_TagihanPembayaranSewa;
 
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.chart.LineChart;
 import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 
 import java.net.URL;
@@ -26,17 +28,21 @@ import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import javafx.event.ActionEvent;
-import javafx.scene.control.ComboBox;
 
 public class DashboardManagerContentController implements Initializable {
 
+    // 1. FXML FIELDS - LABELS (KPI & LEGEND)
     @FXML private Label lblPeriode;
     @FXML private Label lblTotalPendapatan;
     @FXML private Label lblPenyewaanAktif;
     @FXML private Label lblTagihanBelumLunas;
     @FXML private Label lblKiosTersewa;
 
+    @FXML private Label lblLegendLunas;
+    @FXML private Label lblLegendBelumLunas;
+    @FXML private Label lblLegendDibatalkan;
+
+    // 2. FXML FIELDS - CHARTS
     @FXML private LineChart<String, Number> chartPendapatanBulanan;
     @FXML private CategoryAxis axisBulan;
     @FXML private NumberAxis axisPendapatan;
@@ -47,29 +53,22 @@ public class DashboardManagerContentController implements Initializable {
     @FXML private CategoryAxis axisBulanPenyewaan;
     @FXML private NumberAxis axisJumlahPenyewaan;
 
+    // 3. FXML FIELDS - FILTER
     @FXML private ComboBox<String> cbBulan;
     @FXML private ComboBox<Integer> cbTahun;
 
-    @FXML private Label lblLegendLunas;
-    @FXML private Label lblLegendBelumLunas;
-    @FXML private Label lblLegendDibatalkan;
 
+    // 4. CONSTANTS
     private static final NumberFormat FMT_RUPIAH = NumberFormat.getNumberInstance(new Locale("id", "ID"));
-    private static final DateTimeFormatter FMT_BULAN =
-            DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("id", "ID"));
+    private static final DateTimeFormatter FMT_BULAN = DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("id", "ID"));
 
     private static final int JUMLAH_BULAN_TREN = 6;
-
-    private final java.util.List<javafx.scene.Node> labelAktifPendapatan = new java.util.ArrayList<>();
-    private final java.util.List<javafx.scene.Node> labelAktifPenyewaan = new java.util.ArrayList<>();
+    private static final int JUMLAH_TAHUN_FILTER = 6;
 
     private static final List<String> NAMA_BULAN = List.of(
             "Januari", "Februari", "Maret", "April", "Mei", "Juni",
             "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     );
-
-    private static final int JUMLAH_TAHUN_FILTER = 6;
-
 
     private static final String STATUS_LUNAS = "Lunas";
     private static final String STATUS_BELUM_LUNAS = "Belum Lunas";
@@ -78,10 +77,58 @@ public class DashboardManagerContentController implements Initializable {
     private static final String STATUS_KIOS_DISEWAKAN = "Disewakan";
 
 
+    // 5. STATE
     private List<TagihanPembayaranSewa> semuaTagihan = List.of();
     private List<Penyewaan> semuaPenyewaan = List.of();
     private List<Kios> semuaKios = List.of();
 
+    private final java.util.List<javafx.scene.Node> labelAktifPendapatan = new java.util.ArrayList<>();
+    private final java.util.List<javafx.scene.Node> labelAktifPenyewaan = new java.util.ArrayList<>();
+
+
+    // 6. INITIALIZE & SETUP
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        muatDataMentah();
+        isiComboBoxFilter();
+        tampilkanPeriode(YearMonth.now());
+    }
+
+    private void muatDataMentah() {
+        try {
+            semuaTagihan = CRUD_TagihanPembayaranSewa.getAll();
+        } catch (Exception e) {
+            System.err.println("[DashboardManagerContentController] Gagal memuat Tagihan: " + e.getMessage());
+            e.printStackTrace();
+        }
+        try {
+            semuaPenyewaan = CRUD_Penyewaan.getAll();
+        } catch (Exception e) {
+            System.err.println("[DashboardManagerContentController] Gagal memuat Penyewaan: " + e.getMessage());
+            e.printStackTrace();
+        }
+        try {
+            semuaKios = CRUD_Kios.getAll();
+        } catch (Exception e) {
+            System.err.println("[DashboardManagerContentController] Gagal memuat Kios: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void isiComboBoxFilter() {
+        cbBulan.setItems(FXCollections.observableArrayList(NAMA_BULAN));
+
+        int tahunSekarang = YearMonth.now().getYear();
+        List<Integer> daftarTahun = java.util.stream.IntStream
+                .rangeClosed(tahunSekarang - (JUMLAH_TAHUN_FILTER - 1), tahunSekarang)
+                .boxed()
+                .sorted(java.util.Collections.reverseOrder())
+                .toList();
+        cbTahun.setItems(FXCollections.observableArrayList(daftarTahun));
+    }
+
+
+    // 7. EVENT HANDLERS
     @FXML
     private void onCariPeriode(ActionEvent event) {
         String namaBulan = cbBulan.getSelectionModel().getSelectedItem();
@@ -109,59 +156,17 @@ public class DashboardManagerContentController implements Initializable {
     private void onResetPeriode(ActionEvent event) {
         cbBulan.getSelectionModel().clearSelection();
         cbTahun.getSelectionModel().clearSelection();
-
         tampilkanPeriode(YearMonth.now());
     }
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        muatDataMentah();
-        isiComboBoxFilter();
 
-        tampilkanPeriode(YearMonth.now());
-    }
-
+    // 8. DASHBOARD & CHART LOADING
     private void tampilkanPeriode(YearMonth periode) {
-        lblPeriode.setText("Ringkasan & Laporan Bulanan — "
-                + periode.atDay(1).format(FMT_BULAN));
-
+        lblPeriode.setText("Ringkasan & Laporan Bulanan — " + periode.atDay(1).format(FMT_BULAN));
         loadKpi(periode);
         loadChartPendapatanBulanan(periode);
         loadChartStatusTagihan(periode);
         loadChartPenyewaanBulanan(periode);
-    }
-
-    private void isiComboBoxFilter() {
-        cbBulan.setItems(FXCollections.observableArrayList(NAMA_BULAN));
-
-        int tahunSekarang = YearMonth.now().getYear();
-        List<Integer> daftarTahun = java.util.stream.IntStream
-                .rangeClosed(tahunSekarang - (JUMLAH_TAHUN_FILTER - 1), tahunSekarang)
-                .boxed()
-                .sorted(java.util.Collections.reverseOrder())
-                .toList();
-        cbTahun.setItems(FXCollections.observableArrayList(daftarTahun));
-    }
-
-    private void muatDataMentah() {
-        try {
-            semuaTagihan = CRUD_TagihanPembayaranSewa.getAll();
-        } catch (Exception e) {
-            System.err.println("[DashboardManagerContentController] Gagal memuat Tagihan: " + e.getMessage());
-            e.printStackTrace();
-        }
-        try {
-            semuaPenyewaan = CRUD_Penyewaan.getAll();
-        } catch (Exception e) {
-            System.err.println("[DashboardManagerContentController] Gagal memuat Penyewaan: " + e.getMessage());
-            e.printStackTrace();
-        }
-        try {
-            semuaKios = CRUD_Kios.getAll();
-        } catch (Exception e) {
-            System.err.println("[DashboardManagerContentController] Gagal memuat Kios: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 
     private void loadKpi(YearMonth periode) {
@@ -204,7 +209,7 @@ public class DashboardManagerContentController implements Initializable {
             nilaiMaksimum = Math.max(nilaiMaksimum, totalBulanIni);
         }
 
-        aturHeadroomAxis(axisPendapatan, nilaiMaksimum); // <-- tambahkan ini
+        aturHeadroomAxis(axisPendapatan, nilaiMaksimum);
         chartPendapatanBulanan.setData(FXCollections.observableArrayList(series));
         tambahkanLabelData(series, true, labelAktifPendapatan);
     }
@@ -237,12 +242,10 @@ public class DashboardManagerContentController implements Initializable {
             d.getNode().setStyle("-fx-pie-color: " + warna + ";");
         }
 
-        // ====== TAMBAHKAN 3 BARIS INI DI SINI ======
         lblLegendLunas.setText("Lunas (" + lunas + ")");
         lblLegendBelumLunas.setText("Belum Lunas (" + belumLunas + ")");
         lblLegendDibatalkan.setText("Dibatalkan (" + dibatalkan + ")");
     }
-
 
     private void loadChartPenyewaanBulanan(YearMonth periode) {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
@@ -257,12 +260,13 @@ public class DashboardManagerContentController implements Initializable {
             nilaiMaksimum = Math.max(nilaiMaksimum, jumlahBulanIni);
         }
 
-        aturHeadroomAxis(axisJumlahPenyewaan, nilaiMaksimum); // <-- tambahkan ini
+        aturHeadroomAxis(axisJumlahPenyewaan, nilaiMaksimum);
         chartPenyewaanBulanan.setData(FXCollections.observableArrayList(series));
         tambahkanLabelData(series, false, labelAktifPenyewaan);
     }
 
 
+    // 9. UTILITAS FORMATTING & HELPERS
     private List<YearMonth> bulanTerakhir(YearMonth bulanAkhir, int jumlahBulan) {
         return java.util.stream.IntStream.rangeClosed(0, jumlahBulan - 1)
                 .mapToObj(i -> bulanAkhir.minusMonths(jumlahBulan - 1 - i))
@@ -273,13 +277,22 @@ public class DashboardManagerContentController implements Initializable {
         return bulan.getMonth().getDisplayName(TextStyle.SHORT, new Locale("id", "ID"));
     }
 
+    private void aturHeadroomAxis(NumberAxis axis, double nilaiMaksimum) {
+        if (nilaiMaksimum <= 0) {
+            axis.setAutoRanging(true);
+            return;
+        }
+        axis.setAutoRanging(false);
+        axis.setLowerBound(0);
+        axis.setUpperBound(nilaiMaksimum * 1.2); // beri ruang 20% di atas nilai tertinggi
+        axis.setTickUnit(nilaiMaksimum * 1.2 / 5); // 5 pembagian tick, sesuaikan kalau perlu
+    }
+
     private void tambahkanLabelData(XYChart.Series<String, Number> series, boolean isRupiah) {
         for (XYChart.Data<String, Number> data : series.getData()) {
             if (data.getNode() != null) {
-                // Node sudah ada duluan -> langsung pasang labelnya
                 tampilkanLabelDiTitik(data, isRupiah);
             } else {
-                // Node belum ada -> tunggu sampai muncul
                 data.nodeProperty().addListener((obs, oldNode, newNode) -> {
                     if (newNode != null) {
                         tampilkanLabelDiTitik(data, isRupiah);
@@ -315,17 +328,6 @@ public class DashboardManagerContentController implements Initializable {
         label.layoutYProperty().bind(node.layoutYProperty().subtract(10));
     }
 
-    private void aturHeadroomAxis(NumberAxis axis, double nilaiMaksimum) {
-        if (nilaiMaksimum <= 0) {
-            axis.setAutoRanging(true);
-            return;
-        }
-        axis.setAutoRanging(false);
-        axis.setLowerBound(0);
-        axis.setUpperBound(nilaiMaksimum * 1.2); // beri ruang 20% di atas nilai tertinggi
-        axis.setTickUnit(nilaiMaksimum * 1.2 / 5); // 5 pembagian tick, sesuaikan kalau perlu
-    }
-
     private void tambahkanLabelData(XYChart.Series<String, Number> series, boolean isRupiah,
                                     java.util.List<javafx.scene.Node> labelAktif) {
         // Hapus semua label lama dari parent-nya sebelum menambah yang baru
@@ -357,7 +359,7 @@ public class DashboardManagerContentController implements Initializable {
 
         javafx.scene.text.Text label = new javafx.scene.text.Text(teks);
         label.setStyle("-fx-font-size: 10px; -fx-font-weight: 700; -fx-fill: #1A3A8F;");
-        labelAktif.add(label); // <-- catat supaya bisa dihapus nanti
+        labelAktif.add(label);
 
         final javafx.scene.Node node = data.getNode();
         javafx.scene.Parent parent = node.getParent();

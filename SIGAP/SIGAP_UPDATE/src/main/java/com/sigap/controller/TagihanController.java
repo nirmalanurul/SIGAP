@@ -195,7 +195,8 @@ public class TagihanController implements Initializable {
     // di tabel mini pada form ini (Detail_Tagihan_Biaya sendiri cuma simpan Id).
     private List<BiayaTambahan> masterBiayaTambahan = List.of();
 
-    private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    // Format tanggal tampilan: "28 Juli 2026" (nama bulan, bukan angka) — konsisten dengan PenyewaanController
+    private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("id", "ID"));
     private static final NumberFormat FMT_RUPIAH = NumberFormat.getNumberInstance(new Locale("id", "ID"));
 
     // Sama seperti KATA_KUNCI_KETERLAMBATAN di PilihBiayaTambahanController --

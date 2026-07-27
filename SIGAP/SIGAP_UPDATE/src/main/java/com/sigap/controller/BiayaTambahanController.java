@@ -118,7 +118,7 @@ public class BiayaTambahanController implements Initializable {
 
     private final ObservableList<BiayaTambahan> displayList = FXCollections.observableArrayList();
 
-    private static final int PAGE_SIZE = 10;
+    private static final int PAGE_SIZE = 14;
     private int currentPage = 1;
     private int totalPage = 1;
 

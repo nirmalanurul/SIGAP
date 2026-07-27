@@ -261,8 +261,8 @@
                                 <TableColumn fx:id="colId" prefWidth="80" text="ID" />
                                 <TableColumn fx:id="colPenyewaan" prefWidth="190" text="Penyewaan" />
                                 <TableColumn fx:id="colKaryawan" prefWidth="80" text="Karyawan" />
-                                <TableColumn fx:id="colTglBayar" prefWidth="100" text="Tgl Bayar" />
-                                <TableColumn fx:id="colTglTempo" prefWidth="100" text="Jatuh Tempo" />
+                                <TableColumn fx:id="colTglBayar" prefWidth="110" text="Tgl Bayar" />
+                                <TableColumn fx:id="colTglTempo" prefWidth="110" text="Jatuh Tempo" />
                                 <TableColumn fx:id="colTotalTagihan" prefWidth="110" text="Total Tagihan" />
                                 <TableColumn fx:id="colTotalDibayar" prefWidth="110" text="Total Dibayar" />
                                 <TableColumn fx:id="colStatus" prefWidth="100" text="Status" />

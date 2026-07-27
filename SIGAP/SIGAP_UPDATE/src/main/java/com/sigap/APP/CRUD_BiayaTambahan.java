@@ -9,14 +9,20 @@ import java.util.List;
 
 public class CRUD_BiayaTambahan {
 
-    public static void insert(BiayaTambahan d) throws SQLException {
+    public static String insert(BiayaTambahan d) throws SQLException {
         try (Connection conn = new DBConnect().conn;
-             CallableStatement cs = conn.prepareCall("{CALL spInsertBiayaTambahan(?,?,?,?)}")) {
-            cs.setString(1, d.getIdBiayaTambahan());
-            cs.setString(2, d.getJenisBiayaTambahan());
-            cs.setDouble(3, d.getNominalDenda());
-            cs.setString(4, d.getKeterangan());
+             CallableStatement cs = conn.prepareCall(
+                     "{CALL spInsertBiayaTambahan(?,?,?,?,?)}")) {
+
+            cs.setString(1, d.getJenisBiayaTambahan());   // @Jenis_Biaya_Tambahan
+            cs.setDouble(2, d.getNominalDenda());          // @Nominal
+            cs.setString(3, d.getKeterangan());            // @Keterangan
+            cs.setString(4, "Aktif");                      // @Sts_Biaya_Tambahan (atau biarkan default)
+            cs.registerOutParameter(5, Types.VARCHAR);     // @Id_Biaya_Tambahan_Out
+
             cs.executeUpdate();
+
+            return cs.getString(5); // ID hasil generate dari SP
         }
     }
 

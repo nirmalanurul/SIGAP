@@ -15,6 +15,7 @@ import com.sigap.APP.CRUD_Penyewaan;
 import com.sigap.APP.CRUD_TagihanPembayaranSewa;
 import com.sigap.util.Session;
 
+import java.sql.SQLException;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -30,10 +31,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -104,9 +109,21 @@ public class TagihanController implements Initializable {
     @FXML
     private Button btnBayar;
 
-    // 3. FXML FIELDS — PENCARIAN & TABLE
+    // 3. FXML FIELDS — PENCARIAN, FILTER & TABLE
     @FXML
     private TextField txtCari;
+    @FXML
+    private MenuButton btnFilter;
+    @FXML
+    private Menu menuPenyewaan;
+    @FXML
+    private RadioMenuItem rmStatusBelumLunas;
+    @FXML
+    private RadioMenuItem rmStatusLunas;
+    @FXML
+    private RadioMenuItem rmStatusTerlambat;
+    @FXML
+    private RadioMenuItem rmStatusDibatalkan;
     @FXML
     private TableView<TagihanPembayaranSewa> tabelTagihan;
     @FXML
@@ -149,6 +166,10 @@ public class TagihanController implements Initializable {
     private Map<String, Penyewaan> petaPenyewaan = Map.of();
     private Map<String, Penyewa> petaPenyewa = Map.of();
 
+    // Kriteria filter aktif dari MenuButton FILTER (null = tidak difilter pada kolom itu)
+    private String filterIdPenyewaan = null;
+    private String filterStatus = null;
+
     // Data terpilih dari dialog picker
     private Penyewaan penyewaanTerpilih = null;
     // Harga_Kios dari Kios milik penyewaanTerpilih -- diambil sekali pas
@@ -177,6 +198,9 @@ public class TagihanController implements Initializable {
     private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static final NumberFormat FMT_RUPIAH = NumberFormat.getNumberInstance(new Locale("id", "ID"));
 
+    // Sama seperti KATA_KUNCI_KETERLAMBATAN di PilihBiayaTambahanController --
+// SATU-SATUNYA jenis biaya yang wajib ditambahkan kalau pembayaran telat.
+    private static final String KATA_KUNCI_KETERLAMBATAN = "keterlambatan";
     private static final String STYLE_READONLY =
             "-fx-background-color:#F0F0F0;-fx-border-color:#D0D8E8;" +
                     "-fx-border-radius:6;-fx-background-radius:6;-fx-padding:6 12;" +
@@ -210,6 +234,7 @@ public class TagihanController implements Initializable {
         setupTabelBiayaTambahan();
         setupNominalBayarFormatter();
         setupTotalDibayarAwalFormatter();
+        setupFilterStatus();
         setFormState(false);
 
         Platform.runLater(() -> {
@@ -390,8 +415,41 @@ public class TagihanController implements Initializable {
         return switch (status == null ? "" : status) {
             case "Lunas"      -> "-fx-background-color:#E0F5E8;-fx-text-fill:#1E8A3C;" + base;
             case "Terlambat"  -> "-fx-background-color:#FFE8E8;-fx-text-fill:#C0392B;" + base;
+            case "Dibatalkan" -> "-fx-background-color:#EAEAEA;-fx-text-fill:#555555;" + base;
             default           -> "-fx-background-color:#FFF3D6;-fx-text-fill:#B8860B;" + base; // Belum Lunas
         };
+    }
+
+    // 8c. FILTER — MenuButton FILTER (submenu Penyewaan dinamis + submenu Status statis)
+    /** ToggleGroup untuk RadioMenuItem status di menu FILTER, supaya cuma 1 status aktif dalam satu waktu. */
+    private void setupFilterStatus() {
+        ToggleGroup grupStatus = new ToggleGroup();
+        rmStatusBelumLunas.setToggleGroup(grupStatus);
+        rmStatusLunas.setToggleGroup(grupStatus);
+        rmStatusTerlambat.setToggleGroup(grupStatus);
+        rmStatusDibatalkan.setToggleGroup(grupStatus);
+    }
+
+    /**
+     * Mengisi submenu Penyewaan di menu FILTER secara dinamis (item-nya tergantung
+     * petaPenyewaan), dipanggil ulang tiap kali data selesai dimuat lewat loadData().
+     * Label tiap item pakai labelPenyewaan() supaya konsisten dengan kolom Penyewaan di tabel.
+     */
+    private void populateFilterMenus() {
+        menuPenyewaan.getItems().clear();
+        ToggleGroup grupPenyewaan = new ToggleGroup();
+        RadioMenuItem rmSemuaPenyewaan = new RadioMenuItem("Semua Penyewaan");
+        rmSemuaPenyewaan.setToggleGroup(grupPenyewaan);
+        rmSemuaPenyewaan.setSelected(filterIdPenyewaan == null);
+        rmSemuaPenyewaan.setOnAction(e -> { filterIdPenyewaan = null; terapkanFilterDanCari(); });
+        menuPenyewaan.getItems().add(rmSemuaPenyewaan);
+        petaPenyewaan.values().forEach(p -> {
+            RadioMenuItem rmi = new RadioMenuItem(labelPenyewaan(p.getIdPenyewaan()));
+            rmi.setToggleGroup(grupPenyewaan);
+            rmi.setSelected(p.getIdPenyewaan().equalsIgnoreCase(filterIdPenyewaan));
+            rmi.setOnAction(e -> { filterIdPenyewaan = p.getIdPenyewaan(); terapkanFilterDanCari(); });
+            menuPenyewaan.getItems().add(rmi);
+        });
     }
 
     // 9. LOAD DATA & PAGINATION
@@ -399,9 +457,8 @@ public class TagihanController implements Initializable {
         try {
             muatPetaPenyewaan();
             daftarLengkap = CRUD_TagihanPembayaranSewa.getAll();
-            masterList.setAll(daftarLengkap);
-            currentPage = 1;
-            refreshTable();
+            populateFilterMenus();
+            terapkanFilterDanCari();
             tabelTagihan.refresh();
         } catch (Exception e) {
             e.printStackTrace();
@@ -772,6 +829,35 @@ public class TagihanController implements Initializable {
             return;
         }
 
+        // Wajib ada biaya keterlambatan kalau pembayaran melewati jatuh tempo
+        if (LocalDate.now().isAfter(tglJatuhTempoTerpilih)) {
+            boolean sudahAdaBiayaKeterlambatan;
+            try {
+                Map<String, BiayaTambahan> masterBiaya = CRUD_BiayaTambahan.getAll().stream()
+                        .collect(Collectors.toMap(BiayaTambahan::getIdBiayaTambahan, b -> b));
+
+                sudahAdaBiayaKeterlambatan = daftarBiayaTambahan.stream()
+                        .anyMatch(d -> {
+                            BiayaTambahan master = masterBiaya.get(d.getIdBiayaTambahan());
+                            return master != null
+                                    && master.getJenisBiayaTambahan() != null
+                                    && master.getJenisBiayaTambahan().toLowerCase().contains(KATA_KUNCI_KETERLAMBATAN);
+                        });
+            } catch (SQLException ex) {
+                showAlert(Alert.AlertType.ERROR, "Gagal Memeriksa Biaya Tambahan",
+                        "Terjadi kesalahan saat memeriksa data biaya tambahan. Coba lagi.");
+                return;
+            }
+
+            if (!sudahAdaBiayaKeterlambatan) {
+                showAlert(Alert.AlertType.WARNING, "Biaya Keterlambatan Diperlukan",
+                        "Pembayaran ini melewati tanggal jatuh tempo (" + tglJatuhTempoTerpilih + "). "
+                                + "Tambahkan biaya tambahan jenis 'Keterlambatan Sewa' terlebih dahulu "
+                                + "sebelum menyimpan.");
+                return;
+            }
+        }
+
         try {
             double dibayarAwal = 0;
             if (!txtTotalDibayarAwal.isDisabled()) {
@@ -967,25 +1053,50 @@ public class TagihanController implements Initializable {
         refreshTabelBiayaTambahan();
     }
 
-    // 18. EVENT HANDLER — PENCARIAN
-    // Pencarian dilakukan client-side atas daftarLengkap (data yang sudah dimuat
-    // penuh oleh loadData()), bukan lewat stored procedure spSearchTagihan lagi.
+    // 18. EVENT HANDLER — PENCARIAN & FILTER
+    // Pencarian & filter dilakukan client-side atas daftarLengkap (data yang sudah
+    // dimuat penuh oleh loadData()), bukan lewat stored procedure spSearchTagihan lagi.
     // Ini supaya kasir bisa cari tagihan berdasarkan Nama Penyewa juga, tanpa
     // perlu mengubah stored procedure di database (nama penyewa didapat lewat
     // rantai Id_Penyewaan -> Penyewaan.Id_Penyewa -> Penyewa.Nama_Penyewa).
     @FXML
     void onCari(ActionEvent event) {
-        String kw = txtCari.getText() == null ? "" : txtCari.getText().trim();
-        if (kw.isEmpty()) {
-            masterList.setAll(daftarLengkap);
-            currentPage = 1;
-            refreshTable();
-            return;
-        }
-        String kwLower = kw.toLowerCase();
+        terapkanFilterDanCari();
+    }
+
+    /** Filter Status dipilih lewat submenu Status di MenuButton FILTER (radio, hanya 1 aktif). */
+    @FXML
+    void onFilterStatus(ActionEvent event) {
+        filterStatus = rmStatusBelumLunas.isSelected() ? "Belum Lunas"
+                : rmStatusLunas.isSelected() ? "Lunas"
+                : rmStatusTerlambat.isSelected() ? "Terlambat"
+                : rmStatusDibatalkan.isSelected() ? "Dibatalkan" : null;
+        terapkanFilterDanCari();
+    }
+
+    /** Reset semua filter (Penyewaan, Status) sekaligus, dipicu item "Reset Filter" di MenuButton. */
+    @FXML
+    void onResetFilter(ActionEvent event) {
+        filterIdPenyewaan = null;
+        filterStatus = null;
+        rmStatusBelumLunas.setSelected(false);
+        rmStatusLunas.setSelected(false);
+        rmStatusTerlambat.setSelected(false);
+        rmStatusDibatalkan.setSelected(false);
+        populateFilterMenus();
+        terapkanFilterDanCari();
+    }
+
+    /** Menerapkan kata kunci pencarian + kriteria filter (Penyewaan, Status) ke daftarLengkap, lalu refresh tabel. */
+    private void terapkanFilterDanCari() {
+        String kw = txtCari.getText() == null ? "" : txtCari.getText().trim().toLowerCase();
+
         List<TagihanPembayaranSewa> hasil = daftarLengkap.stream()
-                .filter(t -> cocokKeyword(t, kwLower))
+                .filter(t -> filterIdPenyewaan == null || filterIdPenyewaan.equalsIgnoreCase(t.getIdPenyewaan()))
+                .filter(t -> filterStatus == null || filterStatus.equalsIgnoreCase(t.getStsTagihanPembayaran()))
+                .filter(t -> kw.isEmpty() || cocokKeyword(t, kw))
                 .collect(Collectors.toList());
+
         masterList.setAll(hasil);
         currentPage = 1;
         refreshTable();

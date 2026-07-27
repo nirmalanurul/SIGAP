@@ -4,6 +4,10 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioMenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -213,6 +217,27 @@
                             <children>
                                 <TextField fx:id="txtCari" prefHeight="38" prefWidth="260" promptText="Cari ID / Penyewaan / Nama Penyewa / Status" style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 14; -fx-font-size: 13px;" />
                                 <Button onAction="#onCari" prefHeight="38" prefWidth="94" style="-fx-background-color: #1A3A8F; -fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700; -fx-background-radius: 6; -fx-cursor: hand;" text="CARI" />
+                                <MenuButton fx:id="btnFilter" contentDisplay="GRAPHIC_ONLY" prefHeight="38" style="-fx-background-color: #1A3A8F; -fx-background-radius: 6; -fx-cursor: hand; -fx-mark-color: WHITE; -fx-padding: 6 6 6 14;">
+                                    <graphic>
+                                        <HBox alignment="CENTER_LEFT" spacing="6.0">
+                                            <children>
+                                                <Label style="-fx-text-fill: WHITE; -fx-font-size: 13px; -fx-font-weight: 700;" text="FILTER" />
+                                            </children>
+                                        </HBox>
+                                    </graphic>
+                                    <items>
+                                        <Menu fx:id="menuPenyewaan" style="-fx-text-fill: #333333;" text="Penyewaan" />
+                                        <Menu style="-fx-text-fill: #333333;" text="Status">
+                                            <items>
+                                                <RadioMenuItem fx:id="rmStatusBelumLunas" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Belum Lunas" />
+                                                <RadioMenuItem fx:id="rmStatusLunas" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Lunas" />
+                                                <RadioMenuItem fx:id="rmStatusTerlambat" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Terlambat" />
+                                                <RadioMenuItem fx:id="rmStatusDibatalkan" onAction="#onFilterStatus" style="-fx-text-fill: #333333;" text="Dibatalkan" />
+                                            </items>
+                                        </Menu>
+                                        <MenuItem onAction="#onResetFilter" style="-fx-text-fill: #333333;" text="Reset Filter" />
+                                    </items>
+                                </MenuButton>
                             </children>
                         </HBox>
                     </children>

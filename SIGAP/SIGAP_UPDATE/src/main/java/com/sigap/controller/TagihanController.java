@@ -15,6 +15,7 @@ import com.sigap.APP.CRUD_Penyewaan;
 import com.sigap.APP.CRUD_TagihanPembayaranSewa;
 import com.sigap.util.Session;
 
+import java.sql.SQLException;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -197,6 +198,9 @@ public class TagihanController implements Initializable {
     private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static final NumberFormat FMT_RUPIAH = NumberFormat.getNumberInstance(new Locale("id", "ID"));
 
+    // Sama seperti KATA_KUNCI_KETERLAMBATAN di PilihBiayaTambahanController --
+// SATU-SATUNYA jenis biaya yang wajib ditambahkan kalau pembayaran telat.
+    private static final String KATA_KUNCI_KETERLAMBATAN = "keterlambatan";
     private static final String STYLE_READONLY =
             "-fx-background-color:#F0F0F0;-fx-border-color:#D0D8E8;" +
                     "-fx-border-radius:6;-fx-background-radius:6;-fx-padding:6 12;" +
@@ -823,6 +827,35 @@ public class TagihanController implements Initializable {
             showAlert(Alert.AlertType.ERROR, "Sesi Tidak Valid",
                     "Sesi login karyawan tidak ditemukan. Silakan login ulang.");
             return;
+        }
+
+        // Wajib ada biaya keterlambatan kalau pembayaran melewati jatuh tempo
+        if (LocalDate.now().isAfter(tglJatuhTempoTerpilih)) {
+            boolean sudahAdaBiayaKeterlambatan;
+            try {
+                Map<String, BiayaTambahan> masterBiaya = CRUD_BiayaTambahan.getAll().stream()
+                        .collect(Collectors.toMap(BiayaTambahan::getIdBiayaTambahan, b -> b));
+
+                sudahAdaBiayaKeterlambatan = daftarBiayaTambahan.stream()
+                        .anyMatch(d -> {
+                            BiayaTambahan master = masterBiaya.get(d.getIdBiayaTambahan());
+                            return master != null
+                                    && master.getJenisBiayaTambahan() != null
+                                    && master.getJenisBiayaTambahan().toLowerCase().contains(KATA_KUNCI_KETERLAMBATAN);
+                        });
+            } catch (SQLException ex) {
+                showAlert(Alert.AlertType.ERROR, "Gagal Memeriksa Biaya Tambahan",
+                        "Terjadi kesalahan saat memeriksa data biaya tambahan. Coba lagi.");
+                return;
+            }
+
+            if (!sudahAdaBiayaKeterlambatan) {
+                showAlert(Alert.AlertType.WARNING, "Biaya Keterlambatan Diperlukan",
+                        "Pembayaran ini melewati tanggal jatuh tempo (" + tglJatuhTempoTerpilih + "). "
+                                + "Tambahkan biaya tambahan jenis 'Keterlambatan Sewa' terlebih dahulu "
+                                + "sebelum menyimpan.");
+                return;
+            }
         }
 
         try {

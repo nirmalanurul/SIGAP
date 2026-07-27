@@ -416,6 +416,20 @@ public class BiayaTambahanController implements Initializable {
                 d.getStsDenda() != null ? d.getStsDenda().trim() : ""
         );
         setFormState(true, isTidakAktif);
+
+        // setFormState() di atas selalu meng-enable ulang kedua radio button
+        // (mengikuti status Aktif/Tidak Aktif data yang diklik saja), padahal
+        // radio "Keterlambatan Bayar Sewa" harus tetap terkunci selama data
+        // Keterlambatan lain masih Aktif di DB. Kuncian ini HANYA boleh
+        // dilepas kalau data yang sedang diedit sekarang adalah data
+        // Keterlambatan Aktif itu sendiri (supaya user tetap bisa ubah/hapus
+        // data tersebut). Untuk data lain (mis. Kerusakan Fasilitas), radio
+        // Keterlambatan Bayar Sewa tetap tidak bisa dipilih.
+        if (!isTidakAktif) {
+            boolean isDataIniKeterlambatanAktif =
+                    KETERLAMBATAN.equalsIgnoreCase(d.getJenisBiayaTambahan());
+            rbKeterlambatanBayarSewa.setDisable(keterlambatanTerpakai && !isDataIniKeterlambatanAktif);
+        }
     }
 
     @FXML

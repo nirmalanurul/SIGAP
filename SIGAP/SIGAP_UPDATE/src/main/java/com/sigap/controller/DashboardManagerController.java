@@ -73,9 +73,6 @@ public class DashboardManagerController implements Initializable {
         }
     }
 
-    // ================= DASHBOARD =================
-
-    /** Menu "Dashboard" — tampilkan ringkasan KPI + diagram laporan bulanan. */
     @FXML
     private void onDashboard(ActionEvent event) {
         try {
@@ -93,7 +90,6 @@ public class DashboardManagerController implements Initializable {
         }
     }
 
-    /** Placeholder fallback kalau DashboardManagerContentView belum/gagal dimuat. */
     @FXML
     public void onLogout(ActionEvent event) {
         try {
@@ -116,7 +112,7 @@ public class DashboardManagerController implements Initializable {
         }
     }
 
-    // ================= LAPORAN =================
+
 
     @FXML
     private void onLaporanPenyewaan(ActionEvent event) {
@@ -132,8 +128,8 @@ public class DashboardManagerController implements Initializable {
      * Load laporan dari file .jasper (sudah di-compile sebelumnya via Jaspersoft Studio),
      * fill dari database, export ke PDF, lalu buka otomatis lewat aplikasi PDF default OS.
      *
-     * @param resourcePath path .jasper di classpath, mis. "/report/xxx.jasper"
-     * @param namaFile     nama file PDF output (tanpa ekstensi)
+     * @param resourcePath
+     * @param namaFile
      */
     private void cetakLaporan(String resourcePath, String namaFile) {
         try (Connection conn = new DBConnect().conn;
@@ -149,8 +145,6 @@ public class DashboardManagerController implements Initializable {
             JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
 
             Map<String, Object> params = new HashMap<>();
-            // tambahkan parameter di sini kalau report memakainya, contoh:
-            // params.put("idKaryawan", Session.getLoggedInUser().getIdKaryawan());
 
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, conn);
 
@@ -192,8 +186,6 @@ public class DashboardManagerController implements Initializable {
         alert.setTitle("Laporan Gagal Dibuka");
         alert.setHeaderText(null);
         alert.setContentText(pesan);
-        // Tempelkan ke window aplikasi supaya dialog tidak muncul sebagai window
-        // lepas/independen, melainkan modal & selalu di atas app.
         if (contentArea.getScene() != null) {
             alert.initOwner(contentArea.getScene().getWindow());
             alert.initModality(javafx.stage.Modality.WINDOW_MODAL);

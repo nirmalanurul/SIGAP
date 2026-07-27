@@ -29,15 +29,7 @@ import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
 
-/**
- * Controller untuk DashboardManagerContentView.fxml.
- * Menampilkan ringkasan KPI dan diagram laporan bulanan untuk role Manajer.
- *
- * Karena belum ada stored procedure khusus laporan bulanan, data diambil lewat
- * getAll() yang sudah ada di masing-masing CRUD lalu diagregasi di sisi Java
- * (filter per bulan pakai YearMonth). Kalau datanya sudah besar, sebaiknya
- * dipindah jadi stored procedure agregasi di database supaya lebih cepat.
- */
+
 public class DashboardManagerContentController implements Initializable {
 
     @FXML private Label lblPeriode;
@@ -65,25 +57,22 @@ public class DashboardManagerContentController implements Initializable {
 
     private static final int JUMLAH_BULAN_TREN = 6;
 
-    // Dipakai untuk isi cbBulan dan untuk mapping nama bulan -> nomor bulan (1-12).
+
     private static final List<String> NAMA_BULAN = List.of(
             "Januari", "Februari", "Maret", "April", "Mei", "Juni",
             "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     );
 
-    // Berapa tahun ke belakang yang ditampilkan di cbTahun (termasuk tahun berjalan).
     private static final int JUMLAH_TAHUN_FILTER = 6;
 
-    // Status persis yang dipakai di database — SESUAIKAN kalau ejaan/kapitalisasi
-    // Sts_Tagihan_Pembayaran / Sts_Penyewaan / Sts_Kios kamu berbeda.
+
     private static final String STATUS_LUNAS = "Lunas";
     private static final String STATUS_BELUM_LUNAS = "Belum Lunas";
     private static final String STATUS_DIBATALKAN_TAGIHAN = "Dibatalkan";
     private static final String STATUS_PENYEWAAN_BERLANGSUNG = "Berlangsung";
     private static final String STATUS_KIOS_DISEWAKAN = "Disewakan";
 
-    // Data mentah dimuat sekali di initialize(), dipakai ulang oleh semua panel
-    // (KPI + 3 chart) supaya tidak query berkali-kali ke database.
+
     private List<TagihanPembayaranSewa> semuaTagihan = List.of();
     private List<Penyewaan> semuaPenyewaan = List.of();
     private List<Kios> semuaKios = List.of();
@@ -98,8 +87,6 @@ public class DashboardManagerContentController implements Initializable {
             warning.setTitle("Periode Belum Lengkap");
             warning.setHeaderText(null);
             warning.setContentText("Pilih bulan dan tahun terlebih dahulu sebelum mencari.");
-            // Tempelkan dialog ke window aplikasi (bukan jadi window lepas/independen)
-            // supaya selalu tampil di atas & di tengah app, bukan terpisah/ketutup.
             javafx.stage.Window ownerWindow = cbBulan.getScene().getWindow();
             warning.initOwner(ownerWindow);
             warning.initModality(javafx.stage.Modality.WINDOW_MODAL);
@@ -129,7 +116,6 @@ public class DashboardManagerContentController implements Initializable {
         tampilkanPeriode(YearMonth.now());
     }
 
-    /** Muat ulang seluruh KPI + chart untuk periode (YearMonth) tertentu. */
     private void tampilkanPeriode(YearMonth periode) {
         lblPeriode.setText("Ringkasan & Laporan Bulanan — "
                 + periode.atDay(1).format(FMT_BULAN));
@@ -140,7 +126,6 @@ public class DashboardManagerContentController implements Initializable {
         loadChartPenyewaanBulanan(periode);
     }
 
-    /** Isi pilihan bulan & tahun untuk filter "Cari Periode". */
     private void isiComboBoxFilter() {
         cbBulan.setItems(FXCollections.observableArrayList(NAMA_BULAN));
 
@@ -153,7 +138,6 @@ public class DashboardManagerContentController implements Initializable {
         cbTahun.setItems(FXCollections.observableArrayList(daftarTahun));
     }
 
-    /** Ambil semua data sekali lewat CRUD getAll(); kalau gagal konek DB, biarkan list kosong. */
     private void muatDataMentah() {
         try {
             semuaTagihan = CRUD_TagihanPembayaranSewa.getAll();
@@ -217,7 +201,6 @@ public class DashboardManagerContentController implements Initializable {
         chartPendapatanBulanan.setData(FXCollections.observableArrayList(series));
     }
 
-    /** Sebaran status tagihan yang Tgl_Jatuh_Tempo-nya jatuh di periode yang dipilih. */
     private void loadChartStatusTagihan(YearMonth periode) {
         long lunas = 0, belumLunas = 0, dibatalkan = 0;
 
@@ -227,7 +210,7 @@ public class DashboardManagerContentController implements Initializable {
             String status = t.getStsTagihanPembayaran();
             if (STATUS_LUNAS.equalsIgnoreCase(status)) lunas++;
             else if (STATUS_DIBATALKAN_TAGIHAN.equalsIgnoreCase(status)) dibatalkan++;
-            else belumLunas++; // termasuk "Belum Lunas" atau status lain yang belum dikenali
+            else belumLunas++;
         }
 
         chartStatusTagihan.setData(FXCollections.observableArrayList(
@@ -237,7 +220,7 @@ public class DashboardManagerContentController implements Initializable {
         ));
     }
 
-    /** Jumlah Penyewaan baru (berdasarkan Tgl_Penyewaan) untuk N bulan terakhir sampai periode. */
+
     private void loadChartPenyewaanBulanan(YearMonth periode) {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Penyewaan Baru");
@@ -252,7 +235,7 @@ public class DashboardManagerContentController implements Initializable {
         chartPenyewaanBulanan.setData(FXCollections.observableArrayList(series));
     }
 
-    /** N bulan terakhir termasuk bulanAkhir, urut dari yang paling lama ke yang terbaru. */
+
     private List<YearMonth> bulanTerakhir(YearMonth bulanAkhir, int jumlahBulan) {
         return java.util.stream.IntStream.rangeClosed(0, jumlahBulan - 1)
                 .mapToObj(i -> bulanAkhir.minusMonths(jumlahBulan - 1 - i))

@@ -170,13 +170,18 @@ public class PenyewaanController implements Initializable {
     }
 
     private void setupDatePickers() {
-        dpTglMulai.setDayCellFactory(picker -> new DateCell() {
-            @Override
-            public void updateItem(LocalDate date, boolean empty) {
-                super.updateItem(date, empty);
-                LocalDate batasMaks = LocalDate.now().plusYears(1);
-                setDisable(empty || date.isBefore(LocalDate.now()) || date.isAfter(batasMaks));
+        dpTglMulai.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                LocalDate defaultSelesai = newVal.plusMonths(1);
+                if (dpTglSelesai.getValue() == null
+                        || dpTglSelesai.getValue().isBefore(defaultSelesai)
+                        || dpTglSelesai.getValue().isAfter(newVal.plusYears(5))) {
+                    dpTglSelesai.setValue(defaultSelesai);
+                }
+            } else {
+                dpTglSelesai.setValue(null);
             }
+            onRentangTanggalBerubah();
         });
 
         dpTglSelesai.setDayCellFactory(picker -> new DateCell() {

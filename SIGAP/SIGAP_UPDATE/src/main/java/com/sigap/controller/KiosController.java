@@ -465,7 +465,7 @@ public class KiosController implements Initializable {
         } else {
             try {
                 double harga = Double.parseDouble(hargaStr);
-                if (harga < 1) sb.append("• Harga Kios minimal Rp 1.\n");
+                if (harga <= 0) sb.append("• Harga Kios harus lebih dari Rp 0.\n");
                 if (harga > 99999999) sb.append("• Harga Kios maksimal Rp 99.999.999.\n");
             } catch (NumberFormatException e) {
                 sb.append("• Harga Kios harus berupa angka.\n");
@@ -496,16 +496,6 @@ public class KiosController implements Initializable {
             } catch (NumberFormatException e) {
                 sb.append("• Lebar Kios harus berupa angka.\n");
             }
-        }
-
-        String deskripsi = txtDeskripsi.getText().trim();
-        if (!deskripsi.isEmpty()) {
-            if (deskripsi.length() < 5)
-                sb.append("• Deskripsi minimal 5 karakter jika diisi.\n");
-            else if (deskripsi.length() > 80)
-                sb.append("• Deskripsi maksimal 80 karakter.\n");
-            else if (!deskripsi.matches("^[A-Za-z0-9\\s,./\\-]+$"))
-                sb.append("• Deskripsi hanya boleh mengandung huruf, angka, spasi, koma, titik, garis miring, dan tanda hubung.\n");
         }
 
         if (sb.length() > 0) {

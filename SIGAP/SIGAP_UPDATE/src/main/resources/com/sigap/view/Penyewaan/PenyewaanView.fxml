@@ -100,15 +100,19 @@
                                 <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;" text="Tgl. Transaksi" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                 <TextField fx:id="txtTglPenyewaan" editable="false" maxWidth="1.7976931348623157E308" style="-fx-background-color: #F8F9FC; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px;" GridPane.columnIndex="3" GridPane.rowIndex="2" />
 
-                                <!-- Baris 3: Tanggal Selesai / Status (read-only) -->
-
                                 <HBox alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="0" GridPane.rowIndex="3">
                                     <children>
                                         <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;" text="Tanggal Selesai" />
                                         <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #D63030;" text="*" />
                                     </children>
                                 </HBox>
-                                <DatePicker fx:id="dpTglSelesai" maxWidth="1.7976931348623157E308" promptText="2. Pilih tanggal selesai" style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                                <VBox spacing="3.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                    <children>
+                                        <DatePicker fx:id="dpTglSelesai" maxWidth="1.7976931348623157E308" promptText="2. Pilih tanggal selesai" style="-fx-background-color: WHITE; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-font-size: 13px;" />
+                                        <Label style="-fx-font-size: 10px; -fx-text-fill: #999; -fx-font-style: italic;" text="Minimal 1 bulan, maksimal 5 tahun setelah tanggal mulai" wrapText="true" />
+                                    </children>
+                                </VBox>
 
                                 <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333;" text="Status" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                                 <TextField fx:id="txtStatus" editable="false" maxWidth="1.7976931348623157E308" style="-fx-background-color: #F0F0F0; -fx-border-color: #D0D8E8; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-size: 13px; -fx-text-fill: #888;" GridPane.columnIndex="3" GridPane.rowIndex="3" />

@@ -8,6 +8,7 @@ import com.sigap.APP.CRUD_Karyawan;
 import com.sigap.APP.CRUD_Kios;
 import com.sigap.APP.CRUD_Penyewa;
 import com.sigap.APP.CRUD_Penyewaan;
+import com.sigap.APP.CRUD_TagihanPembayaranSewa;
 import com.sigap.util.Session;
 
 import javafx.application.Platform;
@@ -20,20 +21,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.DateCell;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.RadioMenuItem;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -51,70 +39,39 @@ import java.util.stream.Collectors;
 
 public class PenyewaanController implements Initializable {
 
-    @FXML
-    private TextField txtIdPenyewaan;
-    @FXML
-    private TextField txtNamaKaryawan;
-    @FXML
-    private TextField txtPenyewaTerpilih;
-    @FXML
-    private TextField txtKiosTerpilih;
-    @FXML
-    private DatePicker dpTglMulai;
-    @FXML
-    private DatePicker dpTglSelesai;
-    @FXML
-    private TextField txtTglPenyewaan;
-    @FXML
-    private TextField txtStatus;
-    @FXML
-    private Button btnPilihPenyewa;
-    @FXML
-    private Button btnPilihKios;
-    @FXML
-    private Button btnSimpan;
-    @FXML
-    private Button btnBatalkan;
+    @FXML private TextField txtIdPenyewaan;
+    @FXML private TextField txtNamaKaryawan;
+    @FXML private TextField txtPenyewaTerpilih;
+    @FXML private TextField txtKiosTerpilih;
+    @FXML private DatePicker dpTglMulai;
+    @FXML private DatePicker dpTglSelesai;
+    @FXML private TextField txtTglPenyewaan;
+    @FXML private TextField txtStatus;
+    @FXML private Button btnPilihPenyewa;
+    @FXML private Button btnPilihKios;
+    @FXML private Button btnSimpan;
+    @FXML private Button btnBatalkan;
 
-    @FXML
-    private TextField txtCari;
-    @FXML
-    private MenuButton btnFilter;
-    @FXML
-    private Menu menuPenyewa;
-    @FXML
-    private Menu menuKios;
-    @FXML
-    private RadioMenuItem rmStatusMenunggu;
-    @FXML
-    private RadioMenuItem rmStatusBerlangsung;
-    @FXML
-    private RadioMenuItem rmStatusSelesai;
-    @FXML
-    private RadioMenuItem rmStatusDibatalkan;
-    @FXML
-    private TableView<Penyewaan> tabelPenyewaan;
-    @FXML
-    private TableColumn<Penyewaan, String> colId;
-    @FXML
-    private TableColumn<Penyewaan, String> colKios;
-    @FXML
-    private TableColumn<Penyewaan, String> colPenyewa;
-    @FXML
-    private TableColumn<Penyewaan, String> colKaryawan;
-    @FXML
-    private TableColumn<Penyewaan, String> colTglMulai;
-    @FXML
-    private TableColumn<Penyewaan, String> colTglSelesai;
-    @FXML
-    private TableColumn<Penyewaan, String> colTglTransaksi;
-    @FXML
-    private TableColumn<Penyewaan, String> colStatus;
+    @FXML private TextField txtCari;
+    @FXML private MenuButton btnFilter;
+    @FXML private Menu menuPenyewa;
+    @FXML private Menu menuKios;
+    @FXML private RadioMenuItem rmStatusMenunggu;
+    @FXML private RadioMenuItem rmStatusBerlangsung;
+    @FXML private RadioMenuItem rmStatusSelesai;
+    @FXML private RadioMenuItem rmStatusDibatalkan;
+    @FXML private TableView<Penyewaan> tabelPenyewaan;
+    @FXML private TableColumn<Penyewaan, String> colId;
+    @FXML private TableColumn<Penyewaan, String> colKios;
+    @FXML private TableColumn<Penyewaan, String> colPenyewa;
+    @FXML private TableColumn<Penyewaan, String> colKaryawan;
+    @FXML private TableColumn<Penyewaan, String> colTglMulai;
+    @FXML private TableColumn<Penyewaan, String> colTglSelesai;
+    @FXML private TableColumn<Penyewaan, String> colTglTransaksi;
+    @FXML private TableColumn<Penyewaan, String> colStatus;
 
-    @FXML
-    private Label lblPage;
-    @FXML
-    private Label lblTotal;
+    @FXML private Label lblPage;
+    @FXML private Label lblTotal;
 
     private static final int PAGE_SIZE = 10;
     private static final DateTimeFormatter FMT_TGL = DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("id", "ID"));
@@ -462,6 +419,7 @@ public class PenyewaanController implements Initializable {
         }
     }
 
+
     @FXML
     void onSimpan(ActionEvent event) {
         if (!validasi()) return;
@@ -499,6 +457,26 @@ public class PenyewaanController implements Initializable {
             );
 
             CRUD_Penyewaan.insert(p);
+
+
+            try {
+
+                Kios kios = CRUD_Kios.getById(kiosTerpilih.getIdKios());
+                double hargaKios = (kios != null) ? kios.getHargaKios() : 0;
+                CRUD_TagihanPembayaranSewa.generateTagihanForPenyewaan(
+                        p.getIdPenyewaan(),
+                        karyawanLogin.getIdKaryawan(),
+                        p.getTglMulai(),
+                        p.getTglSelesai(),
+                        hargaKios
+                );
+            } catch (Exception ex) {
+
+                showAlert(Alert.AlertType.WARNING, "Tagihan Gagal Digenerate",
+                        "Penyewaan tersimpan, tetapi tagihan bulanan tidak dapat dibuat otomatis. " +
+                                "Silakan buat tagihan secara manual jika diperlukan.");
+            }
+
             showAlert(Alert.AlertType.INFORMATION, "Berhasil", "Transaksi penyewaan berhasil disimpan.");
             loadData();
             onBersih(null);

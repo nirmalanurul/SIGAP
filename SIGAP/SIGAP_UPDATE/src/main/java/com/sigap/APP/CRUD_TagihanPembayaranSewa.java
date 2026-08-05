@@ -2,6 +2,7 @@ package com.sigap.APP;
 
 import com.sigap.ADT.TagihanPembayaranSewa;
 import com.sigap.database.DBConnect;
+import com.sigap.util.PeriodeTagihanUtil;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -9,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CRUD_TagihanPembayaranSewa {
-
 
     public static void insert(TagihanPembayaranSewa t) throws SQLException {
         try (Connection conn = new DBConnect().conn;
@@ -97,6 +97,52 @@ public class CRUD_TagihanPembayaranSewa {
                      "SELECT dbo.fnGenerateIdTagihanPembayaran() AS Id_Tagihan_Pembayaran")) {
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? rs.getString("Id_Tagihan_Pembayaran") : "TG001";
+            }
+        }
+    }
+
+    public static void updateStatusTagihan(String idTagihan) throws SQLException {
+        try (Connection conn = new DBConnect().conn;
+             CallableStatement cs = conn.prepareCall("{CALL spUpdateStatusTagihan(?)}")) {
+            cs.setString(1, idTagihan);
+            cs.executeUpdate();
+        }
+    }
+
+
+    public static void generateTagihanForPenyewaan(
+            String idPenyewaan,
+            String idKaryawan,
+            LocalDate tglMulai,
+            LocalDate tglSelesai,
+            double hargaKiosPerBulan
+    ) throws SQLException {
+        List<LocalDate> daftarJatuhTempo = PeriodeTagihanUtil.generateJatuhTempoBulanan(tglMulai, tglSelesai);
+
+
+        List<TagihanPembayaranSewa> existing = getByIdPenyewaan(idPenyewaan);
+
+        for (LocalDate jatuhTempo : daftarJatuhTempo) {
+            boolean alreadyExists = existing.stream().anyMatch(t ->
+                    t.getTglJatuhTempo().getMonth() == jatuhTempo.getMonth() &&
+                            t.getTglJatuhTempo().getYear() == jatuhTempo.getYear()
+            );
+            if (!alreadyExists) {
+                String idTagihan = generateNextId();
+                TagihanPembayaranSewa tagihan = new TagihanPembayaranSewa(
+                        idTagihan,
+                        idPenyewaan,
+                        idKaryawan,
+                        LocalDate.now(),
+                        jatuhTempo,
+                        hargaKiosPerBulan,
+                        0,
+                        hargaKiosPerBulan,
+                        0,
+                        "Tunai",
+                        "Belum Lunas"
+                );
+                insert(tagihan);
             }
         }
     }

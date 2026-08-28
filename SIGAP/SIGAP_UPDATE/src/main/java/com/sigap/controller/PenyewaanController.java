@@ -421,6 +421,7 @@ public class PenyewaanController implements Initializable {
     // 9. LOAD DATA & PAGINATION
     private void loadData() {
         try {
+            CRUD_Penyewaan.refreshStatus();   // ⬅️ tambahan: sinkronkan status berdasarkan tanggal hari ini
             muatPetaMaster();
             populateFilterMenus();
             rawList = CRUD_Penyewaan.getAll();
@@ -638,7 +639,7 @@ public class PenyewaanController implements Initializable {
             String statusAwal;
             if (tglMulai.isAfter(hariIni)) {
                 statusAwal = "Menunggu";
-            } else if (tglSelesai.isBefore(hariIni)) {
+            } else if (!tglSelesai.isAfter(hariIni)) {   // ⬅️ ganti: <=  bukan
                 statusAwal = "Selesai";
             } else {
                 statusAwal = "Berlangsung";

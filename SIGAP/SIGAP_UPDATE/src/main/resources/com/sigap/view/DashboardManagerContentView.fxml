@@ -20,6 +20,7 @@
     Dimuat ke dalam contentArea (StackPane) milik DashboardManagerView.fxml
     lewat FXMLLoader saat btnDashboard diklik.
 -->
+<?import javafx.scene.layout.Region?>
 <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sigap.controller.DashboardManagerContentController">
     <content>
         <VBox spacing="20.0" style="-fx-background-color: #F4F6FB;">
@@ -133,13 +134,37 @@
                         </VBox>
 
                         <!-- Diagram Lingkaran: Status Tagihan Bulan Ini -->
-                        <VBox spacing="10.0" prefWidth="320.0" style="-fx-background-color: WHITE; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),8,0,0,2);">
+                        <VBox spacing="10.0" prefWidth="380.0" style="-fx-background-color: WHITE; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.06),8,0,0,2);">
                             <padding>
                                 <Insets bottom="16.0" left="18.0" right="18.0" top="16.0" />
                             </padding>
                             <children>
                                 <Label style="-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #1A3A8F;" text="Status Tagihan Bulan Ini" />
-                                <PieChart fx:id="chartStatusTagihan" animated="false" labelsVisible="true" legendVisible="true" prefHeight="280.0" style="-fx-background-color: transparent;" />
+                                <PieChart fx:id="chartStatusTagihan" animated="false" labelsVisible="true" legendVisible="false" prefHeight="280.0" style="-fx-background-color: transparent;" />
+
+                                <!-- Legend manual — supaya warna &amp; angka selalu rapi, tidak kepotong -->
+                                <VBox spacing="8.0">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                            <children>
+                                                <Region prefHeight="10" prefWidth="10" style="-fx-background-color: #2ECC71; -fx-background-radius: 3;" />
+                                                <Label fx:id="lblLegendLunas" style="-fx-font-size: 11px; -fx-text-fill: #555; -fx-font-weight: 600;" text="Lunas (0)" />
+                                            </children>
+                                        </HBox>
+                                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                            <children>
+                                                <Region prefHeight="10" prefWidth="10" style="-fx-background-color: #F5D021; -fx-background-radius: 3;" />
+                                                <Label fx:id="lblLegendBelumLunas" style="-fx-font-size: 11px; -fx-text-fill: #555; -fx-font-weight: 600;" text="Belum Lunas (0)" />
+                                            </children>
+                                        </HBox>
+                                        <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                            <children>
+                                                <Region prefHeight="10" prefWidth="10" style="-fx-background-color: #F5A623; -fx-background-radius: 3;" />
+                                                <Label fx:id="lblLegendDibatalkan" style="-fx-font-size: 11px; -fx-text-fill: #555; -fx-font-weight: 600;" text="Dibatalkan (0)" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
                             </children>
                         </VBox>
 

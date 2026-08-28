@@ -29,7 +29,6 @@ import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
 
-
 public class DashboardManagerContentController implements Initializable {
 
     @FXML private Label lblPeriode;
@@ -51,12 +50,18 @@ public class DashboardManagerContentController implements Initializable {
     @FXML private ComboBox<String> cbBulan;
     @FXML private ComboBox<Integer> cbTahun;
 
+    @FXML private Label lblLegendLunas;
+    @FXML private Label lblLegendBelumLunas;
+    @FXML private Label lblLegendDibatalkan;
+
     private static final NumberFormat FMT_RUPIAH = NumberFormat.getNumberInstance(new Locale("id", "ID"));
     private static final DateTimeFormatter FMT_BULAN =
             DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("id", "ID"));
 
     private static final int JUMLAH_BULAN_TREN = 6;
 
+    private final java.util.List<javafx.scene.Node> labelAktifPendapatan = new java.util.ArrayList<>();
+    private final java.util.List<javafx.scene.Node> labelAktifPenyewaan = new java.util.ArrayList<>();
 
     private static final List<String> NAMA_BULAN = List.of(
             "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -185,20 +190,23 @@ public class DashboardManagerContentController implements Initializable {
         lblKiosTersewa.setText(kiosTersewa + " / " + semuaKios.size());
     }
 
-    /** Pendapatan (Total_Dibayar berdasarkan Tgl_Bayar) untuk N bulan terakhir sampai periode. */
     private void loadChartPendapatanBulanan(YearMonth periode) {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Pendapatan");
 
+        double nilaiMaksimum = 0;
         for (YearMonth bulan : bulanTerakhir(periode, JUMLAH_BULAN_TREN)) {
             double totalBulanIni = semuaTagihan.stream()
                     .filter(t -> t.getTglBayar() != null && YearMonth.from(t.getTglBayar()).equals(bulan))
                     .mapToDouble(TagihanPembayaranSewa::getTotalDibayar)
                     .sum();
             series.getData().add(new XYChart.Data<>(labelBulan(bulan), totalBulanIni));
+            nilaiMaksimum = Math.max(nilaiMaksimum, totalBulanIni);
         }
 
+        aturHeadroomAxis(axisPendapatan, nilaiMaksimum); // <-- tambahkan ini
         chartPendapatanBulanan.setData(FXCollections.observableArrayList(series));
+        tambahkanLabelData(series, true, labelAktifPendapatan);
     }
 
     private void loadChartStatusTagihan(YearMonth periode) {
@@ -214,10 +222,25 @@ public class DashboardManagerContentController implements Initializable {
         }
 
         chartStatusTagihan.setData(FXCollections.observableArrayList(
-                new PieChart.Data("Lunas", lunas),
-                new PieChart.Data("Belum Lunas", belumLunas),
-                new PieChart.Data("Dibatalkan", dibatalkan)
+                new PieChart.Data("Lunas (" + lunas + ")", lunas),
+                new PieChart.Data("Belum Lunas (" + belumLunas + ")", belumLunas),
+                new PieChart.Data("Dibatalkan (" + dibatalkan + ")", dibatalkan)
         ));
+
+        for (PieChart.Data d : chartStatusTagihan.getData()) {
+            String warna = switch (d.getName().split(" ")[0]) {
+                case "Lunas" -> "#2ECC71";       // hijau
+                case "Belum" -> "#F5D021";       // kuning
+                case "Dibatalkan" -> "#F5A623";  // oren
+                default -> "#CCCCCC";
+            };
+            d.getNode().setStyle("-fx-pie-color: " + warna + ";");
+        }
+
+        // ====== TAMBAHKAN 3 BARIS INI DI SINI ======
+        lblLegendLunas.setText("Lunas (" + lunas + ")");
+        lblLegendBelumLunas.setText("Belum Lunas (" + belumLunas + ")");
+        lblLegendDibatalkan.setText("Dibatalkan (" + dibatalkan + ")");
     }
 
 
@@ -225,14 +248,18 @@ public class DashboardManagerContentController implements Initializable {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Penyewaan Baru");
 
+        long nilaiMaksimum = 0;
         for (YearMonth bulan : bulanTerakhir(periode, JUMLAH_BULAN_TREN)) {
             long jumlahBulanIni = semuaPenyewaan.stream()
                     .filter(p -> p.getTglPenyewaan() != null && YearMonth.from(p.getTglPenyewaan()).equals(bulan))
                     .count();
             series.getData().add(new XYChart.Data<>(labelBulan(bulan), jumlahBulanIni));
+            nilaiMaksimum = Math.max(nilaiMaksimum, jumlahBulanIni);
         }
 
+        aturHeadroomAxis(axisJumlahPenyewaan, nilaiMaksimum); // <-- tambahkan ini
         chartPenyewaanBulanan.setData(FXCollections.observableArrayList(series));
+        tambahkanLabelData(series, false, labelAktifPenyewaan);
     }
 
 
@@ -244,5 +271,109 @@ public class DashboardManagerContentController implements Initializable {
 
     private String labelBulan(YearMonth bulan) {
         return bulan.getMonth().getDisplayName(TextStyle.SHORT, new Locale("id", "ID"));
+    }
+
+    private void tambahkanLabelData(XYChart.Series<String, Number> series, boolean isRupiah) {
+        for (XYChart.Data<String, Number> data : series.getData()) {
+            if (data.getNode() != null) {
+                // Node sudah ada duluan -> langsung pasang labelnya
+                tampilkanLabelDiTitik(data, isRupiah);
+            } else {
+                // Node belum ada -> tunggu sampai muncul
+                data.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                    if (newNode != null) {
+                        tampilkanLabelDiTitik(data, isRupiah);
+                    }
+                });
+            }
+        }
+    }
+
+    private void tampilkanLabelDiTitik(XYChart.Data<String, Number> data, boolean isRupiah) {
+        String teks = isRupiah
+                ? FMT_RUPIAH.format(data.getYValue().longValue())
+                : String.valueOf(data.getYValue().longValue());
+
+        javafx.scene.text.Text label = new javafx.scene.text.Text(teks);
+        label.setStyle("-fx-font-size: 10px; -fx-font-weight: 700; -fx-fill: #1A3A8F;");
+
+        final javafx.scene.Node node = data.getNode();
+        javafx.scene.Parent parent = node.getParent();
+        if (parent instanceof javafx.scene.Group group) {
+            if (!group.getChildren().contains(label)) {
+                group.getChildren().add(label);
+            }
+        } else {
+            node.parentProperty().addListener((obs, oldParent, newParent) -> {
+                if (newParent instanceof javafx.scene.Group group && !group.getChildren().contains(label)) {
+                    group.getChildren().add(label);
+                }
+            });
+        }
+
+        label.layoutXProperty().bind(node.layoutXProperty().subtract(label.prefWidth(-1) / 2));
+        label.layoutYProperty().bind(node.layoutYProperty().subtract(10));
+    }
+
+    private void aturHeadroomAxis(NumberAxis axis, double nilaiMaksimum) {
+        if (nilaiMaksimum <= 0) {
+            axis.setAutoRanging(true);
+            return;
+        }
+        axis.setAutoRanging(false);
+        axis.setLowerBound(0);
+        axis.setUpperBound(nilaiMaksimum * 1.2); // beri ruang 20% di atas nilai tertinggi
+        axis.setTickUnit(nilaiMaksimum * 1.2 / 5); // 5 pembagian tick, sesuaikan kalau perlu
+    }
+
+    private void tambahkanLabelData(XYChart.Series<String, Number> series, boolean isRupiah,
+                                    java.util.List<javafx.scene.Node> labelAktif) {
+        // Hapus semua label lama dari parent-nya sebelum menambah yang baru
+        for (javafx.scene.Node lama : labelAktif) {
+            if (lama.getParent() instanceof javafx.scene.Group group) {
+                group.getChildren().remove(lama);
+            }
+        }
+        labelAktif.clear();
+
+        for (XYChart.Data<String, Number> data : series.getData()) {
+            if (data.getNode() != null) {
+                tampilkanLabelDiTitik(data, isRupiah, labelAktif);
+            } else {
+                data.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                    if (newNode != null) {
+                        tampilkanLabelDiTitik(data, isRupiah, labelAktif);
+                    }
+                });
+            }
+        }
+    }
+
+    private void tampilkanLabelDiTitik(XYChart.Data<String, Number> data, boolean isRupiah,
+                                       java.util.List<javafx.scene.Node> labelAktif) {
+        String teks = isRupiah
+                ? FMT_RUPIAH.format(data.getYValue().longValue())
+                : String.valueOf(data.getYValue().longValue());
+
+        javafx.scene.text.Text label = new javafx.scene.text.Text(teks);
+        label.setStyle("-fx-font-size: 10px; -fx-font-weight: 700; -fx-fill: #1A3A8F;");
+        labelAktif.add(label); // <-- catat supaya bisa dihapus nanti
+
+        final javafx.scene.Node node = data.getNode();
+        javafx.scene.Parent parent = node.getParent();
+        if (parent instanceof javafx.scene.Group group) {
+            if (!group.getChildren().contains(label)) {
+                group.getChildren().add(label);
+            }
+        } else {
+            node.parentProperty().addListener((obs, oldParent, newParent) -> {
+                if (newParent instanceof javafx.scene.Group group && !group.getChildren().contains(label)) {
+                    group.getChildren().add(label);
+                }
+            });
+        }
+
+        label.layoutXProperty().bind(node.layoutXProperty().subtract(label.prefWidth(-1) / 2));
+        label.layoutYProperty().bind(node.layoutYProperty().subtract(10));
     }
 }
